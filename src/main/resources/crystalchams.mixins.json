@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "tektonikal.crystalchams.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "EndCrystalEntityRendererMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "crystalchams",
+  "version": "${version}",
+  "name": "Custom Crystals",
+  "description": "Custom end crystal rendering",
+  "authors": ["Tektonikal"],
+  "license": "LGPL-3.0",
+  "icon": "icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "main": [
+      "tektonikal.crystalchams.Crystalchams"
+    ]
+  },
+  "mixins": [
+    "crystalchams.mixins.json"
+  ],
+  "contact": {
+    "homepage": "https://modrinth.com/mod/custom-end-crystals",
+    "issues": "https://discord.gg/HyUVJYeKS5",
+    "sources": "https://github.com/Tektonikal/CC"
+  },
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}",
+    "midnightlib": "*"
+  },
+  "custom": {
+    "modmenu": {
+      "links": {
+        "Discord": "https://discord.gg/HyUVJYeKS5"
+      }
+    }
+  }
+}
