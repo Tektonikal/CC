@@ -1,150 +1,141 @@
 package tektonikal.crystalchams.mixin;
 
-import net.minecraft.client.model.Model;
 import net.minecraft.client.model.ModelPart;
+import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EndCrystalEntityRenderer;
+import net.minecraft.client.render.entity.EnderDragonEntityRenderer;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.decoration.EndCrystalEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RotationAxis;
+import org.joml.Quaternionf;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArgs;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 import tektonikal.crystalchams.config.ChamsConfig;
 
-import java.awt.*;
-
 @Mixin(EndCrystalEntityRenderer.class)
-public abstract class EndCrystalEntityRendererMixin extends EntityRenderer {
+public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCrystalEntity> {
+
     @Shadow
     @Final
-    private ModelPart core;
+    private static RenderLayer END_CRYSTAL;
+
+    @Shadow
+    @Final
+    private ModelPart bottom;
+
+    @Shadow
+    @Final
+    private static float SINE_45_DEGREES;
 
     @Shadow
     @Final
     private ModelPart frame;
 
-    @Mutable
-    @Shadow @Final private static RenderLayer END_CRYSTAL;
-
-    @Shadow @Final private static Identifier TEXTURE;
+    @Shadow
+    @Final
+    private ModelPart core;
 
     protected EndCrystalEntityRendererMixin(EntityRendererFactory.Context ctx) {
         super(ctx);
     }
 
-
-    @Inject(method = "render(Lnet/minecraft/entity/decoration/EndCrystalEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", at = @At("HEAD"))
-    private void render(EndCrystalEntity endCrystalEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci) {
-        if(ChamsConfig.isActive){
-        this.shadowRadius = ChamsConfig.shadow;
-        this.shadowOpacity = ChamsConfig.shadowOpacity;
-        switch (ChamsConfig.mode){
-            case PORTAL -> END_CRYSTAL = RenderLayer.getEndPortal();
-            //for some reason the lineWidth value does absolutely nothing when I try to change it
-            case WIREFRAME -> END_CRYSTAL = RenderLayer.getDebugLineStrip(10);
-            case GATEWAY -> END_CRYSTAL = RenderLayer.getEndGateway();
-            case CULLED -> END_CRYSTAL = RenderLayer.getItemEntityTranslucentCull(TEXTURE);
-            default -> END_CRYSTAL = RenderLayer.getEntityTranslucent(TEXTURE);
-        }
-        }
-        else{
-            END_CRYSTAL = RenderLayer.getEntityTranslucent(TEXTURE);
-            this.shadowRadius = 0.5F;
-            this.shadowOpacity = 1;
-        }
+    @Unique
+    private static float getYOffset(EndCrystalEntity crystal, float tickDelta, float offset) {
+        float f = (float) crystal.endCrystalAge + tickDelta;
+        float g = MathHelper.sin(f * ChamsConfig.BounceSpeed) / 2.0F + 0.5F;
+        g = (g * g + g) * ChamsConfig.bounce;
+        return g - 1.4F + offset;
     }
 
-    @ModifyArgs(method = "render(Lnet/minecraft/entity/decoration/EndCrystalEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/math/MatrixStack;scale(FFF)V", ordinal = 0))
-    private void modifyScale(Args args) {
-        if (ChamsConfig.isActive){
-        args.set(0, ChamsConfig.scale);
-        args.set(1, ChamsConfig.scale);
-        args.set(2, ChamsConfig.scale);
-        }
-    }
-
-    @Redirect(method = "render(Lnet/minecraft/entity/decoration/EndCrystalEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/EndCrystalEntityRenderer;getYOffset(Lnet/minecraft/entity/decoration/EndCrystalEntity;F)F"))
-    private float offset(EndCrystalEntity crystal, float tickDelta) {
-        if (ChamsConfig.isActive){
-            float f = crystal.endCrystalAge + tickDelta;
-            float g = MathHelper.sin(f * ChamsConfig.BounceSpeed) / 2.0F + 0.5F;
-            g = (g * g + g) * ChamsConfig.bounce;
-            return g - 1.4F + ChamsConfig.offset;
-        }
-        return EndCrystalEntityRenderer.getYOffset(crystal, tickDelta);
-    }
-
-
-    @Redirect(method = {"render(Lnet/minecraft/entity/decoration/EndCrystalEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/ModelPart;render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;II)V", ordinal = 3))
-    private void modifyCore(ModelPart instance, MatrixStack matrices, VertexConsumer vertices, int light, int overlay) {
-        if(ChamsConfig.isActive){
-            if(ChamsConfig.renderCore){
-            try{
-            Color color = Color.decode(ChamsConfig.col);
-            this.core.render(matrices, vertices, ChamsConfig.lLevel == -1 ? light : ChamsConfig.lLevel, overlay, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F, ChamsConfig.alpha);
-            }
-            catch (NumberFormatException e){
-                this.core.render(matrices, vertices, light, overlay, 1, 0,0,1);
-            }
-            }
-        }
-        else{
-            this.core.render(matrices, vertices, light, overlay);
-        }
-    }
-
-    @Redirect(method = "render(Lnet/minecraft/entity/decoration/EndCrystalEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/ModelPart;render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;II)V", ordinal = 1))
-    private void modifyFrame1(ModelPart instance, MatrixStack matrices, VertexConsumer vertices, int light, int overlay) {
-        if (ChamsConfig.isActive) {
-        if (ChamsConfig.renderFrame1) {
-            try{
-            Color color = Color.decode(ChamsConfig.frameCol);
-            this.frame.render(matrices, vertices, ChamsConfig.lLevel == -1 ? light : ChamsConfig.lLevel, overlay, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F, ChamsConfig.frame1Alpha);
-            }
-            catch (NumberFormatException e){
-                this.frame.render(matrices, vertices, light, overlay, 1, 0,0,1);
-            }
-        }
-        }
-        else{
-            this.frame.render(matrices, vertices, light, overlay);
-        }
-    }
-    @ModifyArgs(method = "render(Lnet/minecraft/entity/decoration/EndCrystalEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/RotationAxis;rotationDegrees(F)Lorg/joml/Quaternionf;"))
-//    @ModifyArgs(method={"render(Lnet/minecraft/entity/decoration/EndCrystalEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V"}, at=@At(value="INVOKE", target="Lnet/minecraft/util/math/RotationAxis;rotationDegrees(F)Lorg/joml/Quaternionf;"))
-//        @ModifyArgs(method = "render(Lnet/minecraft/entity/decoration/EndCrystalEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/Vec3f;getDegreesQuaternion(F)Lnet/minecraft/util/math/Quaternion;"))
-    private void modifySpeed(Args args) {
+    //doing the rendering myself seems a lot less janky than writing a dozen separate mixins, and besides, I doubt anyone's going to mixin to here.
+    @Inject(method = "render(Lnet/minecraft/entity/decoration/EndCrystalEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", at = @At("HEAD"), cancellable = true)
+    private void CC$renderInject(EndCrystalEntity endCrystalEntity, float yaw, float tickDelta, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int light, CallbackInfo ci) {
         if (!ChamsConfig.isActive) {
             return;
         }
-        args.set(0, (Float) args.get(0) * ChamsConfig.rotSpeed);
-    }
-
-    @Redirect(method = {"render(Lnet/minecraft/entity/decoration/EndCrystalEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/ModelPart;render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;II)V", ordinal = 2))
-    private void modifyFrame2(ModelPart instance, MatrixStack matrices, VertexConsumer vertices, int light, int overlay) {
-        if (ChamsConfig.isActive) {
+        shadowOpacity = ChamsConfig.shadowOpacity;
+        shadowRadius = ChamsConfig.shadowSize;
+        light = ChamsConfig.lLevel != -1 ? ChamsConfig.lLevel : light;
+        float j = ((float) endCrystalEntity.endCrystalAge + tickDelta) * 3.0F;
+        VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(END_CRYSTAL);
+        //bottom
+        matrixStack.push();
+        matrixStack.push();
+        matrixStack.scale(2, 2, 2);
+        matrixStack.translate(0.0F, -0.5F, 0.0F);
+        int k = OverlayTexture.DEFAULT_UV;
+        if (endCrystalEntity.shouldShowBottom()) {
+            this.bottom.render(matrixStack, vertexConsumer, light, k);
+        }
+        matrixStack.pop();
+        //frame 1
+        if (ChamsConfig.renderFrame1) {
+            matrixStack.push();
+            matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(j));
+            matrixStack.translate(0.0F, 2F + getYOffset(endCrystalEntity, tickDelta, ChamsConfig.frame1Offset), 0.0F);
+            matrixStack.multiply((new Quaternionf()).setAngleAxis(1.0471976F, SINE_45_DEGREES, 0.0F, SINE_45_DEGREES));
+            matrixStack.scale(ChamsConfig.frame1Scale, ChamsConfig.frame1Scale, ChamsConfig.frame1Scale);
+            this.frame.render(matrixStack, vertexConsumer, light, k);
+            matrixStack.pop();
+        }
+//        matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(j));
+//        matrixStack.translate(0.0F, 1.5F + h / 2.0F, 0.0F);
+//        matrixStack.multiply((new Quaternionf()).setAngleAxis(1.0471976F, SINE_45_DEGREES, 0.0F, SINE_45_DEGREES));
+//        this.frame.render(matrixStack, vertexConsumer, i, k);
+//        float l = 0.875F;
+//        matrixStack.scale(0.875F, 0.875F, 0.875F);
+//        matrixStack.multiply((new Quaternionf()).setAngleAxis(1.0471976F, SINE_45_DEGREES, 0.0F, SINE_45_DEGREES));
+//        matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(j));
+        //frame 2
         if (ChamsConfig.renderFrame2) {
-            try{
-            Color color = Color.decode(ChamsConfig.frameCol2);
-                this.frame.render(matrices, vertices, ChamsConfig.lLevel == -1 ? light : ChamsConfig.lLevel, overlay, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F, ChamsConfig.frame2Alpha);
-            }
-            catch (NumberFormatException e){
-                this.frame.render(matrices, vertices, light, overlay, 1, 0,0,1);
-            }
+            matrixStack.push();
+            matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(j));
+            matrixStack.translate(0.0F, 2F + getYOffset(endCrystalEntity, tickDelta, ChamsConfig.frame2Offset), 0.0F);
+            matrixStack.multiply((new Quaternionf()).setAngleAxis(1.0471976F, SINE_45_DEGREES, 0.0F, SINE_45_DEGREES));
+            matrixStack.multiply((new Quaternionf()).setAngleAxis(1.0471976F, SINE_45_DEGREES, 0.0F, SINE_45_DEGREES));
+            matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(j));
+            matrixStack.scale(ChamsConfig.frame2Scale, ChamsConfig.frame2Scale, ChamsConfig.frame2Scale);
+            this.frame.render(matrixStack, vertexConsumer, light, k);
+            matrixStack.pop();
         }
+        //core
+        if (ChamsConfig.renderCore) {
+            matrixStack.push();
+            matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(j));
+            matrixStack.translate(0.0F, 2F + getYOffset(endCrystalEntity, tickDelta, ChamsConfig.coreOffset), 0.0F);
+            matrixStack.multiply((new Quaternionf()).setAngleAxis(1.0471976F, SINE_45_DEGREES, 0.0F, SINE_45_DEGREES));
+            matrixStack.multiply((new Quaternionf()).setAngleAxis(1.0471976F, SINE_45_DEGREES, 0.0F, SINE_45_DEGREES));
+            matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(j));
+            matrixStack.multiply((new Quaternionf()).setAngleAxis(1.0471976F, SINE_45_DEGREES, 0.0F, SINE_45_DEGREES));
+            matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(j));
+            matrixStack.scale(ChamsConfig.coreScale, ChamsConfig.coreScale, ChamsConfig.coreScale);
+            this.core.render(matrixStack, vertexConsumer, light, k);
+            matrixStack.pop();
         }
-        else{
-            this.frame.render(matrices, vertices, light, overlay);
+        matrixStack.pop();
+        //don't care about any of this
+        BlockPos blockPos = endCrystalEntity.getBeamTarget();
+        if (blockPos != null) {
+            float m = (float) blockPos.getX() + 0.5F;
+            float n = (float) blockPos.getY() + 0.5F;
+            float o = (float) blockPos.getZ() + 0.5F;
+            float p = (float) ((double) m - endCrystalEntity.getX());
+            float q = (float) ((double) n - endCrystalEntity.getY());
+            float r = (float) ((double) o - endCrystalEntity.getZ());
+            matrixStack.translate(p, q, r);
+            EnderDragonEntityRenderer.renderCrystalBeam(-p, -q + getYOffset(endCrystalEntity, tickDelta, 0F), -r, tickDelta, endCrystalEntity.endCrystalAge, matrixStack, vertexConsumerProvider, light);
         }
+
+        super.render(endCrystalEntity, yaw, tickDelta, matrixStack, vertexConsumerProvider, light);
+        ci.cancel();
     }
 }
