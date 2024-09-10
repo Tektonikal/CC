@@ -15,6 +15,8 @@ public class ChamsConfig extends MidnightConfig {
     public static float BounceSpeed = 0.2f;
     @Entry(name = "Light level", min = -1, max = 255, isSlider = true)
     public static int lLevel = -1;
+    @Entry(name = "Render Mode")
+    public static RenderMode renderMode = RenderMode.DEFAULT;
 
 
 
@@ -76,7 +78,6 @@ public class ChamsConfig extends MidnightConfig {
 
     public enum RenderMode {
         DEFAULT,
-        PORTAL,
         GATEWAY,
         WIREFRAME,
         CULLED,

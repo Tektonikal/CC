@@ -11,6 +11,7 @@ import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.decoration.EndCrystalEntity;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
@@ -21,12 +22,20 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import tektonikal.crystalchams.config.ChamsConfig;
 
+import java.awt.*;
+
+import static tektonikal.crystalchams.config.ChamsConfig.RenderMode.*;
+
 @Mixin(EndCrystalEntityRenderer.class)
 public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCrystalEntity> {
 
     @Shadow
     @Final
-    private static RenderLayer END_CRYSTAL;
+    private static Identifier TEXTURE;
+    @Shadow
+    @Final
+    @Mutable
+    private static RenderLayer END_CRYSTAL = RenderLayer.getEntityTranslucent(TEXTURE);
 
     @Shadow
     @Final
@@ -77,6 +86,13 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
             this.bottom.render(matrixStack, vertexConsumer, light, k);
         }
         matrixStack.pop();
+        switch (ChamsConfig.renderMode){
+            //for some reason the lineWidth value does absolutely nothing when I try to change it
+            case WIREFRAME -> END_CRYSTAL = RenderLayer.getDebugLineStrip(10);
+            case GATEWAY -> END_CRYSTAL = RenderLayer.getEndGateway();
+            case CULLED -> END_CRYSTAL = RenderLayer.getItemEntityTranslucentCull(TEXTURE);
+            default -> END_CRYSTAL = RenderLayer.getEntityTranslucent(TEXTURE);
+        }
         //frame 1
         if (ChamsConfig.renderFrame1) {
             matrixStack.push();
@@ -84,17 +100,14 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
             matrixStack.translate(0.0F, 2F + getYOffset(endCrystalEntity, tickDelta, ChamsConfig.frame1Offset), 0.0F);
             matrixStack.multiply((new Quaternionf()).setAngleAxis(1.0471976F, SINE_45_DEGREES, 0.0F, SINE_45_DEGREES));
             matrixStack.scale(ChamsConfig.frame1Scale, ChamsConfig.frame1Scale, ChamsConfig.frame1Scale);
-            this.frame.render(matrixStack, vertexConsumer, light, k);
+            try {
+                Color col = Color.decode(ChamsConfig.frameCol);
+                this.frame.render(matrixStack, vertexConsumer, light, k, col.getRed() / 255.0F, col.getGreen() / 255.0F, col.getBlue() / 255.0F, ChamsConfig.frame1Alpha);
+            } catch (NumberFormatException e) {
+                this.frame.render(matrixStack, vertexConsumer, light, k, 1, 0, 0, 1);
+            }
             matrixStack.pop();
         }
-//        matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(j));
-//        matrixStack.translate(0.0F, 1.5F + h / 2.0F, 0.0F);
-//        matrixStack.multiply((new Quaternionf()).setAngleAxis(1.0471976F, SINE_45_DEGREES, 0.0F, SINE_45_DEGREES));
-//        this.frame.render(matrixStack, vertexConsumer, i, k);
-//        float l = 0.875F;
-//        matrixStack.scale(0.875F, 0.875F, 0.875F);
-//        matrixStack.multiply((new Quaternionf()).setAngleAxis(1.0471976F, SINE_45_DEGREES, 0.0F, SINE_45_DEGREES));
-//        matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(j));
         //frame 2
         if (ChamsConfig.renderFrame2) {
             matrixStack.push();
@@ -104,7 +117,12 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
             matrixStack.multiply((new Quaternionf()).setAngleAxis(1.0471976F, SINE_45_DEGREES, 0.0F, SINE_45_DEGREES));
             matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(j));
             matrixStack.scale(ChamsConfig.frame2Scale, ChamsConfig.frame2Scale, ChamsConfig.frame2Scale);
-            this.frame.render(matrixStack, vertexConsumer, light, k);
+            try {
+                Color col = Color.decode(ChamsConfig.frameCol2);
+                this.frame.render(matrixStack, vertexConsumer, light, k, col.getRed() / 255.0F, col.getGreen() / 255.0F, col.getBlue() / 255.0F, ChamsConfig.frame2Alpha);
+            } catch (NumberFormatException e) {
+                this.frame.render(matrixStack, vertexConsumer, light, k, 1, 0, 0, 1);
+            }
             matrixStack.pop();
         }
         //core
@@ -118,7 +136,12 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
             matrixStack.multiply((new Quaternionf()).setAngleAxis(1.0471976F, SINE_45_DEGREES, 0.0F, SINE_45_DEGREES));
             matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(j));
             matrixStack.scale(ChamsConfig.coreScale, ChamsConfig.coreScale, ChamsConfig.coreScale);
-            this.core.render(matrixStack, vertexConsumer, light, k);
+            try {
+                Color col = Color.decode(ChamsConfig.col);
+                this.core.render(matrixStack, vertexConsumer, light, k, col.getRed() / 255.0F, col.getGreen() / 255.0F, col.getBlue() / 255.0F, ChamsConfig.alpha);
+            } catch (NumberFormatException e) {
+                this.core.render(matrixStack, vertexConsumer, light, k, 1, 0, 0, 1);
+            }
             matrixStack.pop();
         }
         matrixStack.pop();
