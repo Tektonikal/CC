@@ -9,8 +9,11 @@
   "icon": "icon.png",
   "environment": "client",
   "entrypoints": {
+    "modmenu": [
+      "tektonikal.crystalchams.config.ModMenuIntegration"
+    ],
     "main": [
-      "tektonikal.crystalchams.Crystalchams"
+      "tektonikal.crystalchams.CrystalChams"
     ]
   },
   "mixins": [
@@ -25,7 +28,7 @@
     "fabricloader": ">=${loader_version}",
     "fabric": "*",
     "minecraft": "${minecraft_version}",
-    "midnightlib": "*"
+    "yet_another_config_lib_v3": "*"
   },
   "custom": {
     "modmenu": {

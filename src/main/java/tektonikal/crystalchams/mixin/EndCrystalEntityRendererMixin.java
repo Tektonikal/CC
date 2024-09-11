@@ -24,8 +24,6 @@ import tektonikal.crystalchams.config.ChamsConfig;
 
 import java.awt.*;
 
-import static tektonikal.crystalchams.config.ChamsConfig.RenderMode.*;
-
 @Mixin(EndCrystalEntityRenderer.class)
 public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCrystalEntity> {
 
@@ -60,20 +58,20 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
     @Unique
     private static float getYOffset(EndCrystalEntity crystal, float tickDelta, float offset) {
         float f = (float) crystal.endCrystalAge + tickDelta;
-        float g = MathHelper.sin(f * ChamsConfig.BounceSpeed) / 2.0F + 0.5F;
-        g = (g * g + g) * ChamsConfig.bounce;
+        float g = MathHelper.sin(f * ChamsConfig.CONFIG.instance().BounceSpeed) / 2.0F + 0.5F;
+        g = (g * g + g) * ChamsConfig.CONFIG.instance().bounce;
         return g - 1.4F + offset;
     }
 
     //doing the rendering myself seems a lot less janky than writing a dozen separate mixins, and besides, I doubt anyone's going to mixin to here.
     @Inject(method = "render(Lnet/minecraft/entity/decoration/EndCrystalEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", at = @At("HEAD"), cancellable = true)
     private void CC$renderInject(EndCrystalEntity endCrystalEntity, float yaw, float tickDelta, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int light, CallbackInfo ci) {
-        if (!ChamsConfig.isActive) {
+        if (!ChamsConfig.CONFIG.instance().modEnabled) {
             return;
         }
-        shadowOpacity = ChamsConfig.shadowOpacity;
-        shadowRadius = ChamsConfig.shadowSize;
-        light = ChamsConfig.lLevel != -1 ? ChamsConfig.lLevel : light;
+        shadowOpacity = ChamsConfig.CONFIG.instance().shadowOpacity;
+        shadowRadius = ChamsConfig.CONFIG.instance().shadowSize;
+        light = ChamsConfig.CONFIG.instance().lLevel != -1 ? ChamsConfig.CONFIG.instance().lLevel : light;
         float j = ((float) endCrystalEntity.endCrystalAge + tickDelta) * 3.0F;
         VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(END_CRYSTAL);
         //bottom
@@ -86,7 +84,7 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
             this.bottom.render(matrixStack, vertexConsumer, light, k);
         }
         matrixStack.pop();
-        switch (ChamsConfig.renderMode){
+        switch (ChamsConfig.CONFIG.instance().renderMode) {
             //for some reason the lineWidth value does absolutely nothing when I try to change it
             case WIREFRAME -> END_CRYSTAL = RenderLayer.getDebugLineStrip(10);
             case GATEWAY -> END_CRYSTAL = RenderLayer.getEndGateway();
@@ -94,51 +92,51 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
             default -> END_CRYSTAL = RenderLayer.getEntityTranslucent(TEXTURE);
         }
         //frame 1
-        if (ChamsConfig.renderFrame1) {
+        if (ChamsConfig.CONFIG.instance().renderFrame1) {
             matrixStack.push();
             matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(j));
-            matrixStack.translate(0.0F, 2F + getYOffset(endCrystalEntity, tickDelta, ChamsConfig.frame1Offset), 0.0F);
+            matrixStack.translate(0.0F, 2F + getYOffset(endCrystalEntity, tickDelta, ChamsConfig.CONFIG.instance().frame1Offset), 0.0F);
             matrixStack.multiply((new Quaternionf()).setAngleAxis(1.0471976F, SINE_45_DEGREES, 0.0F, SINE_45_DEGREES));
-            matrixStack.scale(ChamsConfig.frame1Scale, ChamsConfig.frame1Scale, ChamsConfig.frame1Scale);
+            matrixStack.scale(ChamsConfig.CONFIG.instance().frame1Scale, ChamsConfig.CONFIG.instance().frame1Scale, ChamsConfig.CONFIG.instance().frame1Scale);
             try {
-                Color col = Color.decode(ChamsConfig.frameCol);
-                this.frame.render(matrixStack, vertexConsumer, light, k, col.getRed() / 255.0F, col.getGreen() / 255.0F, col.getBlue() / 255.0F, ChamsConfig.frame1Alpha);
+                Color col = Color.decode(ChamsConfig.CONFIG.instance().frameCol);
+                this.frame.render(matrixStack, vertexConsumer, light, k, col.getRed() / 255.0F, col.getGreen() / 255.0F, col.getBlue() / 255.0F, ChamsConfig.CONFIG.instance().frame1Alpha);
             } catch (NumberFormatException e) {
                 this.frame.render(matrixStack, vertexConsumer, light, k, 1, 0, 0, 1);
             }
             matrixStack.pop();
         }
         //frame 2
-        if (ChamsConfig.renderFrame2) {
+        if (ChamsConfig.CONFIG.instance().renderFrame2) {
             matrixStack.push();
             matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(j));
-            matrixStack.translate(0.0F, 2F + getYOffset(endCrystalEntity, tickDelta, ChamsConfig.frame2Offset), 0.0F);
+            matrixStack.translate(0.0F, 2F + getYOffset(endCrystalEntity, tickDelta, ChamsConfig.CONFIG.instance().frame2Offset), 0.0F);
             matrixStack.multiply((new Quaternionf()).setAngleAxis(1.0471976F, SINE_45_DEGREES, 0.0F, SINE_45_DEGREES));
             matrixStack.multiply((new Quaternionf()).setAngleAxis(1.0471976F, SINE_45_DEGREES, 0.0F, SINE_45_DEGREES));
             matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(j));
-            matrixStack.scale(ChamsConfig.frame2Scale, ChamsConfig.frame2Scale, ChamsConfig.frame2Scale);
+            matrixStack.scale(ChamsConfig.CONFIG.instance().frame2Scale, ChamsConfig.CONFIG.instance().frame2Scale, ChamsConfig.CONFIG.instance().frame2Scale);
             try {
-                Color col = Color.decode(ChamsConfig.frameCol2);
-                this.frame.render(matrixStack, vertexConsumer, light, k, col.getRed() / 255.0F, col.getGreen() / 255.0F, col.getBlue() / 255.0F, ChamsConfig.frame2Alpha);
+                Color col = Color.decode(ChamsConfig.CONFIG.instance().frameCol2);
+                this.frame.render(matrixStack, vertexConsumer, light, k, col.getRed() / 255.0F, col.getGreen() / 255.0F, col.getBlue() / 255.0F, ChamsConfig.CONFIG.instance().frame2Alpha);
             } catch (NumberFormatException e) {
                 this.frame.render(matrixStack, vertexConsumer, light, k, 1, 0, 0, 1);
             }
             matrixStack.pop();
         }
         //core
-        if (ChamsConfig.renderCore) {
+        if (ChamsConfig.CONFIG.instance().renderCore) {
             matrixStack.push();
             matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(j));
-            matrixStack.translate(0.0F, 2F + getYOffset(endCrystalEntity, tickDelta, ChamsConfig.coreOffset), 0.0F);
+            matrixStack.translate(0.0F, 2F + getYOffset(endCrystalEntity, tickDelta, ChamsConfig.CONFIG.instance().coreOffset), 0.0F);
             matrixStack.multiply((new Quaternionf()).setAngleAxis(1.0471976F, SINE_45_DEGREES, 0.0F, SINE_45_DEGREES));
             matrixStack.multiply((new Quaternionf()).setAngleAxis(1.0471976F, SINE_45_DEGREES, 0.0F, SINE_45_DEGREES));
             matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(j));
             matrixStack.multiply((new Quaternionf()).setAngleAxis(1.0471976F, SINE_45_DEGREES, 0.0F, SINE_45_DEGREES));
             matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(j));
-            matrixStack.scale(ChamsConfig.coreScale, ChamsConfig.coreScale, ChamsConfig.coreScale);
+            matrixStack.scale(ChamsConfig.CONFIG.instance().coreScale, ChamsConfig.CONFIG.instance().coreScale, ChamsConfig.CONFIG.instance().coreScale);
             try {
-                Color col = Color.decode(ChamsConfig.col);
-                this.core.render(matrixStack, vertexConsumer, light, k, col.getRed() / 255.0F, col.getGreen() / 255.0F, col.getBlue() / 255.0F, ChamsConfig.alpha);
+                Color col = Color.decode(ChamsConfig.CONFIG.instance().col);
+                this.core.render(matrixStack, vertexConsumer, light, k, col.getRed() / 255.0F, col.getGreen() / 255.0F, col.getBlue() / 255.0F, ChamsConfig.CONFIG.instance().alpha);
             } catch (NumberFormatException e) {
                 this.core.render(matrixStack, vertexConsumer, light, k, 1, 0, 0, 1);
             }

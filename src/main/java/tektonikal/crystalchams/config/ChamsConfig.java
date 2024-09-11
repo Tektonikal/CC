@@ -1,85 +1,106 @@
 package tektonikal.crystalchams.config;
 
-import eu.midnightdust.lib.config.MidnightConfig;
+import dev.isxander.yacl3.api.*;
+import dev.isxander.yacl3.config.v2.api.ConfigClassHandler;
+import dev.isxander.yacl3.config.v2.api.SerialEntry;
+import dev.isxander.yacl3.config.v2.api.serializer.GsonConfigSerializerBuilder;
+import dev.isxander.yacl3.impl.controller.TickBoxControllerBuilderImpl;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.text.Text;
 
-public class ChamsConfig extends MidnightConfig {
-    @Comment(centered = true)
-    public static String general = "";
-    @Entry(name = "Enabled")
-    public static boolean isActive = true;
-//    @Entry(name = "Render mode")
-//    public static RenderMode mode = RenderMode.DEFAULT;
-    @Entry(name = "Bounce height", min = 0f, max = 1f,isSlider = true)
-    public static float bounce = 0.4f;
-    @Entry(name = "Bounce speed", min = 0f, max = 1,isSlider = true)
-    public static float BounceSpeed = 0.2f;
-    @Entry(name = "Light level", min = -1, max = 255, isSlider = true)
-    public static int lLevel = -1;
-    @Entry(name = "Render Mode")
-    public static RenderMode renderMode = RenderMode.DEFAULT;
+public class ChamsConfig {
+    public static final ConfigClassHandler<ChamsConfig> CONFIG = ConfigClassHandler.createBuilder(ChamsConfig.class)
+            .serializer(config -> GsonConfigSerializerBuilder.create(config)
+                    .setPath(FabricLoader.getInstance().getConfigDir().resolve("crystalchams.json"))
+                    .build())
+            .build();
+    @SerialEntry
+    public boolean modEnabled = true;
+    @SerialEntry
+    public RenderMode mode = RenderMode.DEFAULT;
+    @SerialEntry
+    public float bounce = 0.4f;
+    @SerialEntry
+    public float BounceSpeed = 0.2f;
+    @SerialEntry
+    public int lLevel = -1;
+    @SerialEntry
+    public RenderMode renderMode = RenderMode.DEFAULT;
+    @SerialEntry
+    public boolean renderCore = true;
+    @SerialEntry
+    public float coreScale = 1.53125f;
+    @SerialEntry
+    public float coreOffset = 0f;
+    @SerialEntry
+    public float coreRotSpeed = 1f;
+    @SerialEntry
+    public String col = "#ffffff";
+    @SerialEntry
+    public float alpha = 1;
+    @SerialEntry
+    public boolean renderFrame1 = true;
+    @SerialEntry
+    public float frame1Scale = 2F;
+    @SerialEntry
+    public float frame1Offset = 0f;
+    @SerialEntry
+    public String frameCol = "#ffffff";
+    @SerialEntry
+    public float frame1Alpha = 1f;
+    @SerialEntry
+    public boolean renderFrame2 = true;
+    @SerialEntry
+    public float frame2Scale = 1.75F;
+    @SerialEntry
+    public float frame2Offset = 0f;
+    @SerialEntry
+    public String frameCol2 = "#ffffff";
+    @SerialEntry
+    public float frame2Alpha = 1;
+    @SerialEntry
+    public float shadowSize = 0.5F;
+    @SerialEntry
+    public float shadowOpacity = 1;
 
-
-
-
-
-    @Comment(centered = true)
-    public static String core = "";
-    @Entry(name = "Render core")
-    public static boolean renderCore = true;
-    @Entry(name = "Core Scale", min = 0.1f, max = 5f,isSlider = true)
-    public static float coreScale = 1.53125f;
-    @Entry(name = "Height Offset", min = -1f, max = 1f,isSlider = true)
-    public static float coreOffset = 0f;
-    @Entry(name = "Rotation Speed", min = 0f, max = 25f,isSlider = true)
-    public static float coreRotSpeed = 1f;
-    @Entry(name = "Color", isColor = true)
-    public static String col = "#ffffff";
-    @Entry(name = "Core Alpha", min = 0f, max = 1f,isSlider = true)
-    public static float alpha = 1;
-
-
-
-
-
-    @Comment(centered = true)
-    public static String f1 = "";
-    @Entry(name = "Render frame 1")
-    public static boolean renderFrame1 = true;
-    @Entry(name = "Frame 1 Scale", min = 0.1f, max = 5f,isSlider = true)
-    public static float frame1Scale = 2F;
-    @Entry(name = "Height Offset", min = -1f, max = 1f,isSlider = true)
-    public static float frame1Offset = 0f;
-    @Entry(name = "Frame 1 Color", isColor = true)
-    public static String frameCol = "#ffffff";
-    @Entry(name = "Frame 1 Alpha", min = 0f, max = 1f,isSlider = true)
-    public static float frame1Alpha = 1f;
-
-
-
-
-    @Comment(centered = true)
-    public static String f2 = "";
-    @Entry(name = "Render Frame 2")
-    public static boolean renderFrame2 = true;
-    @Entry(name = "Frame 2 Scale", min = 0.1f, max = 5f,isSlider = true)
-    public static float frame2Scale = 1.75F;
-    @Entry(name = "Height Offset", min = -1f, max = 1f,isSlider = true)
-    public static float frame2Offset = 0f;
-    @Entry(name = "Frame 2 Color", isColor = true)
-    public static String frameCol2 = "#ffffff";
-    @Entry(name = "Frame 2 Alpha", min = 0f, max = 1f, isSlider = true)
-    public static float frame2Alpha = 1;
-    @Comment(centered = true)
-    public static String shadowC = "";
-    @Entry(name = "Shadow size", isSlider = true, min = 0, max = 1.5F)
-    public static float shadowSize = 0.5F;
-    @Entry(name = "Shadow opacity", isSlider = true, min =0, max = 1)
-    public static float shadowOpacity = 1;
-
-    public enum RenderMode {
+    public enum RenderMode implements NameableEnum {
         DEFAULT,
         GATEWAY,
         WIREFRAME,
-        CULLED,
+        CULLED;
+
+        @Override
+        public Text getDisplayName() {
+            return switch (name()){
+                default -> Text.of("blegh");
+            };
+        }
+    }
+    public static Screen getConfigScreen(Screen parent) {
+        return YetAnotherConfigLib.createBuilder()
+                .title(Text.of("Custom End Crystals"))
+                .category(ConfigCategory.createBuilder()
+                        .name(Text.of("General"))
+                        .group(OptionGroup.createBuilder()
+                                .name(Text.of("General"))
+                                .option(Option.<Boolean>createBuilder()
+                                        .name(Text.of("Mod Enabled"))
+                                        .controller(TickBoxControllerBuilderImpl::new)
+                                        .binding(true, () -> CONFIG.instance().modEnabled, newVal -> CONFIG.instance().modEnabled = newVal)
+                                        .build())
+                                .build())
+                        .build())
+                .category(ConfigCategory.createBuilder()
+                        .name(Text.of("Core"))
+                        .build())
+                .category(ConfigCategory.createBuilder()
+                        .name(Text.of("Frame 1"))
+                        .build())
+                .category(ConfigCategory.createBuilder()
+                        .name(Text.of("Frame 2"))
+                        .build())
+                .build()
+                .generateScreen(parent);
     }
 }
