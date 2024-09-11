@@ -1,6 +1,8 @@
 package tektonikal.crystalchams.config;
 
 import dev.isxander.yacl3.api.*;
+import dev.isxander.yacl3.api.controller.EnumControllerBuilder;
+import dev.isxander.yacl3.api.controller.FloatSliderControllerBuilder;
 import dev.isxander.yacl3.config.v2.api.ConfigClassHandler;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
 import dev.isxander.yacl3.config.v2.api.serializer.GsonConfigSerializerBuilder;
@@ -8,6 +10,8 @@ import dev.isxander.yacl3.impl.controller.TickBoxControllerBuilderImpl;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
+
+import java.awt.*;
 
 public class ChamsConfig {
     public static final ConfigClassHandler<ChamsConfig> CONFIG = ConfigClassHandler.createBuilder(ChamsConfig.class)
@@ -18,13 +22,11 @@ public class ChamsConfig {
     @SerialEntry
     public boolean modEnabled = true;
     @SerialEntry
-    public RenderMode mode = RenderMode.DEFAULT;
+    public float bounceHeight = 0.4f;
     @SerialEntry
-    public float bounce = 0.4f;
+    public float bounceSpeed = 0.2f;
     @SerialEntry
-    public float BounceSpeed = 0.2f;
-    @SerialEntry
-    public int lLevel = -1;
+    public int lightLevel = -1;
     @SerialEntry
     public RenderMode renderMode = RenderMode.DEFAULT;
     @SerialEntry
@@ -36,9 +38,9 @@ public class ChamsConfig {
     @SerialEntry
     public float coreRotSpeed = 1f;
     @SerialEntry
-    public String col = "#ffffff";
+    public Color coreColor = Color.decode("#ffffff");
     @SerialEntry
-    public float alpha = 1;
+    public float coreAlpha = 1;
     @SerialEntry
     public boolean renderFrame1 = true;
     @SerialEntry
@@ -46,7 +48,7 @@ public class ChamsConfig {
     @SerialEntry
     public float frame1Offset = 0f;
     @SerialEntry
-    public String frameCol = "#ffffff";
+    public Color frame1Color = Color.decode("#ffffff");
     @SerialEntry
     public float frame1Alpha = 1f;
     @SerialEntry
@@ -56,13 +58,13 @@ public class ChamsConfig {
     @SerialEntry
     public float frame2Offset = 0f;
     @SerialEntry
-    public String frameCol2 = "#ffffff";
+    public Color frame2Color = Color.decode("#ffffff");
     @SerialEntry
     public float frame2Alpha = 1;
     @SerialEntry
-    public float shadowSize = 0.5F;
+    public float shadowRadius = 0.5F;
     @SerialEntry
-    public float shadowOpacity = 1;
+    public float shadowAlpha = 1;
 
     public enum RenderMode implements NameableEnum {
         DEFAULT,
@@ -73,7 +75,11 @@ public class ChamsConfig {
         @Override
         public Text getDisplayName() {
             return switch (name()){
-                default -> Text.of("blegh");
+                case "DEFAULT" -> Text.of("Default");
+                case "GATEWAY" -> Text.of("Gateway");
+                case "WIREFRAME" -> Text.of("Wireframe");
+                case "CULLED" -> Text.of("Culled");
+                default -> Text.of("blegh .");
             };
         }
     }
@@ -88,6 +94,27 @@ public class ChamsConfig {
                                         .name(Text.of("Mod Enabled"))
                                         .controller(TickBoxControllerBuilderImpl::new)
                                         .binding(true, () -> CONFIG.instance().modEnabled, newVal -> CONFIG.instance().modEnabled = newVal)
+                                        .build())
+                                .build())
+                        .group(OptionGroup.createBuilder()
+                                .name(Text.of("Shadow"))
+                                .option(Option.<Float>createBuilder()
+                                        .name(Text.of("Shadow Radius"))
+                                        .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0.1f, 2f).step(0.1f).formatValue(val -> Text.of(String.format("%.1f", val))))
+                                        .binding(0.5F, () -> CONFIG.instance().shadowRadius, newVal -> CONFIG.instance().shadowRadius = newVal)
+                                        .build())
+                                .option(Option.<Float>createBuilder()
+                                        .name(Text.of("Shadow Opacity"))
+                                        .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(val -> Text.of(String.format("%.2f", val) + "%")))
+                                        .binding(1F, () -> CONFIG.instance().shadowAlpha, newVal -> CONFIG.instance().shadowAlpha = newVal)
+                                        .build())
+                                .build())
+                        .group(OptionGroup.createBuilder()
+                                .name(Text.of("Miscellaneous"))
+                                .option(Option.<RenderMode>createBuilder()
+                                        .name(Text.of("Render Mode"))
+                                        .controller(renderModeOption -> EnumControllerBuilder.create(renderModeOption).enumClass(RenderMode.class))
+                                        .binding(RenderMode.DEFAULT, () ->CONFIG.instance().renderMode, newVal -> CONFIG.instance().renderMode = newVal)
                                         .build())
                                 .build())
                         .build())

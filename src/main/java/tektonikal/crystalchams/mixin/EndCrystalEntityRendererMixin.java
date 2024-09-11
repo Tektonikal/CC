@@ -58,8 +58,8 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
     @Unique
     private static float getYOffset(EndCrystalEntity crystal, float tickDelta, float offset) {
         float f = (float) crystal.endCrystalAge + tickDelta;
-        float g = MathHelper.sin(f * ChamsConfig.CONFIG.instance().BounceSpeed) / 2.0F + 0.5F;
-        g = (g * g + g) * ChamsConfig.CONFIG.instance().bounce;
+        float g = MathHelper.sin(f * ChamsConfig.CONFIG.instance().bounceSpeed) / 2.0F + 0.5F;
+        g = (g * g + g) * ChamsConfig.CONFIG.instance().bounceHeight;
         return g - 1.4F + offset;
     }
 
@@ -69,9 +69,9 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
         if (!ChamsConfig.CONFIG.instance().modEnabled) {
             return;
         }
-        shadowOpacity = ChamsConfig.CONFIG.instance().shadowOpacity;
-        shadowRadius = ChamsConfig.CONFIG.instance().shadowSize;
-        light = ChamsConfig.CONFIG.instance().lLevel != -1 ? ChamsConfig.CONFIG.instance().lLevel : light;
+        shadowOpacity = ChamsConfig.CONFIG.instance().shadowAlpha;
+        shadowRadius = ChamsConfig.CONFIG.instance().shadowRadius;
+        light = ChamsConfig.CONFIG.instance().lightLevel != -1 ? ChamsConfig.CONFIG.instance().lightLevel : light;
         float j = ((float) endCrystalEntity.endCrystalAge + tickDelta) * 3.0F;
         VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(END_CRYSTAL);
         //bottom
@@ -99,7 +99,7 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
             matrixStack.multiply((new Quaternionf()).setAngleAxis(1.0471976F, SINE_45_DEGREES, 0.0F, SINE_45_DEGREES));
             matrixStack.scale(ChamsConfig.CONFIG.instance().frame1Scale, ChamsConfig.CONFIG.instance().frame1Scale, ChamsConfig.CONFIG.instance().frame1Scale);
             try {
-                Color col = Color.decode(ChamsConfig.CONFIG.instance().frameCol);
+                Color col = ChamsConfig.CONFIG.instance().frame1Color;
                 this.frame.render(matrixStack, vertexConsumer, light, k, col.getRed() / 255.0F, col.getGreen() / 255.0F, col.getBlue() / 255.0F, ChamsConfig.CONFIG.instance().frame1Alpha);
             } catch (NumberFormatException e) {
                 this.frame.render(matrixStack, vertexConsumer, light, k, 1, 0, 0, 1);
@@ -116,7 +116,7 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
             matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(j));
             matrixStack.scale(ChamsConfig.CONFIG.instance().frame2Scale, ChamsConfig.CONFIG.instance().frame2Scale, ChamsConfig.CONFIG.instance().frame2Scale);
             try {
-                Color col = Color.decode(ChamsConfig.CONFIG.instance().frameCol2);
+                Color col = ChamsConfig.CONFIG.instance().frame2Color;
                 this.frame.render(matrixStack, vertexConsumer, light, k, col.getRed() / 255.0F, col.getGreen() / 255.0F, col.getBlue() / 255.0F, ChamsConfig.CONFIG.instance().frame2Alpha);
             } catch (NumberFormatException e) {
                 this.frame.render(matrixStack, vertexConsumer, light, k, 1, 0, 0, 1);
@@ -135,8 +135,8 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
             matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(j));
             matrixStack.scale(ChamsConfig.CONFIG.instance().coreScale, ChamsConfig.CONFIG.instance().coreScale, ChamsConfig.CONFIG.instance().coreScale);
             try {
-                Color col = Color.decode(ChamsConfig.CONFIG.instance().col);
-                this.core.render(matrixStack, vertexConsumer, light, k, col.getRed() / 255.0F, col.getGreen() / 255.0F, col.getBlue() / 255.0F, ChamsConfig.CONFIG.instance().alpha);
+                Color col = ChamsConfig.CONFIG.instance().coreColor;
+                this.core.render(matrixStack, vertexConsumer, light, k, col.getRed() / 255.0F, col.getGreen() / 255.0F, col.getBlue() / 255.0F, ChamsConfig.CONFIG.instance().coreAlpha);
             } catch (NumberFormatException e) {
                 this.core.render(matrixStack, vertexConsumer, light, k, 1, 0, 0, 1);
             }
