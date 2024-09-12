@@ -53,14 +53,14 @@ public class ChamsConfig {
     @SerialEntry
     public int coreChromaDelay = 0;
     @SerialEntry
-    public float coreChromaSpeed = 2.5F;
+    public int coreChromaSpeed = 5;
 
     //TODO: rainbow/chroma
 
     @SerialEntry
     public boolean renderFrame1 = true;
     @SerialEntry
-    public float frame1Scale = 2F;
+    public float frame1Scale = 1.75F;
     @SerialEntry
     public float frame1Offset = 0f;
     @SerialEntry
@@ -78,13 +78,13 @@ public class ChamsConfig {
     @SerialEntry
     public int frame1ChromaDelay = 0;
     @SerialEntry
-    public float frame1ChromaSpeed = 2.5F;
+    public int frame1ChromaSpeed = 5;
 
 
     @SerialEntry
     public boolean renderFrame2 = true;
     @SerialEntry
-    public float frame2Scale = 1.75F;
+    public float frame2Scale = 2F;
     @SerialEntry
     public float frame2Offset = 0f;
     @SerialEntry
@@ -102,7 +102,7 @@ public class ChamsConfig {
     @SerialEntry
     public int frame2ChromaDelay = 0;
     @SerialEntry
-    public float frame2ChromaSpeed = 2.5F;
+    public int frame2ChromaSpeed = 5;
 
     public enum RenderMode implements NameableEnum {
         DEFAULT,
@@ -204,6 +204,21 @@ public class ChamsConfig {
                                         .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(val -> Text.of(String.format("%.0f", val * 100) + "%")))
                                         .binding(1F, () -> CONFIG.instance().coreAlpha, newVal -> CONFIG.instance().coreAlpha = newVal)
                                         .build())
+                                .option(Option.<Boolean>createBuilder()
+                                        .name(Text.of("Chroma"))
+                                        .binding(false, () -> CONFIG.instance().coreChroma, newVal -> CONFIG.instance().coreChroma = newVal)
+                                        .controller(TickBoxControllerBuilderImpl::new)
+                                        .build())
+                                .option(Option.<Integer>createBuilder()
+                                        .name(Text.of("Chroma Delay"))
+                                        .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-500, 500))
+                                        .binding(0, () -> CONFIG.instance().coreChromaDelay, newVal -> CONFIG.instance().coreChromaDelay = newVal)
+                                        .build())
+                                .option(Option.<Integer>createBuilder()
+                                        .name(Text.of("Chroma Speed"))
+                                        .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(1,10))
+                                        .binding(2, () -> CONFIG.instance().coreChromaSpeed, newVal -> CONFIG.instance().coreChromaSpeed = newVal)
+                                        .build())
                                 .build())
                         .category(ConfigCategory.createBuilder()
                                 .name(Text.of("Frame 1"))
@@ -247,6 +262,21 @@ public class ChamsConfig {
                                         .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(val -> Text.of(String.format("%.0f", val * 100) + "%")))
                                         .binding(1F, () -> CONFIG.instance().frame1Alpha, newVal -> CONFIG.instance().frame1Alpha = newVal)
                                         .build())
+                                .option(Option.<Boolean>createBuilder()
+                                        .name(Text.of("Chroma"))
+                                        .binding(false, () -> CONFIG.instance().frame1Chroma, newVal -> CONFIG.instance().frame1Chroma = newVal)
+                                        .controller(TickBoxControllerBuilderImpl::new)
+                                        .build())
+                                .option(Option.<Integer>createBuilder()
+                                        .name(Text.of("Chroma Delay"))
+                                        .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-500, 500))
+                                        .binding(0, () -> CONFIG.instance().frame1ChromaDelay, newVal -> CONFIG.instance().frame1ChromaDelay = newVal)
+                                        .build())
+                                .option(Option.<Integer>createBuilder()
+                                        .name(Text.of("Chroma Speed"))
+                                        .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(1,10))
+                                        .binding(2, () -> CONFIG.instance().frame1ChromaSpeed, newVal -> CONFIG.instance().frame1ChromaSpeed = newVal)
+                                        .build())
                                 .build())
                         .category(ConfigCategory.createBuilder()
                                 .name(Text.of("Frame 2"))
@@ -289,6 +319,21 @@ public class ChamsConfig {
                                         .name(Text.of("Opacity"))
                                         .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(val -> Text.of(String.format("%.0f", val * 100) + "%")))
                                         .binding(1F, () -> CONFIG.instance().frame2Alpha, newVal -> CONFIG.instance().frame2Alpha = newVal)
+                                        .build())
+                                .option(Option.<Boolean>createBuilder()
+                                        .name(Text.of("Chroma"))
+                                        .binding(false, () -> CONFIG.instance().frame2Chroma, newVal -> CONFIG.instance().frame2Chroma = newVal)
+                                        .controller(TickBoxControllerBuilderImpl::new)
+                                        .build())
+                                .option(Option.<Integer>createBuilder()
+                                        .name(Text.of("Chroma Delay"))
+                                        .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-500, 500))
+                                        .binding(0, () -> CONFIG.instance().frame2ChromaDelay, newVal -> CONFIG.instance().frame2ChromaDelay = newVal)
+                                        .build())
+                                .option(Option.<Integer>createBuilder()
+                                        .name(Text.of("Chroma Speed"))
+                                        .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(1,10))
+                                        .binding(2, () -> CONFIG.instance().frame2ChromaSpeed, newVal -> CONFIG.instance().frame2ChromaSpeed = newVal)
                                         .build())
                                 .build())))
                 .generateScreen(parent);

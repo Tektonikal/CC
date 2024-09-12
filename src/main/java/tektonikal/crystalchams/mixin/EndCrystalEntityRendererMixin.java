@@ -72,7 +72,6 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
         shadowOpacity = ChamsConfig.CONFIG.instance().shadowAlpha;
         shadowRadius = ChamsConfig.CONFIG.instance().shadowRadius;
         light = ChamsConfig.CONFIG.instance().lightLevel != -1 ? ChamsConfig.CONFIG.instance().lightLevel : light;
-        //TODO: make independent
         float j = ((float) endCrystalEntity.endCrystalAge + tickDelta) * 3.0F;
         VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(END_CRYSTAL);
         //bottom
@@ -99,11 +98,16 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
             matrixStack.translate(0.0F, 2F + getYOffset(endCrystalEntity, tickDelta, ChamsConfig.CONFIG.instance().frame1Offset, ChamsConfig.CONFIG.instance().frame1BounceSpeed, ChamsConfig.CONFIG.instance().frame1BounceHeight), 0.0F);
             matrixStack.multiply((new Quaternionf()).setAngleAxis(1.0471976F, SINE_45_DEGREES, 0.0F, SINE_45_DEGREES));
             matrixStack.scale(ChamsConfig.CONFIG.instance().frame1Scale, ChamsConfig.CONFIG.instance().frame1Scale, ChamsConfig.CONFIG.instance().frame1Scale);
-            try {
-                Color col = ChamsConfig.CONFIG.instance().frame1Color;
+            if (ChamsConfig.CONFIG.instance().frame1Chroma) {
+                Color col = getRainbowCol(ChamsConfig.CONFIG.instance().frame1ChromaDelay, ChamsConfig.CONFIG.instance().frame1ChromaSpeed);
                 this.frame.render(matrixStack, vertexConsumer, light, k, col.getRed() / 255.0F, col.getGreen() / 255.0F, col.getBlue() / 255.0F, ChamsConfig.CONFIG.instance().frame1Alpha);
-            } catch (NumberFormatException e) {
-                this.frame.render(matrixStack, vertexConsumer, light, k, 1, 0, 0, 1);
+            } else {
+                try {
+                    Color col = ChamsConfig.CONFIG.instance().frame1Color;
+                    this.frame.render(matrixStack, vertexConsumer, light, k, col.getRed() / 255.0F, col.getGreen() / 255.0F, col.getBlue() / 255.0F, ChamsConfig.CONFIG.instance().frame1Alpha);
+                } catch (NumberFormatException e) {
+                    this.frame.render(matrixStack, vertexConsumer, light, k, 1, 0, 0, 1);
+                }
             }
             matrixStack.pop();
         }
@@ -116,11 +120,16 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
             matrixStack.multiply((new Quaternionf()).setAngleAxis(1.0471976F, SINE_45_DEGREES, 0.0F, SINE_45_DEGREES));
             matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(j * ChamsConfig.CONFIG.instance().frame2RotationSpeed));
             matrixStack.scale(ChamsConfig.CONFIG.instance().frame2Scale, ChamsConfig.CONFIG.instance().frame2Scale, ChamsConfig.CONFIG.instance().frame2Scale);
-            try {
-                Color col = ChamsConfig.CONFIG.instance().frame2Color;
-                this.frame.render(matrixStack, vertexConsumer, light, k, col.getRed() / 255.0F, col.getGreen() / 255.0F, col.getBlue() / 255.0F, ChamsConfig.CONFIG.instance().frame2Alpha);
-            } catch (NumberFormatException e) {
-                this.frame.render(matrixStack, vertexConsumer, light, k, 1, 0, 0, 1);
+            if (ChamsConfig.CONFIG.instance().frame2Chroma) {
+                Color col = getRainbowCol(ChamsConfig.CONFIG.instance().frame2ChromaDelay, ChamsConfig.CONFIG.instance().frame2ChromaSpeed);
+                this.frame.render(matrixStack, vertexConsumer, light, k, col.getRed() / 255.0F, col.getGreen() / 255.0F, col.getBlue() / 255.0F, ChamsConfig.CONFIG.instance().frame1Alpha);
+            } else {
+                try {
+                    Color col = ChamsConfig.CONFIG.instance().frame2Color;
+                    this.frame.render(matrixStack, vertexConsumer, light, k, col.getRed() / 255.0F, col.getGreen() / 255.0F, col.getBlue() / 255.0F, ChamsConfig.CONFIG.instance().frame2Alpha);
+                } catch (NumberFormatException e) {
+                    this.frame.render(matrixStack, vertexConsumer, light, k, 1, 0, 0, 1);
+                }
             }
             matrixStack.pop();
         }
@@ -135,11 +144,16 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
             matrixStack.multiply((new Quaternionf()).setAngleAxis(1.0471976F, SINE_45_DEGREES, 0.0F, SINE_45_DEGREES));
             matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(j * ChamsConfig.CONFIG.instance().coreRotationSpeed));
             matrixStack.scale(ChamsConfig.CONFIG.instance().coreScale, ChamsConfig.CONFIG.instance().coreScale, ChamsConfig.CONFIG.instance().coreScale);
-            try {
-                Color col = ChamsConfig.CONFIG.instance().coreColor;
-                this.core.render(matrixStack, vertexConsumer, light, k, col.getRed() / 255.0F, col.getGreen() / 255.0F, col.getBlue() / 255.0F, ChamsConfig.CONFIG.instance().coreAlpha);
-            } catch (NumberFormatException e) {
-                this.core.render(matrixStack, vertexConsumer, light, k, 1, 0, 0, 1);
+            if (ChamsConfig.CONFIG.instance().coreChroma) {
+                Color col = getRainbowCol(ChamsConfig.CONFIG.instance().coreChromaDelay, ChamsConfig.CONFIG.instance().coreChromaSpeed);
+                this.core.render(matrixStack, vertexConsumer, light, k, col.getRed() / 255.0F, col.getGreen() / 255.0F, col.getBlue() / 255.0F, ChamsConfig.CONFIG.instance().frame1Alpha);
+            } else {
+                try {
+                    Color col = ChamsConfig.CONFIG.instance().coreColor;
+                    this.core.render(matrixStack, vertexConsumer, light, k, col.getRed() / 255.0F, col.getGreen() / 255.0F, col.getBlue() / 255.0F, ChamsConfig.CONFIG.instance().coreAlpha);
+                } catch (NumberFormatException e) {
+                    this.core.render(matrixStack, vertexConsumer, light, k, 1, 0, 0, 1);
+                }
             }
             matrixStack.pop();
         }
@@ -160,9 +174,10 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
         super.render(endCrystalEntity, yaw, tickDelta, matrixStack, vertexConsumerProvider, light);
         ci.cancel();
     }
+
     @Unique
-    private static Color getRainbowCol(int delay, float speed) {
-        return getRainbow(((System.currentTimeMillis() + delay) % 10000L / 10000.0f) * speed);
+    private static Color getRainbowCol(int delay, int speed) {
+        return getRainbow(-((System.currentTimeMillis() + delay) % 10000L / 10000.0f) * speed);
     }
 
     //https://github.com/Splzh/ClearHitboxes/blob/main/src/main/java/splash/utils/ColorUtils.java !!
