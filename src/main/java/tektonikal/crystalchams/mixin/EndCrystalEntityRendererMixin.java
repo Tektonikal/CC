@@ -72,7 +72,8 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
         shadowOpacity = ChamsConfig.CONFIG.instance().shadowAlpha;
         shadowRadius = ChamsConfig.CONFIG.instance().shadowRadius;
         light = ChamsConfig.CONFIG.instance().lightLevel != -1 ? ChamsConfig.CONFIG.instance().lightLevel : light;
-        float j = ((float) endCrystalEntity.endCrystalAge + tickDelta) * 3.0F;
+        //TODO: make independent
+        float j = ((float) endCrystalEntity.endCrystalAge + tickDelta) * 3.0F * ChamsConfig.CONFIG.instance().rotationSpeed;
         VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(END_CRYSTAL);
         //bottom
         matrixStack.push();
@@ -84,7 +85,7 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
             this.bottom.render(matrixStack, vertexConsumer, light, k);
         }
         matrixStack.pop();
-        switch (ChamsConfig.CONFIG.instance().renderMode) {
+        switch (ChamsConfig.CONFIG.instance().renderLayer) {
             //for some reason the lineWidth value does absolutely nothing when I try to change it
             case WIREFRAME -> END_CRYSTAL = RenderLayer.getDebugLineStrip(10);
             case GATEWAY -> END_CRYSTAL = RenderLayer.getEndGateway();
