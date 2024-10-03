@@ -13,6 +13,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ColorHelper;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 import org.joml.Quaternionf;
@@ -79,9 +80,9 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
         matrixStack.push();
         matrixStack.scale(2, 2, 2);
         matrixStack.translate(0.0F, -0.5F, 0.0F);
-        int k = OverlayTexture.DEFAULT_UV;
+        int overlay = OverlayTexture.DEFAULT_UV;
         if (endCrystalEntity.shouldShowBottom()) {
-            this.bottom.render(matrixStack, vertexConsumer, light, k);
+            this.bottom.render(matrixStack, vertexConsumer, light, overlay);
         }
         matrixStack.pop();
         switch (ChamsConfig.CONFIG.instance().renderLayer) {
@@ -100,13 +101,13 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
             matrixStack.scale(ChamsConfig.CONFIG.instance().frame1Scale, ChamsConfig.CONFIG.instance().frame1Scale, ChamsConfig.CONFIG.instance().frame1Scale);
             if (ChamsConfig.CONFIG.instance().frame1Chroma) {
                 Color col = getRainbowCol(ChamsConfig.CONFIG.instance().frame1ChromaDelay, ChamsConfig.CONFIG.instance().frame1ChromaSpeed);
-                this.frame.render(matrixStack, vertexConsumer, light, k, col.getRed() / 255.0F, col.getGreen() / 255.0F, col.getBlue() / 255.0F, ChamsConfig.CONFIG.instance().frame1Alpha);
+                this.frame.render(matrixStack, vertexConsumer, light, overlay, getColor(col, ChamsConfig.CONFIG.instance().frame1Alpha));
             } else {
                 try {
                     Color col = ChamsConfig.CONFIG.instance().frame1Color;
-                    this.frame.render(matrixStack, vertexConsumer, light, k, col.getRed() / 255.0F, col.getGreen() / 255.0F, col.getBlue() / 255.0F, ChamsConfig.CONFIG.instance().frame1Alpha);
+                    this.frame.render(matrixStack, vertexConsumer, light, overlay, getColor(col, ChamsConfig.CONFIG.instance().frame1Alpha));
                 } catch (NumberFormatException e) {
-                    this.frame.render(matrixStack, vertexConsumer, light, k, 1, 0, 0, 1);
+                    this.frame.render(matrixStack, vertexConsumer, light, overlay, ColorHelper.Argb.getArgb(1, 0, 0, 1));
                 }
             }
             matrixStack.pop();
@@ -122,13 +123,13 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
             matrixStack.scale(ChamsConfig.CONFIG.instance().frame2Scale, ChamsConfig.CONFIG.instance().frame2Scale, ChamsConfig.CONFIG.instance().frame2Scale);
             if (ChamsConfig.CONFIG.instance().frame2Chroma) {
                 Color col = getRainbowCol(ChamsConfig.CONFIG.instance().frame2ChromaDelay, ChamsConfig.CONFIG.instance().frame2ChromaSpeed);
-                this.frame.render(matrixStack, vertexConsumer, light, k, col.getRed() / 255.0F, col.getGreen() / 255.0F, col.getBlue() / 255.0F, ChamsConfig.CONFIG.instance().frame1Alpha);
+                this.frame.render(matrixStack, vertexConsumer, light, overlay, getColor(col, ChamsConfig.CONFIG.instance().frame1Alpha));
             } else {
                 try {
                     Color col = ChamsConfig.CONFIG.instance().frame2Color;
-                    this.frame.render(matrixStack, vertexConsumer, light, k, col.getRed() / 255.0F, col.getGreen() / 255.0F, col.getBlue() / 255.0F, ChamsConfig.CONFIG.instance().frame2Alpha);
+                    this.frame.render(matrixStack, vertexConsumer, light, overlay, getColor(col, ChamsConfig.CONFIG.instance().frame2Alpha));
                 } catch (NumberFormatException e) {
-                    this.frame.render(matrixStack, vertexConsumer, light, k, 1, 0, 0, 1);
+                    this.frame.render(matrixStack, vertexConsumer, light, overlay, ColorHelper.Argb.getArgb(1, 0, 0, 1));
                 }
             }
             matrixStack.pop();
@@ -146,13 +147,13 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
             matrixStack.scale(ChamsConfig.CONFIG.instance().coreScale, ChamsConfig.CONFIG.instance().coreScale, ChamsConfig.CONFIG.instance().coreScale);
             if (ChamsConfig.CONFIG.instance().coreChroma) {
                 Color col = getRainbowCol(ChamsConfig.CONFIG.instance().coreChromaDelay, ChamsConfig.CONFIG.instance().coreChromaSpeed);
-                this.core.render(matrixStack, vertexConsumer, light, k, col.getRed() / 255.0F, col.getGreen() / 255.0F, col.getBlue() / 255.0F, ChamsConfig.CONFIG.instance().frame1Alpha);
+                this.core.render(matrixStack, vertexConsumer, light, overlay, getColor(col, ChamsConfig.CONFIG.instance().frame1Alpha));
             } else {
                 try {
                     Color col = ChamsConfig.CONFIG.instance().coreColor;
-                    this.core.render(matrixStack, vertexConsumer, light, k, col.getRed() / 255.0F, col.getGreen() / 255.0F, col.getBlue() / 255.0F, ChamsConfig.CONFIG.instance().coreAlpha);
+                    this.core.render(matrixStack, vertexConsumer, light, overlay, getColor(col, ChamsConfig.CONFIG.instance().coreAlpha));
                 } catch (NumberFormatException e) {
-                    this.core.render(matrixStack, vertexConsumer, light, k, 1, 0, 0, 1);
+                    this.core.render(matrixStack, vertexConsumer, light, overlay, ColorHelper.Argb.getArgb(1, 0, 0, 1));
                 }
             }
             matrixStack.pop();
@@ -189,5 +190,9 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
         float green = (float) ((Math.sin(pos + offset) * 127) + 128);
         float blue = (float) ((Math.sin(pos + offset * 2) * 127) + 128);
         return new Color((int) (red), (int) (green), (int) (blue), 255);
+    }
+    @Unique
+    private static int getColor(Color col, float alpha){
+        return ColorHelper.Argb.getArgb((int) (alpha * 255.0F), col.getRed(), col.getGreen(), col.getBlue());
     }
 }

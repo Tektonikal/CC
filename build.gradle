@@ -33,6 +33,7 @@ dependencies {
         // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     modImplementation "dev.isxander:yet-another-config-lib:${project.yacl_version}"
+//    implementation "dev.isxander.yacl:yet-another-config-lib-fabric:3.1.1+1.19.4"
     modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
     }
 
