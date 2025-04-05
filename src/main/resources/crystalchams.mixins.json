@@ -6,9 +6,10 @@
   "mixins": [
     "EndCrystalEntityRendererMixin"
   ],
-  "client": [
-  ],
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "client": [
+    "EnderDragonEntityRendererMixin"
+  ]
 }

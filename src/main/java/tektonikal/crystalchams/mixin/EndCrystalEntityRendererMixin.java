@@ -14,13 +14,13 @@ import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ColorHelper;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 import org.joml.Quaternionf;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import tektonikal.crystalchams.CrystalChams;
 import tektonikal.crystalchams.config.ChamsConfig;
 
 import java.awt.*;
@@ -52,16 +52,9 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
     @Final
     private ModelPart core;
 
+
     protected EndCrystalEntityRendererMixin(EntityRendererFactory.Context ctx) {
         super(ctx);
-    }
-
-    @Unique
-    private static float getYOffset(EndCrystalEntity crystal, float tickDelta, float offset, float bounceSpeed, float bounceHeight) {
-        float f = (float) crystal.endCrystalAge + tickDelta;
-        float g = MathHelper.sin(f * bounceSpeed) / 2.0F + 0.5F;
-        g = (g * g + g) * bounceHeight;
-        return g - 1.4F + offset;
     }
 
     //doing the rendering myself seems a lot less janky than writing a dozen separate mixins, and besides, I doubt anyone's going to mixin to here.
@@ -86,7 +79,7 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
         }
         matrixStack.pop();
         switch (ChamsConfig.CONFIG.instance().renderLayer) {
-            //for some reason the lineWidth value does absolutely nothing when I try to change it
+            //debug line strip is always 1 pixel wide, and the normal one is fucked up
             case WIREFRAME -> END_CRYSTAL = RenderLayer.getDebugLineStrip(10);
             case GATEWAY -> END_CRYSTAL = RenderLayer.getEndGateway();
             case CULLED -> END_CRYSTAL = RenderLayer.getItemEntityTranslucentCull(TEXTURE);
@@ -96,11 +89,11 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
         if (ChamsConfig.CONFIG.instance().renderFrame1) {
             matrixStack.push();
             matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(j * ChamsConfig.CONFIG.instance().frame1RotationSpeed));
-            matrixStack.translate(0.0F, 2F + getYOffset(endCrystalEntity, tickDelta, ChamsConfig.CONFIG.instance().frame1Offset, ChamsConfig.CONFIG.instance().frame1BounceSpeed, ChamsConfig.CONFIG.instance().frame1BounceHeight), 0.0F);
+            matrixStack.translate(0.0F, 2 + CrystalChams.getYOffset(endCrystalEntity.endCrystalAge, tickDelta, ChamsConfig.CONFIG.instance().frame1Offset, ChamsConfig.CONFIG.instance().frame1BounceSpeed, ChamsConfig.CONFIG.instance().frame1BounceHeight), 0.0F);
             matrixStack.multiply((new Quaternionf()).setAngleAxis(1.0471976F, SINE_45_DEGREES, 0.0F, SINE_45_DEGREES));
             matrixStack.scale(ChamsConfig.CONFIG.instance().frame1Scale, ChamsConfig.CONFIG.instance().frame1Scale, ChamsConfig.CONFIG.instance().frame1Scale);
-            if (ChamsConfig.CONFIG.instance().frame1Chroma) {
-                Color col = getRainbowCol(ChamsConfig.CONFIG.instance().frame1ChromaDelay, ChamsConfig.CONFIG.instance().frame1ChromaSpeed);
+            if (ChamsConfig.CONFIG.instance().frame1Rainbow) {
+                Color col = CrystalChams.getRainbowCol(ChamsConfig.CONFIG.instance().frame1RainbowDelay, ChamsConfig.CONFIG.instance().frame1RainbowSpeed);
                 this.frame.render(matrixStack, vertexConsumer, light, overlay, getColor(col, ChamsConfig.CONFIG.instance().frame1Alpha));
             } else {
                 try {
@@ -116,14 +109,14 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
         if (ChamsConfig.CONFIG.instance().renderFrame2) {
             matrixStack.push();
             matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(j * ChamsConfig.CONFIG.instance().frame2RotationSpeed));
-            matrixStack.translate(0.0F, 2F + getYOffset(endCrystalEntity, tickDelta, ChamsConfig.CONFIG.instance().frame2Offset, ChamsConfig.CONFIG.instance().frame2BounceSpeed, ChamsConfig.CONFIG.instance().frame2BounceHeight), 0.0F);
+            matrixStack.translate(0.0F, 2F + CrystalChams.getYOffset(endCrystalEntity.endCrystalAge, tickDelta, ChamsConfig.CONFIG.instance().frame2Offset, ChamsConfig.CONFIG.instance().frame2BounceSpeed, ChamsConfig.CONFIG.instance().frame2BounceHeight), 0.0F);
             matrixStack.multiply((new Quaternionf()).setAngleAxis(1.0471976F, SINE_45_DEGREES, 0.0F, SINE_45_DEGREES));
             matrixStack.multiply((new Quaternionf()).setAngleAxis(1.0471976F, SINE_45_DEGREES, 0.0F, SINE_45_DEGREES));
             matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(j * ChamsConfig.CONFIG.instance().frame2RotationSpeed));
             matrixStack.scale(ChamsConfig.CONFIG.instance().frame2Scale, ChamsConfig.CONFIG.instance().frame2Scale, ChamsConfig.CONFIG.instance().frame2Scale);
-            if (ChamsConfig.CONFIG.instance().frame2Chroma) {
-                Color col = getRainbowCol(ChamsConfig.CONFIG.instance().frame2ChromaDelay, ChamsConfig.CONFIG.instance().frame2ChromaSpeed);
-                this.frame.render(matrixStack, vertexConsumer, light, overlay, getColor(col, ChamsConfig.CONFIG.instance().frame1Alpha));
+            if (ChamsConfig.CONFIG.instance().frame2Rainbow) {
+                Color col = CrystalChams.getRainbowCol(ChamsConfig.CONFIG.instance().frame2RainbowDelay, ChamsConfig.CONFIG.instance().frame2RainbowSpeed);
+                this.frame.render(matrixStack, vertexConsumer, light, overlay, getColor(col, ChamsConfig.CONFIG.instance().frame2Alpha));
             } else {
                 try {
                     Color col = ChamsConfig.CONFIG.instance().frame2Color;
@@ -138,16 +131,16 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
         if (ChamsConfig.CONFIG.instance().renderCore) {
             matrixStack.push();
             matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(j * ChamsConfig.CONFIG.instance().coreRotationSpeed));
-            matrixStack.translate(0.0F, 2F + getYOffset(endCrystalEntity, tickDelta, ChamsConfig.CONFIG.instance().coreOffset, ChamsConfig.CONFIG.instance().coreBounceSpeed, ChamsConfig.CONFIG.instance().coreBounceHeight), 0.0F);
+            matrixStack.translate(0.0F, 2F + CrystalChams.getYOffset(endCrystalEntity.endCrystalAge, tickDelta, ChamsConfig.CONFIG.instance().coreOffset, ChamsConfig.CONFIG.instance().coreBounceSpeed, ChamsConfig.CONFIG.instance().coreBounceHeight), 0.0F);
             matrixStack.multiply((new Quaternionf()).setAngleAxis(1.0471976F, SINE_45_DEGREES, 0.0F, SINE_45_DEGREES));
             matrixStack.multiply((new Quaternionf()).setAngleAxis(1.0471976F, SINE_45_DEGREES, 0.0F, SINE_45_DEGREES));
             matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(j * ChamsConfig.CONFIG.instance().coreRotationSpeed));
             matrixStack.multiply((new Quaternionf()).setAngleAxis(1.0471976F, SINE_45_DEGREES, 0.0F, SINE_45_DEGREES));
             matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(j * ChamsConfig.CONFIG.instance().coreRotationSpeed));
             matrixStack.scale(ChamsConfig.CONFIG.instance().coreScale, ChamsConfig.CONFIG.instance().coreScale, ChamsConfig.CONFIG.instance().coreScale);
-            if (ChamsConfig.CONFIG.instance().coreChroma) {
-                Color col = getRainbowCol(ChamsConfig.CONFIG.instance().coreChromaDelay, ChamsConfig.CONFIG.instance().coreChromaSpeed);
-                this.core.render(matrixStack, vertexConsumer, light, overlay, getColor(col, ChamsConfig.CONFIG.instance().frame1Alpha));
+            if (ChamsConfig.CONFIG.instance().coreRainbow) {
+                Color col = CrystalChams.getRainbowCol(ChamsConfig.CONFIG.instance().coreRainbowDelay, ChamsConfig.CONFIG.instance().coreRainbowSpeed);
+                this.core.render(matrixStack, vertexConsumer, light, overlay, getColor(col, ChamsConfig.CONFIG.instance().coreAlpha));
             } else {
                 try {
                     Color col = ChamsConfig.CONFIG.instance().coreColor;
@@ -159,40 +152,23 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
             matrixStack.pop();
         }
         matrixStack.pop();
-        //don't care about any of this
         BlockPos blockPos = endCrystalEntity.getBeamTarget();
         if (blockPos != null) {
-            float m = (float) blockPos.getX() + 0.5F;
-            float n = (float) blockPos.getY() + 0.5F;
-            float o = (float) blockPos.getZ() + 0.5F;
-            float p = (float) ((double) m - endCrystalEntity.getX());
-            float q = (float) ((double) n - endCrystalEntity.getY());
-            float r = (float) ((double) o - endCrystalEntity.getZ());
+            float m = (float)blockPos.getX() + 0.5F;
+            float n = (float)blockPos.getY() + 0.5F;
+            float o = (float)blockPos.getZ() + 0.5F;
+            float p = (float)((double)m - endCrystalEntity.getX());
+            float q = (float)((double)n - endCrystalEntity.getY());
+            float r = (float)((double)o - endCrystalEntity.getZ());
             matrixStack.translate(p, q, r);
-            EnderDragonEntityRenderer.renderCrystalBeam(-p, -q + getYOffset(endCrystalEntity, tickDelta, 0F, 0.2F, 1), -r, tickDelta, endCrystalEntity.endCrystalAge, matrixStack, vertexConsumerProvider, light);
+            EnderDragonEntityRenderer.renderCrystalBeam(-p, -q + CrystalChams.getYOffset(endCrystalEntity.endCrystalAge, tickDelta, ChamsConfig.CONFIG.instance().coreOffset, ChamsConfig.CONFIG.instance().coreBounceSpeed, ChamsConfig.CONFIG.instance().coreBounceHeight), -r, tickDelta, endCrystalEntity.endCrystalAge, matrixStack, vertexConsumerProvider, light);
         }
-
         super.render(endCrystalEntity, yaw, tickDelta, matrixStack, vertexConsumerProvider, light);
         ci.cancel();
     }
 
     @Unique
-    private static Color getRainbowCol(int delay, int speed) {
-        return getRainbow(-((System.currentTimeMillis() + delay) % 10000L / 10000.0f) * speed);
-    }
-
-    //https://github.com/Splzh/ClearHitboxes/blob/main/src/main/java/splash/utils/ColorUtils.java !!
-    @Unique
-    private static Color getRainbow(double percent) {
-        double offset = Math.PI * 2 / 3;
-        double pos = percent * (Math.PI * 2);
-        float red = (float) ((Math.sin(pos) * 127) + 128);
-        float green = (float) ((Math.sin(pos + offset) * 127) + 128);
-        float blue = (float) ((Math.sin(pos + offset * 2) * 127) + 128);
-        return new Color((int) (red), (int) (green), (int) (blue), 255);
-    }
-    @Unique
-    private static int getColor(Color col, float alpha){
+    private static int getColor(Color col, float alpha) {
         return ColorHelper.Argb.getArgb((int) (alpha * 255.0F), col.getRed(), col.getGreen(), col.getBlue());
     }
 }
