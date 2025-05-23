@@ -4,12 +4,19 @@
   "package": "tektonikal.crystalchams.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "EndCrystalEntityRendererMixin"
+    "EndCrystalEntityMixin",
+    "OptionDescriptionWidgetMixin"
   ],
   "injectors": {
     "defaultRequire": 1
   },
   "client": [
-    "EnderDragonEntityRendererMixin"
+    "CategoryTabMixin",
+    "EndCrystalEntityRendererMixin",
+    "EnderDragonEntityRendererMixin",
+    "ModelPartMixin",
+    "OptionListWidgetAccessor",
+    "OptionListWidgetAccessor$OptionListWidgetEntryMixin",
+    "PopupControllerScreenMixin"
   ]
 }

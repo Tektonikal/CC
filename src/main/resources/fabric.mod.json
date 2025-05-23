@@ -3,7 +3,7 @@
   "id": "crystalchams",
   "version": "${version}",
   "name": "Custom End Crystals",
-  "description": "Custom end crystal rendering!",
+  "description": "Customize how your end crystals look!",
   "authors": ["Tektonikal"],
   "license": "LGPL-3.0",
   "icon": "icon.png",
@@ -35,6 +35,10 @@
       "links": {
         "Discord": "https://discord.gg/HyUVJYeKS5"
       }
+    },
+    "loom:injected_interfaces": {
+      "net/minecraft/class_630": ["tektonikal/crystalchams/interfaces/ModelPartInterface"]
     }
-  }
+  },
+  "accessWidener": "crystalchams.accesswidener"
 }

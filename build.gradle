@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '1.9-SNAPSHOT'
+    id 'fabric-loom' version '1.10-SNAPSHOT'
     id 'maven-publish'
 }
 
@@ -79,6 +79,10 @@ jar {
         rename { "${it}_${project.archivesBaseName}_${project.minecraft_version}" }
 
     }
+}
+
+loom {
+    accessWidenerPath = file("src/main/resources/crystalchams.accesswidener")
 }
 
 // configure the maven publication

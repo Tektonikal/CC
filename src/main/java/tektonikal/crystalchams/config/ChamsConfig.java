@@ -21,6 +21,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import tektonikal.crystalchams.CrystalChams;
 import tektonikal.crystalchams.annotation.Updatable;
+import tektonikal.crystalchams.util.Easings;
 
 import java.awt.*;
 import java.io.IOException;
@@ -43,12 +44,24 @@ public class ChamsConfig {
     //@formatter:off
     //General:
     @SerialEntry  public boolean modEnabled = true;
+        @SerialEntry public boolean randomizeAge = true;
         //Shadow
         @SerialEntry public float shadowRadius = 0.5F;
-        @SerialEntry public float shadowAlpha = 1;
-        //Miscellaneous
-        @SerialEntry public int lightLevel = -1;
-        @SerialEntry public RenderMode renderLayer = RenderMode.DEFAULT;
+        @SerialEntry public float shadowAlpha = 0.5F;
+        //Base
+        @SerialEntry public BaseRenderMode showBaseMode = BaseRenderMode.DEFAULT;
+        //change back to a float later
+        @SerialEntry public int baseOffset = -5;
+        @SerialEntry public float baseScale = 1F;
+        @SerialEntry public int baseRotation = 0;
+        @SerialEntry public Color baseColor = Color.decode("#FFFFFF");
+        @SerialEntry public float baseAlpha = 1.0F;
+        @SerialEntry public int baseLightLevel = -1;
+        @SerialEntry public RenderMode baseRenderMode = RenderMode.DEFAULT;
+            //Base Rainbow
+            @SerialEntry public boolean baseRainbow = false;
+            @SerialEntry public int baseRainbowSpeed = 2;
+            @SerialEntry public int baseRainbowDelay = 0;
         //Config
             //Empty
         //Core
@@ -56,27 +69,46 @@ public class ChamsConfig {
             //Core Movement
             @SerialEntry public float coreOffset = 0f;
             @SerialEntry public float coreRotationSpeed = 1F;
-            @SerialEntry public float coreBounceHeight = 0.4f;
-            @SerialEntry public float coreBounceSpeed = 0.2f;
+            @SerialEntry public float coreBounceHeight = 1f;
+            @SerialEntry public float coreBounceSpeed = 1f;
+            @SerialEntry public float coreTickDelay = 0;
             //Core Rendering
-            @SerialEntry public float coreScale = 1.53125f;
+            @SerialEntry public float coreScale = 1F;
             @SerialEntry public Color coreColor = Color.decode("#ffffff");
             @SerialEntry public float coreAlpha = 1;
+            @SerialEntry public int coreLightLevel = -1;
+            @SerialEntry public RenderMode coreRenderLayer = RenderMode.DEFAULT;
+
             //Core Rainbow
             @SerialEntry  public boolean coreRainbow = false;
                 @SerialEntry public int coreRainbowSpeed = 2;
                 @SerialEntry public int coreRainbowDelay = 0;
+            //Animation
+            @SerialEntry public boolean coreAlphaAnimation = false;
+                @SerialEntry public float coreStartAlpha = 0F;
+                @SerialEntry public float coreAlphaAnimDuration = 1F;
+                @SerialEntry public float coreAlphaDelay = 0F;
+                @SerialEntry public Easings coreAlphaEasing = Easings.OFF;
+
+            @SerialEntry public boolean coreScaleAnimation = false;
+                @SerialEntry public float coreStartScale = 0F;
+                @SerialEntry public float coreScaleAnimDuration = 1F;
+                @SerialEntry public float coreScaleDelay = 0F;
+                @SerialEntry public Easings coreScaleEasing = Easings.OFF;
         //Frame 1
         @SerialEntry  public boolean renderFrame1 = true;
             //Frame 1 Movement
             @SerialEntry public float frame1Offset = 0f;
             @SerialEntry public float frame1RotationSpeed = 1F;
-            @SerialEntry public float frame1BounceHeight = 0.4f;
-            @SerialEntry public float frame1BounceSpeed = 0.2f;
+            @SerialEntry public float frame1BounceHeight = 1f;
+            @SerialEntry public float frame1BounceSpeed = 1f;
+            @SerialEntry public float frame1TickDelay = 0;
             //Frame 1 Rendering
-            @SerialEntry public float frame1Scale = 2F;
+            @SerialEntry public float frame1Scale = 1F;
             @SerialEntry public Color frame1Color = Color.decode("#ffffff");
             @SerialEntry public float frame1Alpha = 1f;
+            @SerialEntry public int frame1LightLevel = -1;
+            @SerialEntry public RenderMode frame1RenderLayer = RenderMode.DEFAULT;
             //Frame 1 Rainbow
             @SerialEntry  public boolean frame1Rainbow = false;
                 @SerialEntry public int frame1RainbowSpeed = 2;
@@ -86,12 +118,15 @@ public class ChamsConfig {
             //Frame 2 Movement
             @SerialEntry public float frame2Offset = 0f;
             @SerialEntry public float frame2RotationSpeed = 1F;
-            @SerialEntry public float frame2BounceHeight = 0.4f;
-            @SerialEntry public float frame2BounceSpeed = 0.2f;
+            @SerialEntry public float frame2BounceHeight = 1f;
+            @SerialEntry public float frame2BounceSpeed = 1f;
+            @SerialEntry public float frame2TickDelay = 0;
             //Frame 2 Rendering
-            @SerialEntry public float frame2Scale = 1.75F;
+            @SerialEntry public float frame2Scale = 1F;
             @SerialEntry public Color frame2Color = Color.decode("#ffffff");
             @SerialEntry public float frame2Alpha = 1;
+            @SerialEntry public int frame2LightLevel = -1;
+            @SerialEntry public RenderMode frame2RenderLayer = RenderMode.DEFAULT;
             //Frame 2 Rainbow
             @SerialEntry  public boolean frame2Rainbow = false;
                 @SerialEntry public int frame2RainbowSpeed = 2;
@@ -102,9 +137,11 @@ public class ChamsConfig {
             @SerialEntry public Color beam1Color = Color.decode("#ffffff");
             @SerialEntry public float beam1Alpha = 1;
             @SerialEntry public float beam1Radius = 0.75F;
+            @SerialEntry public int beam1LightLevel = -1;
             @SerialEntry public Color beam2Color = Color.decode("#000000");
             @SerialEntry public float beam2Alpha = 1;
-            @SerialEntry public float beam2Radius = 0.2F;
+            @SerialEntry public float beam2Radius = 0.15F;
+            @SerialEntry public int beam2LightLevel = -1;
             //Rainbow 1
             @SerialEntry public boolean beam1Rainbow = false;
                 @SerialEntry public int beam1RainbowSpeed = 2;
@@ -113,348 +150,644 @@ public class ChamsConfig {
             @SerialEntry public boolean beam2Rainbow = false;
                 @SerialEntry public int beam2RainbowSpeed = 2;
                 @SerialEntry public int beam2RainbowDelay = 0;
+            //Extras
+            @SerialEntry public float beamScrollSpeed = 1;
+            @SerialEntry public int beamSides = 8;
+            @SerialEntry public RenderMode beamRenderMode = RenderMode.DEFAULT;
     //@formatter:on
     @Updatable
     public static Option<Boolean> o_modEnabled = Option.<Boolean>createBuilder()
             .name(Text.of("Mod Enabled"))
             .controller(TickBoxControllerBuilderImpl::new)
-            .binding(true, () -> CONFIG.instance().modEnabled, newVal -> CONFIG.instance().modEnabled = newVal)
-            .instant(true)
+            .stateManager(StateManager.createInstant(true, () -> CONFIG.instance().modEnabled, newVal -> CONFIG.instance().modEnabled = newVal))
+            .build();
+    public static Option<Boolean> o_randomizeAge = Option.<Boolean>createBuilder()
+            .name(Text.of("Randomize Age"))
+            //TODO: add proper description
+            .controller(TickBoxControllerBuilderImpl::new)
+            .stateManager(StateManager.createInstant(true, () -> CONFIG.instance().randomizeAge, newVal -> CONFIG.instance().randomizeAge = newVal))
             .build();
     public static Option<Float> o_shadowRadius = Option.<Float>createBuilder()
             .name(Text.of("Shadow Radius"))
-            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0.1f, 2f).step(0.1f).formatValue(val -> Text.of(String.format("%.1f", val))))
-            .binding(0.5F, () -> CONFIG.instance().shadowRadius, newVal -> CONFIG.instance().shadowRadius = newVal)
-            .instant(true)
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 2f).step(0.1f).formatValue(val -> Text.of(String.format("%.1f", val).replace(".0", "") + (val == 1 ? " block" : " blocks"))))
+            .stateManager(StateManager.createInstant(0.5F, () -> CONFIG.instance().shadowRadius, newVal -> CONFIG.instance().shadowRadius = newVal))
+            .listener((floatOption, aFloat) -> floatOption.setAvailable(o_modEnabled.pendingValue()))
             .build();
     public static Option<Float> o_shadowAlpha = Option.<Float>createBuilder()
             .name(Text.of("Shadow Opacity"))
-            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(val -> Text.of(String.format("%.2f", val) + "%")))
-            .binding(1F, () -> CONFIG.instance().shadowAlpha, newVal -> CONFIG.instance().shadowAlpha = newVal)
-            .instant(true)
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(val -> Text.of(String.format("%d", (int) (val * 100)) + "%")))
+            .stateManager(StateManager.createInstant(0.5F, () -> CONFIG.instance().shadowAlpha, newVal -> CONFIG.instance().shadowAlpha = newVal))
             .build();
-    public static Option<RenderMode> o_renderLayer = Option.<RenderMode>createBuilder()
+    public static LinkedOptionImpl<Float> o_baseScale = LinkedOptionImpl.<Float>createBuilder()
+            .name(Text.of("Scale"))
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 5f).step(0.05f).formatValue(val -> Text.of(String.format("%.2f", val) + "x")))
+            .stateManager(StateManager.createInstant(1F, () -> CONFIG.instance().baseScale, newVal -> CONFIG.instance().baseScale = newVal))
+            .build();
+    public static LinkedOptionImpl<Integer> o_baseRotation = LinkedOptionImpl.<Integer>createBuilder()
+            .name(Text.of("Rotation"))
+            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(0, 360).formatValue(value -> Text.of(value + "°")))
+            .stateManager(StateManager.createInstant(0, () -> CONFIG.instance().baseRotation, newVal -> CONFIG.instance().baseRotation = newVal))
+            //i don't know why i have to do this now, one day it just broke and i had no idea why
+            .available(CONFIG.instance().baseRainbow && CONFIG.instance().showBaseMode != BaseRenderMode.NEVER && CONFIG.instance().modEnabled)
+            .build();
+    public static LinkedOptionImpl<RenderMode> o_baseRenderLayer = LinkedOptionImpl.<RenderMode>createBuilder()
             .name(Text.of("Render Mode"))
+            .description(OptionDescription.createBuilder().text(Text.of("Culled: Doesn't render back sides of objects.\n\nWireframe: Draws outlines of objects. Does not support light levels. Line width also cannot be changed due to game limitations.\n\nGateway: Uses the game's end gateway shader. Does not support color, opacity, or light levels.")).build())
             .controller(renderModeOption -> EnumControllerBuilder.create(renderModeOption).enumClass(RenderMode.class))
-            .binding(RenderMode.DEFAULT, () -> CONFIG.instance().renderLayer, newVal -> CONFIG.instance().renderLayer = newVal)
-            .instant(true)
+            .stateManager(StateManager.createInstant(RenderMode.DEFAULT, () -> CONFIG.instance().baseRenderMode, newVal -> CONFIG.instance().baseRenderMode = newVal))
             .build();
-    public static Option<Integer> o_lightLevel = Option.<Integer>createBuilder()
+    public static LinkedOptionImpl<Integer> o_baseOffset = LinkedOptionImpl.<Integer>createBuilder()
+            .name(Text.of("Vertical Offset"))
+            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).range(-10, 10).step(1).formatValue(val -> Text.of(String.format("%.1f", val * 0.2F).replace(".0", "") + (Math.abs(val * 0.2F) == 1 ? " block" : " blocks"))))
+            .stateManager(StateManager.createInstant(-5, () -> CONFIG.instance().baseOffset, newVal -> CONFIG.instance().baseOffset = newVal))
+            .build();
+    public static LinkedOptionImpl<Color> o_baseColor = LinkedOptionImpl.<Color>createBuilder()
+            .name(Text.of("Color"))
+            .controller(ColorControllerBuilderImpl::new)
+            .stateManager(StateManager.createInstant(new Color(255, 255, 255), () -> CONFIG.instance().baseColor, newVal -> CONFIG.instance().baseColor = newVal))
+            .build();
+    public static LinkedOptionImpl<Float> o_baseAlpha = LinkedOptionImpl.<Float>createBuilder()
+            .name(Text.of("Opacity"))
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(val -> Text.of(String.format("%.0f", val * 100) + "%")))
+            .stateManager(StateManager.createInstant(1F, () -> CONFIG.instance().baseAlpha, newVal -> CONFIG.instance().baseAlpha = newVal))
+            .build();
+    public static LinkedOptionImpl<Integer> o_baseLightLevel = LinkedOptionImpl.<Integer>createBuilder()
             .name(Text.of("Light Level"))
-            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-1, 255))
-            .binding(-1, () -> CONFIG.instance().lightLevel, newVal -> CONFIG.instance().lightLevel = newVal)
-            .instant(true)
+            .description(OptionDescription.createBuilder().text(Text.of("How brightly lit the object is. -1 uses the world's lighting, while 0-255 is mapped respectively.")).build())
+            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-1, 255).formatValue(value -> Text.of(value == -1 ? "Use World Light" : value + "")))
+            .stateManager(StateManager.createInstant(-1, () -> CONFIG.instance().baseLightLevel, newVal -> CONFIG.instance().baseLightLevel = newVal))
+            .build();
+    @Updatable
+    public static LinkedOptionImpl<Boolean> o_baseRainbow = LinkedOptionImpl.<Boolean>createBuilder()
+            .name(Text.of("Rainbow"))
+            .controller(TickBoxControllerBuilderImpl::new)
+            .stateManager(StateManager.createInstant(false, () -> CONFIG.instance().baseRainbow, newVal -> CONFIG.instance().baseRainbow = newVal))
+            .build();
+    public static LinkedOptionImpl<Integer> o_baseRainbowSpeed = LinkedOptionImpl.<Integer>createBuilder()
+            .name(Text.of("Rainbow Speed"))
+            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(1, 10).formatValue(value -> Text.of(value + "x")))
+            .stateManager(StateManager.createInstant(2, () -> CONFIG.instance().baseRainbowSpeed, newVal -> CONFIG.instance().baseRainbowSpeed = newVal))
+            //i don't know why i have to do this now, one day it just broke and i had no idea why
+            .available(CONFIG.instance().baseRainbow && CONFIG.instance().showBaseMode != BaseRenderMode.NEVER && CONFIG.instance().modEnabled)
+            .build();
+    public static LinkedOptionImpl<Integer> o_baseRainbowDelay = LinkedOptionImpl.<Integer>createBuilder()
+            .name(Text.of("Rainbow Delay"))
+            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-500, 500).formatValue(integer -> Text.of(integer + "ms")))
+            .stateManager(StateManager.createInstant(0, () -> CONFIG.instance().baseRainbowDelay, newVal -> CONFIG.instance().baseRainbowDelay = newVal))
+            .available(CONFIG.instance().baseRainbow && CONFIG.instance().showBaseMode != BaseRenderMode.NEVER && CONFIG.instance().modEnabled)
+            .build();
+    //keep this one below all other base options
+    public static Option<BaseRenderMode> o_baseRenderMode = Option.<BaseRenderMode>createBuilder()
+            .name(Text.of("Show"))
+            .description(OptionDescription.createBuilder().text(Text.of("When to show the base.\n\nAlways: Always shows the base.\n\nDefault: Only show the base when the crystal has the base enabled.\n\nNever: Never shows the base.")).build())
+            .controller(renderModeOption -> EnumControllerBuilder.create(renderModeOption).enumClass(BaseRenderMode.class))
+            .listener(ChamsConfig::specialUpdate)
+            .stateManager(StateManager.createInstant(BaseRenderMode.DEFAULT, () -> CONFIG.instance().showBaseMode, newVal -> CONFIG.instance().showBaseMode = newVal))
             .build();
     @Updatable
     public static Option<Boolean> o_renderCore = Option.<Boolean>createBuilder()
             .name(Text.of("Render Core"))
-            .binding(true, () -> CONFIG.instance().renderCore, newVal -> CONFIG.instance().renderCore = newVal)
             .controller(TickBoxControllerBuilderImpl::new)
-            .instant(true)
+            .stateManager(StateManager.createInstant(true, () -> CONFIG.instance().renderCore, newVal -> CONFIG.instance().renderCore = newVal))
             .build();
-    public static Option<Float> o_coreOffset = Option.<Float>createBuilder()
+    public static LinkedOptionImpl<Float> o_coreOffset = LinkedOptionImpl.<Float>createBuilder()
             .name(Text.of("Vertical Offset"))
-            .binding(0F, () -> CONFIG.instance().coreOffset, newVal -> CONFIG.instance().coreOffset = newVal)
-            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(-2.5f, 2.5f).step(0.1f).formatValue(val -> Text.of(String.format("%.1f", val))))
-            .instant(true)
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(-2.5f, 2.5f).step(0.1f).formatValue(val -> Text.of(String.format("%.1f", val).replace(".0", "") + (Math.abs(val) == 1 ? " block" : " blocks"))))
+            .stateManager(StateManager.createInstant(0F, () -> CONFIG.instance().coreOffset, newVal -> CONFIG.instance().coreOffset = newVal))
             .build();
-    public static Option<Float> o_coreRotationSpeed = Option.<Float>createBuilder()
+    public static LinkedOptionImpl<Float> o_coreRotationSpeed = LinkedOptionImpl.<Float>createBuilder()
             .name(Text.of("Rotation Speed"))
-            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 25f).step(0.1f).formatValue(val -> Text.of(String.format("%.1f", val))))
-            .binding(1F, () -> CONFIG.instance().coreRotationSpeed, newVal -> CONFIG.instance().coreRotationSpeed = newVal)
-            .instant(true)
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(-25f, 25f).step(0.1f).formatValue(val -> Text.of(String.format("%.1f", val) + "x")))
+            .stateManager(StateManager.createInstant(1F, () -> CONFIG.instance().coreRotationSpeed, newVal -> CONFIG.instance().coreRotationSpeed = newVal))
             .build();
-    public static Option<Float> o_coreBounceHeight = Option.<Float>createBuilder()
+    public static LinkedOptionImpl<Float> o_coreBounceHeight = LinkedOptionImpl.<Float>createBuilder()
             .name(Text.of("Bounce Height"))
-            .binding(0.4F, () -> CONFIG.instance().coreBounceHeight, newVal -> CONFIG.instance().coreBounceHeight = newVal)
-            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 2f).step(0.05f).formatValue(val -> Text.of(String.format("%.2f", val))))
-            .instant(true)
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 2f).step(0.05f).formatValue(val -> Text.of(String.format("%.2f", val) + "x")))
+            .stateManager(StateManager.createInstant(1F, () -> CONFIG.instance().coreBounceHeight, newVal -> CONFIG.instance().coreBounceHeight = newVal))
             .build();
-    public static Option<Float> o_coreBounceSpeed = Option.<Float>createBuilder()
+    public static LinkedOptionImpl<Float> o_coreBounceSpeed = LinkedOptionImpl.<Float>createBuilder()
             .name(Text.of("Bounce Speed"))
-            .binding(0.2F, () -> CONFIG.instance().coreBounceSpeed, newVal -> CONFIG.instance().coreBounceSpeed = newVal)
-            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 2f).step(0.05f).formatValue(val -> Text.of(String.format("%.2f", val))))
-            .instant(true)
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 2f).step(0.05f).formatValue(val -> Text.of(String.format("%.2f", val) + "x")))
+            .stateManager(StateManager.createInstant(1F, () -> CONFIG.instance().coreBounceSpeed, newVal -> CONFIG.instance().coreBounceSpeed = newVal))
             .build();
-    public static Option<Float> o_coreScale = Option.<Float>createBuilder()
+    public static LinkedOptionImpl<Float> o_coreTickDelay = LinkedOptionImpl.<Float>createBuilder()
+            .name(Text.of("Tick Delay"))
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(-20f, 20f).step(0.1f).formatValue(val -> Text.of(String.format("%.1f", val) + " ticks")))
+            .stateManager(StateManager.createInstant(0F, () -> CONFIG.instance().coreTickDelay, newVal -> CONFIG.instance().coreTickDelay = newVal))
+            .build();
+    public static LinkedOptionImpl<Float> o_coreScale = LinkedOptionImpl.<Float>createBuilder()
             .name(Text.of("Scale"))
-            .binding(1.53125F, () -> CONFIG.instance().coreScale, newVal -> CONFIG.instance().coreScale = newVal)
-            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 10f).step(0.01f).formatValue(val -> Text.of(String.format("%.2f", val))))
-            .instant(true)
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 5f).step(0.05f).formatValue(val -> Text.of(String.format("%.2f", val) + "x")))
+            .stateManager(StateManager.createInstant(1F, () -> CONFIG.instance().coreScale, newVal -> CONFIG.instance().coreScale = newVal))
             .build();
-    public static Option<Color> o_coreColor = Option.<Color>createBuilder()
+    public static LinkedOptionImpl<Color> o_coreColor = LinkedOptionImpl.<Color>createBuilder()
             .name(Text.of("Color"))
             .controller(ColorControllerBuilderImpl::new)
-            .binding(new Color(255, 255, 255), () -> CONFIG.instance().coreColor, newVal -> CONFIG.instance().coreColor = newVal)
-            .instant(true)
+            .stateManager(StateManager.createInstant(new Color(255, 255, 255), () -> CONFIG.instance().coreColor, newVal -> CONFIG.instance().coreColor = newVal))
             .build();
-    public static Option<Float> o_coreAlpha = Option.<Float>createBuilder()
+    public static LinkedOptionImpl<Float> o_coreAlpha = LinkedOptionImpl.<Float>createBuilder()
             .name(Text.of("Opacity"))
             .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(val -> Text.of(String.format("%.0f", val * 100) + "%")))
-            .binding(1F, () -> CONFIG.instance().coreAlpha, newVal -> CONFIG.instance().coreAlpha = newVal)
-            .instant(true)
+            .stateManager(StateManager.createInstant(1F, () -> CONFIG.instance().coreAlpha, newVal -> CONFIG.instance().coreAlpha = newVal))
+            .build();
+    public static LinkedOptionImpl<Integer> o_coreLightLevel = LinkedOptionImpl.<Integer>createBuilder()
+            .name(Text.of("Light Level"))
+            .description(OptionDescription.createBuilder().text(Text.of("How brightly lit the object is. -1 uses the world's lighting, while 0-255 is mapped respectively.")).build())
+            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-1, 255).formatValue(value -> Text.of(value == -1 ? "Use World Light" : value + "")))
+            .stateManager(StateManager.createInstant(-1, () -> CONFIG.instance().coreLightLevel, newVal -> CONFIG.instance().coreLightLevel = newVal))
+            .build();
+    public static LinkedOptionImpl<RenderMode> o_coreRenderLayer = LinkedOptionImpl.<RenderMode>createBuilder()
+            .name(Text.of("Render Mode"))
+            .description(OptionDescription.createBuilder().text(Text.of("Culled: Doesn't render back sides of objects.\n\nWireframe: Draws outlines of objects. Does not support light levels. Line width also cannot be changed due to game limitations.\n\nGateway: Uses the game's end gateway shader. Does not support color, opacity, or light levels.")).build())
+            .controller(renderModeOption -> EnumControllerBuilder.create(renderModeOption).enumClass(RenderMode.class))
+            .stateManager(StateManager.createInstant(RenderMode.DEFAULT, () -> CONFIG.instance().coreRenderLayer, newVal -> CONFIG.instance().coreRenderLayer = newVal))
             .build();
     @Updatable
-    public static Option<Boolean> o_coreRainbow = Option.<Boolean>createBuilder()
+    public static LinkedOptionImpl<Boolean> o_coreRainbow = LinkedOptionImpl.<Boolean>createBuilder()
             .name(Text.of("Rainbow"))
-            .binding(false, () -> CONFIG.instance().coreRainbow, newVal -> CONFIG.instance().coreRainbow = newVal)
             .controller(TickBoxControllerBuilderImpl::new)
-            .instant(true)
+            .stateManager(StateManager.createInstant(false, () -> CONFIG.instance().coreRainbow, newVal -> CONFIG.instance().coreRainbow = newVal))
             .build();
-    public static Option<Integer> o_coreRainbowSpeed = Option.<Integer>createBuilder()
+    public static LinkedOptionImpl<Integer> o_coreRainbowSpeed = LinkedOptionImpl.<Integer>createBuilder()
             .name(Text.of("Rainbow Speed"))
-            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(1, 10))
-            .binding(2, () -> CONFIG.instance().coreRainbowSpeed, newVal -> CONFIG.instance().coreRainbowSpeed = newVal)
-            .instant(true)
+            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(1, 10).formatValue(value -> Text.of(value + "x")))
+            .stateManager(StateManager.createInstant(2, () -> CONFIG.instance().coreRainbowSpeed, newVal -> CONFIG.instance().coreRainbowSpeed = newVal))
             .build();
-    public static Option<Integer> o_coreRainbowDelay = Option.<Integer>createBuilder()
+    public static LinkedOptionImpl<Integer> o_coreRainbowDelay = LinkedOptionImpl.<Integer>createBuilder()
             .name(Text.of("Rainbow Delay"))
-            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-500, 500))
-            .binding(0, () -> CONFIG.instance().coreRainbowDelay, newVal -> CONFIG.instance().coreRainbowDelay = newVal)
-            .instant(true)
+            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-500, 500).formatValue(integer -> Text.of(integer + "ms")))
+            .stateManager(StateManager.createInstant(0, () -> CONFIG.instance().coreRainbowDelay, newVal -> CONFIG.instance().coreRainbowDelay = newVal))
             .build();
+    @Updatable
+    public static Option<Boolean> o_coreAlphaAnimation = Option.<Boolean>createBuilder()
+            .name(Text.of("Animation Enabled"))
+            .controller(TickBoxControllerBuilderImpl::new)
+            .stateManager(StateManager.createInstant(false, () -> CONFIG.instance().coreAlphaAnimation, newVal -> CONFIG.instance().coreAlphaAnimation = newVal))
+            .build();
+    public static Option<Float> o_coreStartOpacity = Option.<Float>createBuilder()
+            .name(Text.of("Starting Opacity"))
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(val -> Text.of(String.format("%.0f", val * 100) + "%")))
+            .stateManager(StateManager.createInstant(0F, () -> CONFIG.instance().coreStartAlpha, newVal -> CONFIG.instance().coreStartAlpha = newVal))
+            .build();
+    public static Option<Float> o_coreAlphaDelay = Option.<Float>createBuilder()
+            .name(Text.of("Delay"))
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 2f).step(0.1f).formatValue(val -> Text.of(String.format("%.1f", val) + "s")))
+            .stateManager(StateManager.createInstant(0F, () -> CONFIG.instance().coreAlphaDelay, newVal -> CONFIG.instance().coreAlphaDelay = newVal))
+            .build();
+    public static Option<Float> o_coreAlphaAnimDuration = Option.<Float>createBuilder()
+            .name(Text.of("Duration"))
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 2f).step(0.1f).formatValue(val -> Text.of(String.format("%.1f", val) + "s")))
+            .stateManager(StateManager.createInstant(1F, () -> CONFIG.instance().coreAlphaAnimDuration, newVal -> CONFIG.instance().coreAlphaAnimDuration = newVal))
+            .build();
+    public static Option<Easings> o_coreAlphaEasing = Option.<Easings>createBuilder()
+            .name(Text.of("Easing"))
+            .controller(easingsOption -> EnumControllerBuilder.create(easingsOption).enumClass(Easings.class))
+            .stateManager(StateManager.createInstant(Easings.OFF, () -> CONFIG.instance().coreAlphaEasing, newVal -> CONFIG.instance().coreAlphaEasing = newVal))
+            .build();
+    @Updatable
+    public static Option<Boolean> o_coreScaleAnimation = Option.<Boolean>createBuilder()
+            .name(Text.of("Animation Enabled"))
+            .controller(TickBoxControllerBuilderImpl::new)
+            .stateManager(StateManager.createInstant(false, () -> CONFIG.instance().coreScaleAnimation, newVal -> CONFIG.instance().coreScaleAnimation = newVal))
+            .build();
+    public static Option<Float> o_coreStartScale = Option.<Float>createBuilder()
+            .name(Text.of("Starting Scale"))
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 5f).step(0.05f).formatValue(val -> Text.of(String.format("%.2f", val) + "x")))
+            .stateManager(StateManager.createInstant(0F, () -> CONFIG.instance().coreStartScale, newVal -> CONFIG.instance().coreStartScale = newVal))
+            .build();
+    public static Option<Float> o_coreScaleDelay = Option.<Float>createBuilder()
+            .name(Text.of("Delay"))
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 2f).step(0.1f).formatValue(val -> Text.of(String.format("%.1f", val) + "s")))
+            .stateManager(StateManager.createInstant(0F, () -> CONFIG.instance().coreScaleDelay, newVal -> CONFIG.instance().coreScaleDelay = newVal))
+            .build();
+    public static Option<Float> o_coreScaleAnimDuration = Option.<Float>createBuilder()
+            .name(Text.of("Duration"))
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 2f).step(0.1f).formatValue(val -> Text.of(String.format("%.1f", val) + "s")))
+            .stateManager(StateManager.createInstant(1F, () -> CONFIG.instance().coreScaleAnimDuration, newVal -> CONFIG.instance().coreScaleAnimDuration = newVal))
+            .build();
+    public static Option<Easings> o_coreScaleEasing = Option.<Easings>createBuilder()
+            .name(Text.of("Easing"))
+            .controller(easingsOption -> EnumControllerBuilder.create(easingsOption).enumClass(Easings.class))
+            .stateManager(StateManager.createInstant(Easings.OFF, () -> CONFIG.instance().coreScaleEasing, newVal -> CONFIG.instance().coreScaleEasing = newVal))
+            .build();
+    //TODO: look into drop-down widget
     @Updatable
     public static Option<Boolean> o_renderFrame1 = Option.<Boolean>createBuilder()
             .name(Text.of("Render Frame 1"))
-            .binding(true, () -> CONFIG.instance().renderFrame1, newVal -> CONFIG.instance().renderFrame1 = newVal)
             .controller(TickBoxControllerBuilderImpl::new)
-            .instant(true)
+            .stateManager(StateManager.createInstant(true, () -> CONFIG.instance().renderFrame1, newVal -> CONFIG.instance().renderFrame1 = newVal))
             .build();
-    public static Option<Float> o_frame1Offset = Option.<Float>createBuilder()
+    public static LinkedOptionImpl<Float> o_frame1Offset = LinkedOptionImpl.<Float>createBuilder()
             .name(Text.of("Vertical Offset"))
-            .binding(0F, () -> CONFIG.instance().frame1Offset, newVal -> CONFIG.instance().frame1Offset = newVal)
-            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(-2.5f, 2.5f).step(0.1f).formatValue(val -> Text.of(String.format("%.1f", val))))
-            .instant(true)
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(-2.5f, 2.5f).step(0.1f).formatValue(val -> Text.of(String.format("%.1f", val).replace(".0", "") + (Math.abs(val) == 1 ? " block" : " blocks"))))
+            .stateManager(StateManager.createInstant(0F, () -> CONFIG.instance().frame1Offset, newVal -> CONFIG.instance().frame1Offset = newVal))
             .build();
-    public static Option<Float> o_frame1RotationSpeed = Option.<Float>createBuilder()
+    public static LinkedOptionImpl<Float> o_frame1RotationSpeed = LinkedOptionImpl.<Float>createBuilder()
             .name(Text.of("Rotation Speed"))
-            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 25f).step(0.1f).formatValue(val -> Text.of(String.format("%.1f", val))))
-            .binding(1F, () -> CONFIG.instance().frame1RotationSpeed, newVal -> CONFIG.instance().frame1RotationSpeed = newVal)
-            .instant(true)
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(-15f, 15f).step(0.1f).formatValue(val -> Text.of(String.format("%.1f", val) + "x")))
+            .stateManager(StateManager.createInstant(1F, () -> CONFIG.instance().frame1RotationSpeed, newVal -> CONFIG.instance().frame1RotationSpeed = newVal))
             .build();
-    public static Option<Float> o_frame1BounceHeight = Option.<Float>createBuilder()
+    public static LinkedOptionImpl<Float> o_frame1BounceHeight = LinkedOptionImpl.<Float>createBuilder()
             .name(Text.of("Bounce Height"))
-            .binding(0.4F, () -> CONFIG.instance().frame1BounceHeight, newVal -> CONFIG.instance().frame1BounceHeight = newVal)
-            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 2f).step(0.05f).formatValue(val -> Text.of(String.format("%.2f", val))))
-            .instant(true)
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 2f).step(0.05f).formatValue(val -> Text.of(String.format("%.2f", val) + "x")))
+            .stateManager(StateManager.createInstant(1F, () -> CONFIG.instance().frame1BounceHeight, newVal -> CONFIG.instance().frame1BounceHeight = newVal))
             .build();
-    public static Option<Float> o_frame1BounceSpeed = Option.<Float>createBuilder()
+    public static LinkedOptionImpl<Float> o_frame1BounceSpeed = LinkedOptionImpl.<Float>createBuilder()
             .name(Text.of("Bounce Speed"))
-            .binding(0.2F, () -> CONFIG.instance().frame1BounceSpeed, newVal -> CONFIG.instance().frame1BounceSpeed = newVal)
-            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 2f).step(0.05f).formatValue(val -> Text.of(String.format("%.2f", val))))
-            .instant(true)
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 2f).step(0.05f).formatValue(val -> Text.of(String.format("%.2f", val) + "x")))
+            .stateManager(StateManager.createInstant(1F, () -> CONFIG.instance().frame1BounceSpeed, newVal -> CONFIG.instance().frame1BounceSpeed = newVal))
             .build();
-    public static Option<Float> o_frame1Scale = Option.<Float>createBuilder()
+    public static LinkedOptionImpl<Float> o_frame1TickDelay = LinkedOptionImpl.<Float>createBuilder()
+            .name(Text.of("Tick Delay"))
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(-20f, 20f).step(0.1f).formatValue(val -> Text.of(String.format("%.1f", val) + " ticks")))
+            .stateManager(StateManager.createInstant(0F, () -> CONFIG.instance().frame1TickDelay, newVal -> CONFIG.instance().frame1TickDelay = newVal))
+            .build();
+    public static LinkedOptionImpl<Float> o_frame1Scale = LinkedOptionImpl.<Float>createBuilder()
             .name(Text.of("Scale"))
-            .binding(2F, () -> CONFIG.instance().frame1Scale, newVal -> CONFIG.instance().frame1Scale = newVal)
-            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 10f).step(0.01f).formatValue(val -> Text.of(String.format("%.2f", val))))
-            .instant(true)
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 5f).step(0.05f).formatValue(val -> Text.of(String.format("%.2f", val) + "x")))
+            .stateManager(StateManager.createInstant(1F, () -> CONFIG.instance().frame1Scale, newVal -> CONFIG.instance().frame1Scale = newVal))
             .build();
-    public static Option<Color> o_frame1Color = Option.<Color>createBuilder()
+    public static LinkedOptionImpl<Color> o_frame1Color = LinkedOptionImpl.<Color>createBuilder()
             .name(Text.of("Color"))
             .controller(ColorControllerBuilderImpl::new)
-            .binding(new Color(255, 255, 255), () -> CONFIG.instance().frame1Color, newVal -> CONFIG.instance().frame1Color = newVal)
-            .instant(true)
+            .stateManager(StateManager.createInstant(new Color(255, 255, 255), () -> CONFIG.instance().frame1Color, newVal -> CONFIG.instance().frame1Color = newVal))
             .build();
-    public static Option<Float> o_frame1Alpha = Option.<Float>createBuilder()
+    public static LinkedOptionImpl<Float> o_frame1Alpha = LinkedOptionImpl.<Float>createBuilder()
             .name(Text.of("Opacity"))
             .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(val -> Text.of(String.format("%.0f", val * 100) + "%")))
-            .binding(1F, () -> CONFIG.instance().frame1Alpha, newVal -> CONFIG.instance().frame1Alpha = newVal)
-            .instant(true)
+            .stateManager(StateManager.createInstant(1F, () -> CONFIG.instance().frame1Alpha, newVal -> CONFIG.instance().frame1Alpha = newVal))
+            .build();
+    public static LinkedOptionImpl<Integer> o_frame1LightLevel = LinkedOptionImpl.<Integer>createBuilder()
+            .name(Text.of("Light Level"))
+            .description(OptionDescription.createBuilder().text(Text.of("How brightly lit the object is. -1 uses the world's lighting, while 0-255 is mapped respectively.")).build())
+            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-1, 255).formatValue(value -> Text.of(value == -1 ? "Use World Light" : value + "")))
+            .stateManager(StateManager.createInstant(-1, () -> CONFIG.instance().frame1LightLevel, newVal -> CONFIG.instance().frame1LightLevel = newVal))
+            .build();
+    public static LinkedOptionImpl<RenderMode> o_frame1RenderLayer = LinkedOptionImpl.<RenderMode>createBuilder()
+            .name(Text.of("Render Mode"))
+            .description(OptionDescription.createBuilder().text(Text.of("Culled: Doesn't render back sides of objects.\n\nWireframe: Draws outlines of objects. Does not support light levels. Line width also cannot be changed due to game limitations.\n\nGateway: Uses the game's end gateway shader. Does not support color, opacity, or light levels.")).build())
+            .controller(renderModeOption -> EnumControllerBuilder.create(renderModeOption).enumClass(RenderMode.class))
+            .stateManager(StateManager.createInstant(RenderMode.DEFAULT, () -> CONFIG.instance().frame1RenderLayer, newVal -> CONFIG.instance().frame1RenderLayer = newVal))
             .build();
     @Updatable
-    public static Option<Boolean> o_frame1Rainbow = Option.<Boolean>createBuilder()
+    public static LinkedOptionImpl<Boolean> o_frame1Rainbow = LinkedOptionImpl.<Boolean>createBuilder()
             .name(Text.of("Rainbow"))
-            .binding(false, () -> CONFIG.instance().frame1Rainbow, newVal -> CONFIG.instance().frame1Rainbow = newVal)
             .controller(TickBoxControllerBuilderImpl::new)
-            .instant(true)
+            .stateManager(StateManager.createInstant(false, () -> CONFIG.instance().frame1Rainbow, newVal -> CONFIG.instance().frame1Rainbow = newVal))
             .build();
-    public static Option<Integer> o_frame1RainbowSpeed = Option.<Integer>createBuilder()
+    public static LinkedOptionImpl<Integer> o_frame1RainbowSpeed = LinkedOptionImpl.<Integer>createBuilder()
             .name(Text.of("Rainbow Speed"))
-            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(1, 10))
-            .binding(2, () -> CONFIG.instance().frame1RainbowSpeed, newVal -> CONFIG.instance().frame1RainbowSpeed = newVal)
-            .instant(true)
+            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(1, 10).formatValue(value -> Text.of(value + "x")))
+            .stateManager(StateManager.createInstant(2, () -> CONFIG.instance().frame1RainbowSpeed, newVal -> CONFIG.instance().frame1RainbowSpeed = newVal))
+            .available(CONFIG.instance().frame1Rainbow && CONFIG.instance().renderFrame1 && CONFIG.instance().modEnabled)
             .build();
-    public static Option<Integer> o_frame1RainbowDelay = Option.<Integer>createBuilder()
+    public static LinkedOptionImpl<Integer> o_frame1RainbowDelay = LinkedOptionImpl.<Integer>createBuilder()
             .name(Text.of("Rainbow Delay"))
-            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-500, 500))
-            .binding(0, () -> CONFIG.instance().frame1RainbowDelay, newVal -> CONFIG.instance().frame1RainbowDelay = newVal)
-            .instant(true)
+            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-500, 500).formatValue(integer -> Text.of(integer + "ms")))
+            .stateManager(StateManager.createInstant(0, () -> CONFIG.instance().frame1RainbowDelay, newVal -> CONFIG.instance().frame1RainbowDelay = newVal))
+            .available(CONFIG.instance().frame1Rainbow && CONFIG.instance().renderFrame1 && CONFIG.instance().modEnabled)
             .build();
     @Updatable
     public static Option<Boolean> o_renderFrame2 = Option.<Boolean>createBuilder()
             .name(Text.of("Render Frame 2"))
-            .binding(true, () -> CONFIG.instance().renderFrame2, newVal -> CONFIG.instance().renderFrame2 = newVal)
             .controller(TickBoxControllerBuilderImpl::new)
-            .instant(true)
+            .stateManager(StateManager.createInstant(true, () -> CONFIG.instance().renderFrame2, newVal -> CONFIG.instance().renderFrame2 = newVal))
             .build();
-    public static Option<Float> o_frame2Offset = Option.<Float>createBuilder()
+    public static LinkedOptionImpl<Float> o_frame2Offset = LinkedOptionImpl.<Float>createBuilder()
             .name(Text.of("Vertical Offset"))
-            .binding(0F, () -> CONFIG.instance().frame2Offset, newVal -> CONFIG.instance().frame2Offset = newVal)
-            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(-2.5f, 2.5f).step(0.1f).formatValue(val -> Text.of(String.format("%.1f", val))))
-            .instant(true)
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(-2.5f, 2.5f).step(0.1f).formatValue(val -> Text.of(String.format("%.1f", val).replace(".0", "") + (Math.abs(val) == 1 ? " block" : " blocks"))))
+            .stateManager(StateManager.createInstant(0F, () -> CONFIG.instance().frame2Offset, newVal -> CONFIG.instance().frame2Offset = newVal))
             .build();
-    public static Option<Float> o_frame2RotationSpeed = Option.<Float>createBuilder()
+    public static LinkedOptionImpl<Float> o_frame2RotationSpeed = LinkedOptionImpl.<Float>createBuilder()
             .name(Text.of("Rotation Speed"))
-            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 25f).step(0.1f).formatValue(val -> Text.of(String.format("%.1f", val))))
-            .binding(1F, () -> CONFIG.instance().frame2RotationSpeed, newVal -> CONFIG.instance().frame2RotationSpeed = newVal)
-            .instant(true)
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(-25f, 25f).step(0.1f).formatValue(val -> Text.of(String.format("%.1f", val) + "x")))
+            .stateManager(StateManager.createInstant(1F, () -> CONFIG.instance().frame2RotationSpeed, newVal -> CONFIG.instance().frame2RotationSpeed = newVal))
             .build();
-    public static Option<Float> o_frame2BounceHeight = Option.<Float>createBuilder()
+    public static LinkedOptionImpl<Float> o_frame2BounceHeight = LinkedOptionImpl.<Float>createBuilder()
             .name(Text.of("Bounce Height"))
-            .binding(0.4F, () -> CONFIG.instance().frame2BounceHeight, newVal -> CONFIG.instance().frame2BounceHeight = newVal)
-            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 2f).step(0.05f).formatValue(val -> Text.of(String.format("%.2f", val))))
-            .instant(true)
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 2f).step(0.05f).formatValue(val -> Text.of(String.format("%.2f", val) + "x")))
+            .stateManager(StateManager.createInstant(1F, () -> CONFIG.instance().frame2BounceHeight, newVal -> CONFIG.instance().frame2BounceHeight = newVal))
             .build();
-    public static Option<Float> o_frame2BounceSpeed = Option.<Float>createBuilder()
+    public static LinkedOptionImpl<Float> o_frame2BounceSpeed = LinkedOptionImpl.<Float>createBuilder()
             .name(Text.of("Bounce Speed"))
-            .binding(0.2F, () -> CONFIG.instance().frame2BounceSpeed, newVal -> CONFIG.instance().frame2BounceSpeed = newVal)
-            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 2f).step(0.05f).formatValue(val -> Text.of(String.format("%.2f", val))))
-            .instant(true)
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 2f).step(0.05f).formatValue(val -> Text.of(String.format("%.2f", val) + "x")))
+            .stateManager(StateManager.createInstant(1F, () -> CONFIG.instance().frame2BounceSpeed, newVal -> CONFIG.instance().frame2BounceSpeed = newVal))
             .build();
-    public static Option<Float> o_frame2Scale = Option.<Float>createBuilder()
+    public static LinkedOptionImpl<Float> o_frame2TickDelay = LinkedOptionImpl.<Float>createBuilder()
+            .name(Text.of("Tick Delay"))
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(-20f, 20f).step(0.1f).formatValue(val -> Text.of(String.format("%.1f", val) + " ticks")))
+            .stateManager(StateManager.createInstant(0F, () -> CONFIG.instance().frame2TickDelay, newVal -> CONFIG.instance().frame2TickDelay = newVal))
+            .build();
+    public static LinkedOptionImpl<Float> o_frame2Scale = LinkedOptionImpl.<Float>createBuilder()
             .name(Text.of("Scale"))
-            .binding(1.75F, () -> CONFIG.instance().frame2Scale, newVal -> CONFIG.instance().frame2Scale = newVal)
-            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 10f).step(0.01f).formatValue(val -> Text.of(String.format("%.2f", val))))
-            .instant(true)
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 5f).step(0.05f).formatValue(val -> Text.of(String.format("%.2f", val) + "x")))
+            .stateManager(StateManager.createInstant(1F, () -> CONFIG.instance().frame2Scale, newVal -> CONFIG.instance().frame2Scale = newVal))
             .build();
-    public static Option<Color> o_frame2Color = Option.<Color>createBuilder()
+    public static LinkedOptionImpl<Color> o_frame2Color = LinkedOptionImpl.<Color>createBuilder()
             .name(Text.of("Color"))
             .controller(ColorControllerBuilderImpl::new)
-            .binding(new Color(255, 255, 255), () -> CONFIG.instance().frame2Color, newVal -> CONFIG.instance().frame2Color = newVal)
-            .instant(true)
+            .stateManager(StateManager.createInstant(new Color(255, 255, 255), () -> CONFIG.instance().frame2Color, newVal -> CONFIG.instance().frame2Color = newVal))
             .build();
-    public static Option<Float> o_frame2Alpha = Option.<Float>createBuilder()
+    public static LinkedOptionImpl<Float> o_frame2Alpha = LinkedOptionImpl.<Float>createBuilder()
             .name(Text.of("Opacity"))
             .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(val -> Text.of(String.format("%.0f", val * 100) + "%")))
-            .binding(1F, () -> CONFIG.instance().frame2Alpha, newVal -> CONFIG.instance().frame2Alpha = newVal)
-            .instant(true)
+            .stateManager(StateManager.createInstant(1F, () -> CONFIG.instance().frame2Alpha, newVal -> CONFIG.instance().frame2Alpha = newVal))
+            .build();
+    public static LinkedOptionImpl<Integer> o_frame2LightLevel = LinkedOptionImpl.<Integer>createBuilder()
+            .name(Text.of("Light Level"))
+            .description(OptionDescription.createBuilder().text(Text.of("How brightly lit the object is. -1 uses the world's lighting, while 0-255 is mapped respectively.")).build())
+            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-1, 255).formatValue(value -> Text.of(value == -1 ? "Use World Light" : value + "")))
+            .stateManager(StateManager.createInstant(-1, () -> CONFIG.instance().frame2LightLevel, newVal -> CONFIG.instance().frame2LightLevel = newVal))
+            .build();
+    public static LinkedOptionImpl<RenderMode> o_frame2RenderLayer = LinkedOptionImpl.<RenderMode>createBuilder()
+            .name(Text.of("Render Mode"))
+            .description(OptionDescription.createBuilder().text(Text.of("Culled: Doesn't render back sides of objects.\n\nWireframe: Draws outlines of objects. Does not support light levels. Line width also cannot be changed due to game limitations.\n\nGateway: Uses the game's end gateway shader. Does not support color, opacity, or light levels.")).build())
+            .controller(renderModeOption -> EnumControllerBuilder.create(renderModeOption).enumClass(RenderMode.class))
+            .stateManager(StateManager.createInstant(RenderMode.DEFAULT, () -> CONFIG.instance().frame2RenderLayer, newVal -> CONFIG.instance().frame2RenderLayer = newVal))
             .build();
     @Updatable
-    public static Option<Boolean> o_frame2Rainbow = Option.<Boolean>createBuilder()
+    public static LinkedOptionImpl<Boolean> o_frame2Rainbow = LinkedOptionImpl.<Boolean>createBuilder()
             .name(Text.of("Rainbow"))
-            .binding(false, () -> CONFIG.instance().frame2Rainbow, newVal -> CONFIG.instance().frame2Rainbow = newVal)
             .controller(TickBoxControllerBuilderImpl::new)
-            .instant(true)
+            .stateManager(StateManager.createInstant(false, () -> CONFIG.instance().frame2Rainbow, newVal -> CONFIG.instance().frame2Rainbow = newVal))
             .build();
-    public static Option<Integer> o_frame2RainbowSpeed = Option.<Integer>createBuilder()
+    public static LinkedOptionImpl<Integer> o_frame2RainbowSpeed = LinkedOptionImpl.<Integer>createBuilder()
             .name(Text.of("Rainbow Speed"))
-            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(1, 10))
-            .binding(2, () -> CONFIG.instance().frame2RainbowSpeed, newVal -> CONFIG.instance().frame2RainbowSpeed = newVal)
-            .instant(true)
+            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(1, 10).formatValue(value -> Text.of(value + "x")))
+            .stateManager(StateManager.createInstant(2, () -> CONFIG.instance().frame2RainbowSpeed, newVal -> CONFIG.instance().frame2RainbowSpeed = newVal))
             .build();
-    public static Option<Integer> o_frame2RainbowDelay = Option.<Integer>createBuilder()
+    public static LinkedOptionImpl<Integer> o_frame2RainbowDelay = LinkedOptionImpl.<Integer>createBuilder()
             .name(Text.of("Rainbow Delay"))
-            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-500, 500))
-            .binding(0, () -> CONFIG.instance().frame2RainbowDelay, newVal -> CONFIG.instance().frame2RainbowDelay = newVal)
-            .instant(true)
+            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-500, 500).formatValue(integer -> Text.of(integer + "ms")))
+            .stateManager(StateManager.createInstant(0, () -> CONFIG.instance().frame2RainbowDelay, newVal -> CONFIG.instance().frame2RainbowDelay = newVal))
             .build();
     @Updatable
     public static Option<Boolean> o_renderBeam = Option.<Boolean>createBuilder()
             .name(Text.of("Render Beam"))
-            .binding(true, () -> CONFIG.instance().renderBeam, newVal -> CONFIG.instance().renderBeam = newVal)
             .controller(TickBoxControllerBuilderImpl::new)
-            .instant(true)
+            .stateManager(StateManager.createInstant(true, () -> CONFIG.instance().renderBeam, newVal -> CONFIG.instance().renderBeam = newVal))
             .build();
-    public static Option<Color> o_beam1Color = Option.<Color>createBuilder()
+    public static LinkedOptionImpl<Color> o_beam1Color = LinkedOptionImpl.<Color>createBuilder()
             .name(Text.of("Color"))
             .controller(ColorControllerBuilderImpl::new)
-            .binding(new Color(255, 255, 255), () -> CONFIG.instance().beam1Color, newVal -> CONFIG.instance().beam1Color = newVal)
-            .instant(true)
+            .stateManager(StateManager.createInstant(new Color(255, 255, 255), () -> CONFIG.instance().beam1Color, newVal -> CONFIG.instance().beam1Color = newVal))
             .build();
-    public static Option<Float> o_beam1Alpha = Option.<Float>createBuilder()
+    public static LinkedOptionImpl<Float> o_beam1Alpha = LinkedOptionImpl.<Float>createBuilder()
             .name(Text.of("Opacity"))
             .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(val -> Text.of(String.format("%.0f", val * 100) + "%")))
-            .binding(1F, () -> CONFIG.instance().beam1Alpha, newVal -> CONFIG.instance().beam1Alpha = newVal)
-            .instant(true)
+            .stateManager(StateManager.createInstant(1F, () -> CONFIG.instance().beam1Alpha, newVal -> CONFIG.instance().beam1Alpha = newVal))
+            .build();
+    public static LinkedOptionImpl<Integer> o_beam1LightLevel = LinkedOptionImpl.<Integer>createBuilder()
+            .name(Text.of("Light Level"))
+            .description(OptionDescription.createBuilder().text(Text.of("How brightly lit the object is. -1 uses the world's lighting, while 0-255 is mapped respectively.")).build())
+            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-1, 255).formatValue(value -> Text.of(value == -1 ? "Use World Light" : value + "")))
+            .stateManager(StateManager.createInstant(-1, () -> CONFIG.instance().beam1LightLevel, newVal -> CONFIG.instance().beam1LightLevel = newVal))
             .build();
     @Updatable
-    public static Option<Boolean> o_beam1Rainbow = Option.<Boolean>createBuilder()
+    public static LinkedOptionImpl<Boolean> o_beam1Rainbow = LinkedOptionImpl.<Boolean>createBuilder()
             .name(Text.of("Rainbow"))
-            .binding(false, () -> CONFIG.instance().beam1Rainbow, newVal -> CONFIG.instance().beam1Rainbow = newVal)
             .controller(TickBoxControllerBuilderImpl::new)
-            .instant(true)
+            .stateManager(StateManager.createInstant(false, () -> CONFIG.instance().beam1Rainbow, newVal -> CONFIG.instance().beam1Rainbow = newVal))
             .build();
-    public static Option<Integer> o_beam1RainbowSpeed = Option.<Integer>createBuilder()
+    public static LinkedOptionImpl<Integer> o_beam1RainbowSpeed = LinkedOptionImpl.<Integer>createBuilder()
             .name(Text.of("Rainbow Speed"))
-            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(1, 10))
-            .binding(2, () -> CONFIG.instance().beam1RainbowSpeed, newVal -> CONFIG.instance().beam1RainbowSpeed = newVal)
-            .instant(true)
+            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(1, 10).formatValue(value -> Text.of(value + "x")))
+            .stateManager(StateManager.createInstant(2, () -> CONFIG.instance().beam1RainbowSpeed, newVal -> CONFIG.instance().beam1RainbowSpeed = newVal))
             .build();
-    public static Option<Integer> o_beam1RainbowDelay = Option.<Integer>createBuilder()
+    public static LinkedOptionImpl<Integer> o_beam1RainbowDelay = LinkedOptionImpl.<Integer>createBuilder()
             .name(Text.of("Rainbow Delay"))
-            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-500, 500))
-            .binding(0, () -> CONFIG.instance().beam1RainbowDelay, newVal -> CONFIG.instance().beam1RainbowDelay = newVal)
-            .instant(true)
+            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-500, 500).formatValue(integer -> Text.of(integer + "ms")))
+            .stateManager(StateManager.createInstant(0, () -> CONFIG.instance().beam1RainbowDelay, newVal -> CONFIG.instance().beam1RainbowDelay = newVal))
             .build();
-    public static Option<Color> o_beam2Color = Option.<Color>createBuilder()
+    public static LinkedOptionImpl<Color> o_beam2Color = LinkedOptionImpl.<Color>createBuilder()
             .name(Text.of("Color"))
             .controller(ColorControllerBuilderImpl::new)
-            .binding(new Color(0,0,0), () -> CONFIG.instance().beam2Color, newVal -> CONFIG.instance().beam2Color = newVal)
-            .instant(true)
+            .stateManager(StateManager.createInstant(new Color(0, 0, 0), () -> CONFIG.instance().beam2Color, newVal -> CONFIG.instance().beam2Color = newVal))
             .build();
-    public static Option<Float> o_beam2Alpha = Option.<Float>createBuilder()
+    public static LinkedOptionImpl<Float> o_beam2Alpha = LinkedOptionImpl.<Float>createBuilder()
             .name(Text.of("Opacity"))
             .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(val -> Text.of(String.format("%.0f", val * 100) + "%")))
-            .binding(1F, () -> CONFIG.instance().beam2Alpha, newVal -> CONFIG.instance().beam2Alpha = newVal)
-            .instant(true)
+            .stateManager(StateManager.createInstant(1F, () -> CONFIG.instance().beam2Alpha, newVal -> CONFIG.instance().beam2Alpha = newVal))
+            .build();
+    public static LinkedOptionImpl<Integer> o_beam2LightLevel = LinkedOptionImpl.<Integer>createBuilder()
+            .name(Text.of("Light Level"))
+            .description(OptionDescription.createBuilder().text(Text.of("How brightly lit the object is. -1 uses the world's lighting, while 0-255 is mapped respectively.")).build())
+            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-1, 255).formatValue(value -> Text.of(value == -1 ? "Use World Light" : value + "")))
+            .stateManager(StateManager.createInstant(-1, () -> CONFIG.instance().beam2LightLevel, newVal -> CONFIG.instance().beam2LightLevel = newVal))
             .build();
     @Updatable
-    public static Option<Boolean> o_beam2Rainbow = Option.<Boolean>createBuilder()
+    public static LinkedOptionImpl<Boolean> o_beam2Rainbow = LinkedOptionImpl.<Boolean>createBuilder()
             .name(Text.of("Rainbow"))
-            .binding(false, () -> CONFIG.instance().beam2Rainbow, newVal -> CONFIG.instance().beam2Rainbow = newVal)
             .controller(TickBoxControllerBuilderImpl::new)
-            .instant(true)
+            .stateManager(StateManager.createInstant(false, () -> CONFIG.instance().beam2Rainbow, newVal -> CONFIG.instance().beam2Rainbow = newVal))
             .build();
-    public static Option<Integer> o_beam2RainbowSpeed = Option.<Integer>createBuilder()
+    public static LinkedOptionImpl<Integer> o_beam2RainbowSpeed = LinkedOptionImpl.<Integer>createBuilder()
             .name(Text.of("Rainbow Speed"))
-            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(1, 10))
-            .binding(2, () -> CONFIG.instance().beam2RainbowSpeed, newVal -> CONFIG.instance().beam2RainbowSpeed = newVal)
-            .instant(true)
+            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(1, 10).formatValue(value -> Text.of(value + "x")))
+            .stateManager(StateManager.createInstant(2, () -> CONFIG.instance().beam2RainbowSpeed, newVal -> CONFIG.instance().beam2RainbowSpeed = newVal))
             .build();
-    public static Option<Integer> o_beam2RainbowDelay = Option.<Integer>createBuilder()
+    public static LinkedOptionImpl<Integer> o_beam2RainbowDelay = LinkedOptionImpl.<Integer>createBuilder()
             .name(Text.of("Rainbow Delay"))
-            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-500, 500))
-            .binding(0, () -> CONFIG.instance().beam2RainbowDelay, newVal -> CONFIG.instance().beam2RainbowDelay = newVal)
-            .instant(true)
+            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-500, 500).formatValue(integer -> Text.of(integer + "ms")))
+            .stateManager(StateManager.createInstant(0, () -> CONFIG.instance().beam2RainbowDelay, newVal -> CONFIG.instance().beam2RainbowDelay = newVal))
             .build();
-    public static Option<Float> o_beam1Radius = Option.<Float>createBuilder()
+    public static LinkedOptionImpl<Float> o_beam1Radius = LinkedOptionImpl.<Float>createBuilder()
             .name(Text.of("Radius"))
-            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(val -> Text.of(String.format("%.2f", val))))
-            .binding(0.75F, () -> CONFIG.instance().beam1Radius, newVal -> CONFIG.instance().beam1Radius = newVal)
-            .instant(true)
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(-1f, 1f).step(0.05f).formatValue(val -> Text.of(String.format("%.2f", val).replace(".0", "") + (val == 1 ? " block" : " blocks"))))
+            .stateManager(StateManager.createInstant(0.75F, () -> CONFIG.instance().beam1Radius, newVal -> CONFIG.instance().beam1Radius = newVal))
             .build();
-    public static Option<Float> o_beam2Radius = Option.<Float>createBuilder()
+    public static LinkedOptionImpl<Float> o_beam2Radius = LinkedOptionImpl.<Float>createBuilder()
             .name(Text.of("Radius"))
-            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(val -> Text.of(String.format("%.2f", val))))
-            .binding(0.2F, () -> CONFIG.instance().beam2Radius, newVal -> CONFIG.instance().beam2Radius = newVal)
-            .instant(true)
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(-1f, 1f).step(0.05f).formatValue(val -> Text.of(String.format("%.2f", val).replace(".0", "") + (val == 1 ? " block" : " blocks"))))
+            .stateManager(StateManager.createInstant(0.15F, () -> CONFIG.instance().beam2Radius, newVal -> CONFIG.instance().beam2Radius = newVal))
             .build();
+    public static Option<Integer> o_beamSides = Option.<Integer>createBuilder()
+            .name(Text.of("Sides"))
+            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(2, 64))
+            .stateManager(StateManager.createInstant(8, () -> CONFIG.instance().beamSides, newVal -> CONFIG.instance().beamSides = newVal))
+            .build();
+    public static Option<Float> o_beamScrollSpeed = Option.<Float>createBuilder()
+            .name(Text.of("Scroll Speed"))
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(-2f, 2f).step(0.05f).formatValue(val -> Text.of(String.format("%.2f", val))))
+            .stateManager(StateManager.createInstant(1F, () -> CONFIG.instance().beamScrollSpeed, newVal -> CONFIG.instance().beamScrollSpeed = newVal))
+            .build();
+    public static LinkedOptionImpl<RenderMode> o_beamRenderLayer = LinkedOptionImpl.<RenderMode>createBuilder()
+            .name(Text.of("Render Mode"))
+            .description(OptionDescription.createBuilder().text(Text.of("Culled: Doesn't render back sides of objects.\n\nWireframe: Draws outlines of objects. Does not support light levels. Line width also cannot be changed due to game limitations.\n\nGateway: Uses the game's end gateway shader. Does not support color, opacity, or light levels.")).build())
+            .controller(renderModeOption -> EnumControllerBuilder.create(renderModeOption).enumClass(RenderMode.class))
+            .stateManager(StateManager.createInstant(RenderMode.DEFAULT, () -> CONFIG.instance().beamRenderMode, newVal -> CONFIG.instance().beamRenderMode = newVal))
+            .build();
+
+
+    public static void update(Option<Boolean> booleanOption, Boolean aBoolean) {
+        if (booleanOption.equals(o_modEnabled)) {
+            o_shadowAlpha.setAvailable(aBoolean);
+            o_shadowRadius.setAvailable(aBoolean);
+            o_randomizeAge.setAvailable(aBoolean);
+
+            o_baseRenderMode.setAvailable(aBoolean);
+            o_baseRenderLayer.setAvailable(aBoolean);
+            o_renderCore.setAvailable(aBoolean);
+            o_renderFrame1.setAvailable(aBoolean);
+            o_renderFrame2.setAvailable(aBoolean);
+            o_renderBeam.setAvailable(aBoolean);
+        } else if (booleanOption.equals(o_renderCore)) {
+            o_coreOffset.setAvailable(o_renderCore.available() && aBoolean);
+            o_coreRotationSpeed.setAvailable(o_renderCore.available() && aBoolean);
+            o_coreBounceHeight.setAvailable(o_renderCore.available() && aBoolean);
+            o_coreBounceSpeed.setAvailable(o_renderCore.available() && aBoolean);
+            o_coreTickDelay.setAvailable(o_renderCore.available() && aBoolean);
+            o_coreScale.setAvailable(o_renderCore.available() && aBoolean);
+            o_coreColor.setAvailable(o_renderCore.available() && aBoolean);
+            o_coreAlpha.setAvailable(o_renderCore.available() && aBoolean);
+            o_coreLightLevel.setAvailable(o_renderCore.available() && aBoolean);
+            o_coreRenderLayer.setAvailable(o_renderCore.available() && aBoolean);
+            o_coreRainbow.setAvailable(o_renderCore.available() && aBoolean);
+        } else if (booleanOption.equals(o_coreRainbow)) {
+            o_coreRainbowSpeed.setAvailable(o_coreRainbow.available() && aBoolean);
+            o_coreRainbowDelay.setAvailable(o_coreRainbow.available() && aBoolean);
+        } else if (booleanOption.equals(o_renderFrame1)) {
+            o_frame1Offset.setAvailable(o_renderFrame1.available() && aBoolean);
+            o_frame1RotationSpeed.setAvailable(o_renderFrame1.available() && aBoolean);
+            o_frame1BounceHeight.setAvailable(o_renderFrame1.available() && aBoolean);
+            o_frame1BounceSpeed.setAvailable(o_renderFrame1.available() && aBoolean);
+            o_frame1TickDelay.setAvailable(o_renderFrame1.available() && aBoolean);
+            o_frame1Scale.setAvailable(o_renderFrame1.available() && aBoolean);
+            o_frame1Color.setAvailable(o_renderFrame1.available() && aBoolean);
+            o_frame1Alpha.setAvailable(o_renderFrame1.available() && aBoolean);
+            o_frame1LightLevel.setAvailable(o_renderFrame1.available() && aBoolean);
+            o_frame1RenderLayer.setAvailable(o_renderFrame1.available() && aBoolean);
+            o_frame1Rainbow.setAvailable(o_renderFrame1.available() && aBoolean);
+        } else if (booleanOption.equals(o_frame1Rainbow)) {
+            o_frame1RainbowSpeed.setAvailable(o_frame1Rainbow.available() && aBoolean);
+            o_frame1RainbowDelay.setAvailable(o_frame1Rainbow.available() && aBoolean);
+        } else if (booleanOption.equals(o_renderFrame2)) {
+            o_frame2Offset.setAvailable(o_renderFrame2.available() && aBoolean);
+            o_frame2RotationSpeed.setAvailable(o_renderFrame2.available() && aBoolean);
+            o_frame2BounceHeight.setAvailable(o_renderFrame2.available() && aBoolean);
+            o_frame2BounceSpeed.setAvailable(o_renderFrame2.available() && aBoolean);
+            o_frame2TickDelay.setAvailable(o_renderFrame2.available() && aBoolean);
+            o_frame2Scale.setAvailable(o_renderFrame2.available() && aBoolean);
+            o_frame2Color.setAvailable(o_renderFrame2.available() && aBoolean);
+            o_frame2Alpha.setAvailable(o_renderFrame2.available() && aBoolean);
+            o_frame2LightLevel.setAvailable(o_renderFrame2.available() && aBoolean);
+            o_frame2RenderLayer.setAvailable(o_renderFrame2.available() && aBoolean);
+            o_frame2Rainbow.setAvailable(o_renderFrame2.available() && aBoolean);
+        } else if (booleanOption.equals(o_frame2Rainbow)) {
+            o_frame2RainbowSpeed.setAvailable(o_frame2Rainbow.available() && aBoolean);
+            o_frame2RainbowDelay.setAvailable(o_frame2Rainbow.available() && aBoolean);
+        } else if (booleanOption.equals(o_renderBeam)) {
+            o_beam1Color.setAvailable(o_renderBeam.available() && aBoolean);
+            o_beam1Alpha.setAvailable(o_renderBeam.available() && aBoolean);
+            o_beam1Rainbow.setAvailable(o_renderBeam.available() && aBoolean);
+            o_beam1Radius.setAvailable(o_renderBeam.available() && aBoolean);
+            o_beam1LightLevel.setAvailable(o_renderBeam.available() && aBoolean);
+            o_beam2Color.setAvailable(o_renderBeam.available() && aBoolean);
+            o_beam2Alpha.setAvailable(o_renderBeam.available() && aBoolean);
+            o_beam2Rainbow.setAvailable(o_renderBeam.available() && aBoolean);
+            o_beam2Radius.setAvailable(o_renderBeam.available() && aBoolean);
+            o_beam2LightLevel.setAvailable(o_renderBeam.available() && aBoolean);
+            o_beamSides.setAvailable(o_renderBeam.available() && aBoolean);
+            o_beamScrollSpeed.setAvailable(o_renderBeam.available() && aBoolean);
+            o_beamRenderLayer.setAvailable(o_renderBeam.available() && aBoolean);
+        } else if (booleanOption.equals(o_beam1Rainbow)) {
+            o_beam1RainbowDelay.setAvailable(o_beam1Rainbow.available() && aBoolean);
+            o_beam1RainbowSpeed.setAvailable(o_beam1Rainbow.available() && aBoolean);
+        } else if (booleanOption.equals(o_beam2Rainbow)) {
+            o_beam2RainbowDelay.setAvailable(o_beam2Rainbow.available() && aBoolean);
+            o_beam2RainbowSpeed.setAvailable(o_beam2Rainbow.available() && aBoolean);
+        } else if (booleanOption.equals(o_baseRainbow)) {
+            o_baseRainbowSpeed.setAvailable(o_baseRainbow.available() && aBoolean);
+            o_baseRainbowDelay.setAvailable(o_baseRainbow.available() && aBoolean);
+        }
+        specialUpdate(o_baseRenderMode, o_baseRenderMode.pendingValue());
+    }
+
+    private static void specialUpdate(Option<BaseRenderMode> baseRenderModeOption, BaseRenderMode baseRenderMode) {
+        o_baseOffset.setAvailable(baseRenderModeOption.available() && baseRenderMode != BaseRenderMode.NEVER);
+        o_baseScale.setAvailable(baseRenderModeOption.available() && baseRenderMode != BaseRenderMode.NEVER);
+        o_baseColor.setAvailable(baseRenderModeOption.available() && baseRenderMode != BaseRenderMode.NEVER);
+        o_baseAlpha.setAvailable(baseRenderModeOption.available() && baseRenderMode != BaseRenderMode.NEVER);
+        o_baseLightLevel.setAvailable(baseRenderModeOption.available() && baseRenderMode != BaseRenderMode.NEVER);
+        o_baseRenderLayer.setAvailable(baseRenderModeOption.available() && baseRenderMode != BaseRenderMode.NEVER);
+        o_baseRainbow.setAvailable(baseRenderModeOption.available() && baseRenderMode != BaseRenderMode.NEVER);
+        o_baseRotation.setAvailable(baseRenderModeOption.available() && baseRenderMode != BaseRenderMode.NEVER);
+    }
+
+    public enum RenderMode implements NameableEnum {
+        DEFAULT,
+        GATEWAY,
+        WIREFRAME,
+        NOTEX,
+        CULLED;
+
+        @Override
+        public Text getDisplayName() {
+            return switch (this) {
+                case DEFAULT -> Text.of("Default");
+                case GATEWAY -> Text.of("Gateway");
+                case WIREFRAME -> Text.of("Wireframe");
+                case NOTEX -> Text.of("No Texture Color");
+                case CULLED -> Text.of("Culled");
+            };
+        }
+    }
+
+    public enum BaseRenderMode implements NameableEnum {
+        ALWAYS,
+        DEFAULT,
+        NEVER;
+
+
+        @Override
+        public Text getDisplayName() {
+            return switch (this) {
+                case ALWAYS -> Text.of("Always");
+                case DEFAULT -> Text.of("Default");
+                case NEVER -> Text.of("Never");
+            };
+        }
+    }
 
     public static Screen getConfigScreen(Screen parent) {
         return YetAnotherConfigLib.create(CONFIG, ((defaults, config, builder) -> builder
                         .title(Text.of("Custom End Crystals"))
                         .category(ConfigCategory.createBuilder()
                                 .name(Text.of("General"))
-                                .group(OptionGroup.createBuilder()
-                                        .name(Text.of("General"))
-                                        .option(o_modEnabled)
-                                        .build())
+                                .option(o_modEnabled)
+                                .option(o_randomizeAge)
                                 .group(OptionGroup.createBuilder()
                                         .name(Text.of("Shadow"))
                                         .option(o_shadowRadius)
                                         .option(o_shadowAlpha)
                                         .build())
                                 .group(OptionGroup.createBuilder()
+                                        .name(Text.of("Base"))
+                                        .option(o_baseRenderMode)
+                                        .option(o_baseOffset)
+                                        .option(o_baseScale)
+                                        .option(o_baseRotation)
+                                        .option(o_baseColor)
+                                        .option(o_baseAlpha)
+                                        .option(o_baseLightLevel)
+                                        .option(o_baseRenderLayer)
+                                        .build())
+                                .group(OptionGroup.createBuilder()
+                                        .name(Text.of("Rainbow"))
+                                        .option(o_baseRainbow)
+                                        .option(o_baseRainbowSpeed)
+                                        .option(o_baseRainbowDelay)
+                                        .build())
+                                .group(OptionGroup.createBuilder()
                                         .name(Text.of("Config"))
                                         .option(ButtonOption.createBuilder()
                                                 .name(Text.of("Copy Current Config"))
-                                                .description(OptionDescription.of(Text.of("Copies the current configuration as text to your clipboard. Go share your configs with your buddies! (Make sure to save the config first)")))
+                                                .description(OptionDescription.createBuilder().text(Text.of("Copies the current configuration as text to your clipboard. Go share your configs with your buddies! (Make sure to save the config first)")).build())
                                                 .action((yaclScreen, buttonOption) -> MinecraftClient.getInstance().keyboard.setClipboard(gson.toJson(CONFIG.instance())))
                                                 .build())
                                         .option(ButtonOption.createBuilder()
                                                 .name(Text.literal("Load Config From Clipboard").formatted(Formatting.DARK_RED, Formatting.BOLD))
-                                                .description(OptionDescription.of(Text.of("Loads a configuration from your clipboard if it's valid. WARNING: LOADING A VALID CONFIGURATION WILL OVERWRITE YOUR CURRENT ONE.")))
+                                                .description(OptionDescription.createBuilder().text(Text.of("Loads a configuration from your clipboard if it's valid. WARNING: LOADING A VALID CONFIGURATION WILL OVERWRITE YOUR CURRENT ONE.")).build())
                                                 .action((yaclScreen, buttonOption) -> {
                                                     //this sucks but it works!!
                                                     try {
@@ -476,11 +809,6 @@ public class ChamsConfig {
                                                 })
                                                 .build())
                                         .build())
-                                .group(OptionGroup.createBuilder()
-                                        .name(Text.of("Miscellaneous"))
-                                        .option(o_renderLayer)
-                                        .option(o_lightLevel)
-                                        .build())
                                 .build())
                         .category(ConfigCategory.createBuilder()
                                 .name(Text.of("Core"))
@@ -491,18 +819,40 @@ public class ChamsConfig {
                                         .option(o_coreRotationSpeed)
                                         .option(o_coreBounceHeight)
                                         .option(o_coreBounceSpeed)
+                                        .option(o_coreTickDelay)
                                         .build())
                                 .group(OptionGroup.createBuilder()
                                         .name(Text.of("Rendering"))
                                         .option(o_coreScale)
                                         .option(o_coreColor)
                                         .option(o_coreAlpha)
+                                        .option(o_coreLightLevel)
+                                        .option(o_coreRenderLayer)
                                         .build())
                                 .group(OptionGroup.createBuilder()
                                         .name(Text.of("Rainbow"))
                                         .option(o_coreRainbow)
                                         .option(o_coreRainbowSpeed)
                                         .option(o_coreRainbowDelay)
+                                        .build())
+                                .group(OptionGroup.createBuilder()
+                                        .name(Text.of("Animation"))
+                                        .option(o_coreAlphaAnimation)
+                                        .option(o_coreStartOpacity)
+                                        .option(o_coreAlphaAnimDuration)
+                                        .option(o_coreAlphaDelay)
+                                        .option(o_coreAlphaEasing)
+                                        .option(o_coreScaleAnimation)
+                                        .option(o_coreStartScale)
+                                        .option(o_coreScaleAnimDuration)
+                                        .option(o_coreScaleDelay)
+                                        .option(o_coreScaleEasing)
+
+                                        .option(ButtonOption.createBuilder()
+                                                .name(Text.of("Reset Preview"))
+                                                .description(OptionDescription.createBuilder().text(Text.of("Reset the crystal age to preview the animation settings again.")).build())
+                                                .action((yaclScreen, buttonOption) -> CrystalChams.entity.age = 0)
+                                                .build())
                                         .build())
                                 .build())
                         .category(ConfigCategory.createBuilder()
@@ -514,12 +864,15 @@ public class ChamsConfig {
                                         .option(o_frame1RotationSpeed)
                                         .option(o_frame1BounceHeight)
                                         .option(o_frame1BounceSpeed)
+                                        .option(o_frame1TickDelay)
                                         .build())
                                 .group(OptionGroup.createBuilder()
                                         .name(Text.of("Rendering"))
                                         .option(o_frame1Scale)
                                         .option(o_frame1Color)
                                         .option(o_frame1Alpha)
+                                        .option(o_frame1LightLevel)
+                                        .option(o_frame1RenderLayer)
                                         .build())
                                 .group(OptionGroup.createBuilder()
                                         .name(Text.of("Rainbow"))
@@ -537,12 +890,15 @@ public class ChamsConfig {
                                         .option(o_frame2RotationSpeed)
                                         .option(o_frame2BounceHeight)
                                         .option(o_frame2BounceSpeed)
+                                        .option(o_frame2TickDelay)
                                         .build())
                                 .group(OptionGroup.createBuilder()
                                         .name(Text.of("Rendering"))
                                         .option(o_frame2Scale)
                                         .option(o_frame2Color)
                                         .option(o_frame2Alpha)
+                                        .option(o_frame2LightLevel)
+                                        .option(o_frame2RenderLayer)
                                         .build())
                                 .group(OptionGroup.createBuilder()
                                         .name(Text.of("Rainbow"))
@@ -559,6 +915,7 @@ public class ChamsConfig {
                                         .option(o_beam1Color)
                                         .option(o_beam1Alpha)
                                         .option(o_beam1Radius)
+                                        .option(o_beam1LightLevel)
                                         .option(o_beam1Rainbow)
                                         .option(o_beam1RainbowSpeed)
                                         .option(o_beam1RainbowDelay)
@@ -568,94 +925,19 @@ public class ChamsConfig {
                                         .option(o_beam2Color)
                                         .option(o_beam2Alpha)
                                         .option(o_beam2Radius)
+                                        .option(o_beam2LightLevel)
                                         .option(o_beam2Rainbow)
                                         .option(o_beam2RainbowSpeed)
                                         .option(o_beam2RainbowDelay)
                                         .build())
+                                .group(OptionGroup.createBuilder()
+                                        .name(Text.of("Extras"))
+                                        .option(o_beamSides)
+                                        .option(o_beamScrollSpeed)
+                                        .option(o_beamRenderLayer)
+                                        .build())
                                 .build())
                 ))
                 .generateScreen(parent);
-    }
-
-    public static void update(Option<Boolean> booleanOption, Boolean aBoolean) {
-        if (booleanOption.equals(o_modEnabled)) {
-            o_shadowAlpha.setAvailable(aBoolean);
-            o_shadowRadius.setAvailable(aBoolean);
-            o_renderLayer.setAvailable(aBoolean);
-            o_lightLevel.setAvailable(aBoolean);
-
-            o_renderBeam.setAvailable(aBoolean);
-            o_renderFrame1.setAvailable(aBoolean);
-            o_renderFrame2.setAvailable(aBoolean);
-            o_renderBeam.setAvailable(aBoolean);
-        } else if (booleanOption.equals(o_renderCore)) {
-            o_coreOffset.setAvailable(o_renderCore.available() && aBoolean);
-            o_coreRotationSpeed.setAvailable(o_renderCore.available() && aBoolean);
-            o_coreBounceHeight.setAvailable(o_renderCore.available() && aBoolean);
-            o_coreBounceSpeed.setAvailable(o_renderCore.available() && aBoolean);
-            o_coreScale.setAvailable(o_renderCore.available() && aBoolean);
-            o_coreColor.setAvailable(o_renderCore.available() && aBoolean);
-            o_coreAlpha.setAvailable(o_renderCore.available() && aBoolean);
-            o_coreRainbow.setAvailable(o_renderCore.available() && aBoolean);
-        } else if (booleanOption.equals(o_coreRainbow)) {
-            o_coreRainbowSpeed.setAvailable(o_coreRainbow.available() && aBoolean);
-            o_coreRainbowDelay.setAvailable(o_coreRainbow.available() && aBoolean);
-        } else if (booleanOption.equals(o_renderFrame1)) {
-            o_frame1Offset.setAvailable(o_renderFrame1.available() && aBoolean);
-            o_frame1RotationSpeed.setAvailable(o_renderFrame1.available() && aBoolean);
-            o_frame1BounceHeight.setAvailable(o_renderFrame1.available() && aBoolean);
-            o_frame1BounceSpeed.setAvailable(o_renderFrame1.available() && aBoolean);
-            o_frame1Scale.setAvailable(o_renderFrame1.available() && aBoolean);
-            o_frame1Color.setAvailable(o_renderFrame1.available() && aBoolean);
-            o_frame1Alpha.setAvailable(o_renderFrame1.available() && aBoolean);
-            o_frame1Rainbow.setAvailable(o_renderFrame1.available() && aBoolean);
-        } else if (booleanOption.equals(o_frame1Rainbow)) {
-            o_frame1RainbowSpeed.setAvailable(o_frame1Rainbow.available() && aBoolean);
-            o_frame1RainbowDelay.setAvailable(o_frame1Rainbow.available() && aBoolean);
-        } else if (booleanOption.equals(o_renderFrame2)) {
-            o_frame2Offset.setAvailable(o_renderFrame2.available() && aBoolean);
-            o_frame2RotationSpeed.setAvailable(o_renderFrame2.available() && aBoolean);
-            o_frame2BounceHeight.setAvailable(o_renderFrame2.available() && aBoolean);
-            o_frame2BounceSpeed.setAvailable(o_renderFrame2.available() && aBoolean);
-            o_frame2Scale.setAvailable(o_renderFrame2.available() && aBoolean);
-            o_frame2Color.setAvailable(o_renderFrame2.available() && aBoolean);
-            o_frame2Alpha.setAvailable(o_renderFrame2.available() && aBoolean);
-            o_frame2Rainbow.setAvailable(o_renderFrame2.available() && aBoolean);
-        } else if (booleanOption.equals(o_frame2Rainbow)) {
-            o_frame2RainbowSpeed.setAvailable(o_frame2Rainbow.available() && aBoolean);
-            o_frame2RainbowDelay.setAvailable(o_frame2Rainbow.available() && aBoolean);
-        } else if (booleanOption.equals(o_renderBeam)) {
-            o_beam1Color.setAvailable(o_renderBeam.available() && aBoolean);
-            o_beam1Alpha.setAvailable(o_renderBeam.available() && aBoolean);
-            o_beam1Rainbow.setAvailable(o_renderBeam.available() && aBoolean);
-            o_beam1Radius.setAvailable(o_renderBeam.available() && aBoolean);
-            o_beam2Color.setAvailable(o_renderBeam.available() && aBoolean);
-            o_beam2Alpha.setAvailable(o_renderBeam.available() && aBoolean);
-            o_beam2Rainbow.setAvailable(o_renderBeam.available() && aBoolean);
-            o_beam2Radius.setAvailable(o_renderBeam.available() && aBoolean);
-        } else if (booleanOption.equals(o_beam1Rainbow)) {
-            o_beam1RainbowDelay.setAvailable(o_beam1Rainbow.available() && aBoolean);
-            o_beam1RainbowSpeed.setAvailable(o_beam1Rainbow.available() && aBoolean);
-        } else if (booleanOption.equals(o_beam2Rainbow)) {
-            o_beam2RainbowDelay.setAvailable(o_beam2Rainbow.available() && aBoolean);
-            o_beam2RainbowSpeed.setAvailable(o_beam2Rainbow.available() && aBoolean);
-        }
-    }
-
-    public enum RenderMode implements NameableEnum {
-        DEFAULT,
-        GATEWAY,
-        WIREFRAME,
-        CULLED;
-
-        @Override
-        public Text getDisplayName() {
-            return switch (this) {
-                case DEFAULT -> Text.of("Default");
-                case GATEWAY -> Text.of("Gateway");
-                case WIREFRAME -> Text.of("Wireframe");
-                case CULLED -> Text.of("Culled");
-            };
-        }
     }
 }
