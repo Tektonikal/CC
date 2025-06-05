@@ -15,9 +15,11 @@ public class FrameOptions {
     public Color col;
     public float alpha;
     public int lightLevel;
-    public ChamsConfig.RenderMode renderMode;
+    public RenderMode renderMode;
 
     public boolean rainbow;
     public float rainbowSpeed;
     public int rainbowDelay;
+    public float baseRainbowSaturation;
+    public float baseRainbowBrightness;
 }

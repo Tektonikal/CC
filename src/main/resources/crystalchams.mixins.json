@@ -12,11 +12,13 @@
   },
   "client": [
     "CategoryTabMixin",
+    "ElementListWidgetExtMixin",
     "EndCrystalEntityRendererMixin",
     "EnderDragonEntityRendererMixin",
     "ModelPartMixin",
     "OptionListWidgetAccessor",
     "OptionListWidgetAccessor$OptionListWidgetEntryMixin",
-    "PopupControllerScreenMixin"
+    "PopupControllerScreenMixin",
+    "PopupControllerScreenMixin$PopupControllerScreenAccessor"
   ]
 }

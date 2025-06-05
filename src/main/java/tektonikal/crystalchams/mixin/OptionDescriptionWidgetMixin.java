@@ -3,11 +3,13 @@ package tektonikal.crystalchams.mixin;
 import dev.isxander.yacl3.gui.DescriptionWithName;
 import dev.isxander.yacl3.gui.OptionDescriptionWidget;
 import dev.isxander.yacl3.gui.YACLScreen;
+import dev.isxander.yacl3.gui.controllers.PopupControllerScreen;
 import dev.isxander.yacl3.gui.image.ImageRenderer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.ScreenRect;
+import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.text.OrderedText;
@@ -35,27 +37,26 @@ public abstract class OptionDescriptionWidgetMixin extends ClickableWidget {
     public OptionDescriptionWidgetMixin(int x, int y, int width, int height, Text message) {
         super(x, y, width, height, message);
     }
-
-    @Redirect(method = "renderWidget(Lnet/minecraft/client/gui/DrawContext;IIF)V", at = @At(value = "INVOKE", target = "Ldev/isxander/yacl3/gui/image/ImageRenderer;render(Lnet/minecraft/client/gui/DrawContext;IIIF)I"))
-        private int CC$EVIL(ImageRenderer instance, DrawContext drawContext, int i, int o, int p, float v){
-        //NOP
-        return i;
-    }
-    @Inject(method = "renderWidget", at = @At(value = "HEAD"))
+    @Inject(method = "renderWidget", at = @At(value = "HEAD"), remap = false)
     public void redir(DrawContext drawContext, int mouseX, int mouseY, float delta, CallbackInfo ci) {
-        if (!((YACLScreen) MinecraftClient.getInstance().currentScreen).config.title().equals(Text.of("Custom End Crystals"))) {
-            return;
+        if(MinecraftClient.getInstance().currentScreen instanceof YACLScreen) {
+            if (!((YACLScreen) MinecraftClient.getInstance().currentScreen).config.title().equals(Text.of("Custom End Crystals"))) {
+                return;
+            }
+        } else if (MinecraftClient.getInstance().currentScreen instanceof PopupControllerScreen) {
+            if (!((PopupControllerScreenMixin.PopupControllerScreenAccessor) MinecraftClient.getInstance().currentScreen).getBackgroundYaclScreen().config.title().equals(Text.of("Custom End Crystals"))) {
+                return;
+            }
         }
-        int y = getY();
 
 
-        drawContext.enableScissor(getX(), y, getX() + getWidth(), getY() + getHeight());
+        drawContext.enableScissor(getX(), getY(), getX() + getWidth(), getY() + getHeight());
 
 
-        float i = (float) Math.atan((((getX() + getX() + getWidth()) / 2F) - mouseX) / 40.0F);
-        float j = (float) Math.atan((((y + y + getHeight()) / 2F) - mouseY) / 40.0F);
+        float i = (float) Math.atan((((getX() + getX() + getWidth()) / 2F) - (MinecraftClient.getInstance().mouse.getX() * MinecraftClient.getInstance().getWindow().getScaledWidth() / MinecraftClient.getInstance().getWindow().getWidth())) / 40.0F);
+        float j = (float) Math.atan((((getY() + getY() + getHeight()) / 2F) - (MinecraftClient.getInstance().mouse.getY() * MinecraftClient.getInstance().getWindow().getScaledHeight() / MinecraftClient.getInstance().getWindow().getHeight())) / 40.0F);
         drawContext.getMatrices().push();
-        drawContext.getMatrices().translate((getX() + getX() + getWidth()) / 2F, (y + y + getHeight()) / 2F, 100.0);
+        drawContext.getMatrices().translate((getX() + getX() + getWidth()) / 2F, (getY() + getY() + getHeight()) / 2F, 100.0);
         drawContext.getMatrices().scale(50, 50, -50);
         drawContext.getMatrices().multiply(RotationAxis.POSITIVE_Z.rotation((float) Math.PI));
         drawContext.getMatrices().multiply(RotationAxis.POSITIVE_X.rotation(j * 20.0F * (float) (Math.PI / 180.0)));

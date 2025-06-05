@@ -25,20 +25,21 @@ import tektonikal.crystalchams.config.LinkedOptionImpl;
 
 import java.util.List;
 
-@Mixin(targets = "dev.isxander.yacl3.gui.OptionListWidget")
+@Mixin(value = OptionListWidget.class, remap = false)
 public interface OptionListWidgetAccessor {
+
     @Accessor(remap = false)
     YACLScreen getYaclScreen();
 
-    @Mixin(targets = "dev.isxander.yacl3.gui.OptionListWidget$OptionEntry")
+    @Mixin(value = OptionListWidget.OptionEntry.class, remap = false)
     abstract class OptionListWidgetEntryMixin {
-        @Shadow
+        @Shadow(remap = false)
         @Final
         public AbstractWidget widget;
-        @Shadow
+        @Shadow(remap = false)
         @Final
         private TextScaledButtonWidget resetButton;
-        @Shadow
+        @Shadow(remap = false)
         @Final
         public Option<?> option;
         @Unique
@@ -48,7 +49,7 @@ public interface OptionListWidgetAccessor {
             this.applyAllButton = applyAllButton;
         }
 
-        @Inject(method = "<init>", at = @At("TAIL"))
+        @Inject(method = "<init>", at = @At("TAIL"), remap = false)
         private void onInit(OptionListWidget this$0, Option<?> option, ConfigCategory category, OptionGroup group, OptionListWidget.GroupSeparatorEntry groupSeparatorEntry, AbstractWidget widget, CallbackInfo ci) {
             if (option instanceof LinkedOptionImpl<?>) {
                 this.widget.setDimension(this.widget.getDimension().expanded(-20, 0));
@@ -61,27 +62,29 @@ public interface OptionListWidgetAccessor {
             }
         }
 
-        @Inject(method = "render", at = @At("TAIL"))
+        @Inject(method = "render", at = @At("TAIL"), remap = false)
         private void onRender(DrawContext graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta, CallbackInfo ci) {
             if (applyAllButton != null) {
                 applyAllButton.setY(y);
+                //not the greatest of ways to do it, but whatever
                 applyAllButton.active = !((LinkedOptionImpl<?>) option).linkedOptionsSynced();
                 applyAllButton.render(graphics, mouseX, mouseY, tickDelta);
             }
+
         }
 
-        @Inject(method = "selectableChildren", at = @At("HEAD"), cancellable = true)
+        @Inject(method = "selectableChildren", at = @At("HEAD"), cancellable = true, remap = false)
         private void onSelectableChildren(CallbackInfoReturnable<List<? extends Selectable>> cir) {
             if (option instanceof LinkedOptionImpl<?>) {
                 cir.cancel();
-                cir.setReturnValue(ImmutableList.of(widget, resetButton, applyAllButton));
+                cir.setReturnValue(ImmutableList.of(widget, applyAllButton, resetButton));
             }
         }
-        @Inject(method = "children", at = @At("HEAD"), cancellable = true)
+        @Inject(method = "children", at = @At("HEAD"), cancellable = true, remap = false)
         private void onChildren(CallbackInfoReturnable<List<? extends Selectable>> cir) {
             if (option instanceof LinkedOptionImpl<?>) {
                 cir.cancel();
-                cir.setReturnValue(ImmutableList.of(widget, resetButton, applyAllButton));
+                cir.setReturnValue(ImmutableList.of(widget, applyAllButton, resetButton));
             }
         }
     }

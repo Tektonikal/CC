@@ -1,12 +1,16 @@
 package tektonikal.crystalchams.mixin;
 
+import com.llamalad7.mixinextras.sugar.Local;
 import dev.isxander.yacl3.api.ConfigCategory;
+import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
 import dev.isxander.yacl3.api.utils.Dimension;
 import dev.isxander.yacl3.api.utils.MutableDimension;
 import dev.isxander.yacl3.gui.*;
 import dev.isxander.yacl3.gui.tab.ListHolderWidget;
+import dev.isxander.yacl3.gui.tab.TabExt;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.client.gui.screen.pack.PackScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -16,15 +20,17 @@ import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import tektonikal.crystalchams.config.ChamsConfig;
+import tektonikal.crystalchams.config.MutableOptionGroupImpl;
+import tektonikal.crystalchams.config.RenderMode;
+import tektonikal.crystalchams.interfaces.ElementListWidgetExtInterface;
 
 import java.util.function.Consumer;
 
 @Mixin(YACLScreen.CategoryTab.class)
-public abstract class CategoryTabMixin {
+public abstract class CategoryTabMixin implements TabExt {
 
-    @Shadow
+    @Shadow(remap = false)
     @Final
     private YACLScreen screen;
 
@@ -36,19 +42,21 @@ public abstract class CategoryTabMixin {
     @Final
     public ButtonWidget cancelResetButton;
 
+    @Mutable
     @Shadow
     @Final
     public ButtonWidget saveFinishedButton;
 
-    @Shadow
+    @Shadow(remap = false)
     private ListHolderWidget<OptionListWidget> optionList;
 
-    @Shadow
+    @Shadow(remap = false)
     private OptionDescriptionWidget descriptionWidget;
+
     @Unique
     ButtonWidget packsButton;
 
-    @Inject(method = "forEachChild", at = @At(value = "HEAD"), cancellable = true)
+    @Inject(method = "forEachChild", at = @At(value = "HEAD"), cancellable = true, remap = false)
     private void CC$oughhh(Consumer<ClickableWidget> consumer, CallbackInfo ci) {
         if (this.screen.config.title().equals(Text.of("Custom End Crystals"))) {
             //this is terrible but i don't care anymore
@@ -63,18 +71,69 @@ public abstract class CategoryTabMixin {
         }
     }
 
-    @Inject(method = "<init>", at = @At("TAIL"), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void cc$OUGHHHHHHH(YACLScreen screen, ConfigCategory category, ScreenRect tabArea, CallbackInfo ci, int columnWidth, int padding, int paddedWidth, MutableDimension<Integer> actionDim) {
-        packsButton = ButtonWidget.builder(Text.literal("Resource Packs"), btn -> {
-                    screen.finishOrSave();
-                    MinecraftClient.getInstance().setScreen(new PackScreen(MinecraftClient.getInstance().getResourcePackManager(), resourcePackManager -> {
-                        MinecraftClient.getInstance().options.refreshResourcePacks(resourcePackManager);
-                        MinecraftClient.getInstance().setScreen(screen);
-                    }, MinecraftClient.getInstance().getResourcePackDir(), Text.translatable("resourcePack.title")));
-                })
-                .position(actionDim.x() - actionDim.width() / 2, undoButton.getY() - 22)
-                .size(actionDim.width(), actionDim.height())
-                .build();
-        descriptionWidget.setOptionDescription(DescriptionWithName.of(Text.of(""), OptionDescription.of()));
+    @Inject(method = "renderBackground", at = @At("TAIL"))
+    private void CC$renderBackground(DrawContext graphics, CallbackInfo ci) {
+        double amount = optionList.getList().getScrollAmount();
+        if (screen.config.title().equals(Text.of("Custom End Crystals"))) {
+            int currentTab = screen.tabNavigationBar != null
+                    ? screen.tabNavigationBar.getTabs().indexOf(screen.tabManager.getCurrentTab())
+                    : 0;
+            if (currentTab == -1)
+                currentTab = 0;
+            screen.config.categories().get(currentTab).groups().forEach(group -> {
+                if (group instanceof MutableOptionGroupImpl) {
+                    group.options().forEach(option -> {
+                        if (option.name().equals(Text.of("Render Mode"))) {
+                            Option optionToAdd = null;
+                            if(option.equals(ChamsConfig.o_baseRenderLayer)){
+                                optionToAdd = ChamsConfig.o_baseCulling;
+                            } else if (option.equals(ChamsConfig.o_coreRenderLayer)) {
+                                optionToAdd = ChamsConfig.o_coreCulling;
+                            } else if (option.equals(ChamsConfig.o_frame1RenderLayer)) {
+                                optionToAdd = ChamsConfig.o_frame1Culling;
+                            } else if (option.equals(ChamsConfig.o_frame2RenderLayer)) {
+                                optionToAdd = ChamsConfig.o_frame2Culling;
+                            }
+                            if (((RenderMode)option.stateManager().get()).canCull()) {
+                                if (!((MutableOptionGroupImpl) group).options.contains(optionToAdd)) {
+                                    ((MutableOptionGroupImpl) group).options.add(optionToAdd);
+                                    optionList.getList().refreshOptions();
+                                    optionList.getList().setScrollAmount(amount);
+                                    ((ElementListWidgetExtInterface)optionList.getList()).setSmoothScrollAmount(amount);
+                                }
+                            } else {
+                                if (((MutableOptionGroupImpl) group).options.contains(optionToAdd)) {
+                                    ((MutableOptionGroupImpl) group).options.remove(optionToAdd);
+                                    optionList.getList().refreshOptions();
+                                    optionList.getList().setScrollAmount(amount);
+                                    ((ElementListWidgetExtInterface)optionList.getList()).setSmoothScrollAmount(amount);
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+        }
+    }
+
+    @Inject(method = "<init>", at = @At("TAIL"), remap = false)
+    private void cc$OUGHHHHHHH(YACLScreen screen, ConfigCategory category, ScreenRect tabArea, CallbackInfo ci, @Local(ordinal = 1) int padding, @Local(ordinal = 2) int paddedWidth, @Local MutableDimension<Integer> actionDim) {
+        if (this.screen.config.title().equals(Text.of("Custom End Crystals"))) {
+            packsButton = ButtonWidget.builder(Text.literal("Resource Packs"), btn -> {
+                screen.finishOrSave();
+                MinecraftClient.getInstance().setScreen(new PackScreen(MinecraftClient.getInstance().getResourcePackManager(), resourcePackManager -> {
+                    MinecraftClient.getInstance().options.refreshResourcePacks(resourcePackManager);
+                    MinecraftClient.getInstance().setScreen(screen);
+                }, MinecraftClient.getInstance().getResourcePackDir(), Text.translatable("resourcePack.title")));
+            }).position(actionDim.x() - actionDim.width() / 2, undoButton.getY() - 22).size(actionDim.width(), actionDim.height()).build();
+            descriptionWidget.setOptionDescription(DescriptionWithName.of(Text.of(""), OptionDescription.of()));
+            //force done button to
+            actionDim = Dimension.ofInt(screen.width / 3 * 2 + screen.width / 6, screen.height - padding - 20, paddedWidth, 20);
+            saveFinishedButton = ButtonWidget.builder(Text.literal("Done"), btn -> {
+                        screen.finishOrSave();
+                        ChamsConfig.CONFIG.save();
+                    }).position(actionDim.x() - actionDim.width() / 2, actionDim.y())
+                    .size(actionDim.width(), actionDim.height()).build();
+        }
     }
 }

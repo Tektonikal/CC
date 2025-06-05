@@ -50,18 +50,21 @@ public class ChamsConfig {
         @SerialEntry public float shadowAlpha = 0.5F;
         //Base
         @SerialEntry public BaseRenderMode showBaseMode = BaseRenderMode.DEFAULT;
-        //change back to a float later
-        @SerialEntry public int baseOffset = -5;
+        @SerialEntry public float baseOffset = -1F;
         @SerialEntry public float baseScale = 1F;
         @SerialEntry public int baseRotation = 0;
         @SerialEntry public Color baseColor = Color.decode("#FFFFFF");
         @SerialEntry public float baseAlpha = 1.0F;
         @SerialEntry public int baseLightLevel = -1;
         @SerialEntry public RenderMode baseRenderMode = RenderMode.DEFAULT;
+            @SerialEntry public boolean baseCulling = false;
+
             //Base Rainbow
             @SerialEntry public boolean baseRainbow = false;
             @SerialEntry public int baseRainbowSpeed = 2;
             @SerialEntry public int baseRainbowDelay = 0;
+            @SerialEntry public float baseRainbowSaturation = 1;
+            @SerialEntry public float baseRainbowBrightness = 1;
         //Config
             //Empty
         //Core
@@ -78,11 +81,14 @@ public class ChamsConfig {
             @SerialEntry public float coreAlpha = 1;
             @SerialEntry public int coreLightLevel = -1;
             @SerialEntry public RenderMode coreRenderLayer = RenderMode.DEFAULT;
+                @SerialEntry public boolean coreCulling = false;
 
             //Core Rainbow
             @SerialEntry  public boolean coreRainbow = false;
                 @SerialEntry public int coreRainbowSpeed = 2;
                 @SerialEntry public int coreRainbowDelay = 0;
+                @SerialEntry public float coreRainbowSaturation = 1;
+                @SerialEntry public float coreRainbowBrightness = 1;
             //Animation
             @SerialEntry public boolean coreAlphaAnimation = false;
                 @SerialEntry public float coreStartAlpha = 0F;
@@ -109,10 +115,13 @@ public class ChamsConfig {
             @SerialEntry public float frame1Alpha = 1f;
             @SerialEntry public int frame1LightLevel = -1;
             @SerialEntry public RenderMode frame1RenderLayer = RenderMode.DEFAULT;
+                @SerialEntry public boolean frame1Culling = false;
             //Frame 1 Rainbow
             @SerialEntry  public boolean frame1Rainbow = false;
                 @SerialEntry public int frame1RainbowSpeed = 2;
                 @SerialEntry public int frame1RainbowDelay = 0;
+                @SerialEntry public float frame1RainbowSaturation = 1;
+                @SerialEntry public float frame1RainbowBrightness = 1;
        //Frame 2
         @SerialEntry  public boolean renderFrame2 = true;
             //Frame 2 Movement
@@ -127,10 +136,14 @@ public class ChamsConfig {
             @SerialEntry public float frame2Alpha = 1;
             @SerialEntry public int frame2LightLevel = -1;
             @SerialEntry public RenderMode frame2RenderLayer = RenderMode.DEFAULT;
+                @SerialEntry public boolean frame2Culling = false;
+
             //Frame 2 Rainbow
             @SerialEntry  public boolean frame2Rainbow = false;
                 @SerialEntry public int frame2RainbowSpeed = 2;
                 @SerialEntry public int frame2RainbowDelay = 0;
+                @SerialEntry public float frame2RainbowSaturation = 1;
+                @SerialEntry public float frame2RainbowBrightness = 1;
         //Beam
         @SerialEntry public boolean renderBeam = true;
             //Rendering
@@ -146,14 +159,20 @@ public class ChamsConfig {
             @SerialEntry public boolean beam1Rainbow = false;
                 @SerialEntry public int beam1RainbowSpeed = 2;
                 @SerialEntry public int beam1RainbowDelay = 0;
+                @SerialEntry public float beam1RainbowSaturation = 1;
+                @SerialEntry public float beam1RainbowBrightness = 1;
             //Rainbow 2
             @SerialEntry public boolean beam2Rainbow = false;
                 @SerialEntry public int beam2RainbowSpeed = 2;
                 @SerialEntry public int beam2RainbowDelay = 0;
+                @SerialEntry public float beam2RainbowSaturation = 1;
+                @SerialEntry public float beam2RainbowBrightness = 1;
             //Extras
             @SerialEntry public float beamScrollSpeed = 1;
             @SerialEntry public int beamSides = 8;
             @SerialEntry public RenderMode beamRenderMode = RenderMode.DEFAULT;
+                @SerialEntry public boolean beamCulling = false;
+
     //@formatter:on
     @Updatable
     public static Option<Boolean> o_modEnabled = Option.<Boolean>createBuilder()
@@ -196,10 +215,15 @@ public class ChamsConfig {
             .controller(renderModeOption -> EnumControllerBuilder.create(renderModeOption).enumClass(RenderMode.class))
             .stateManager(StateManager.createInstant(RenderMode.DEFAULT, () -> CONFIG.instance().baseRenderMode, newVal -> CONFIG.instance().baseRenderMode = newVal))
             .build();
-    public static LinkedOptionImpl<Integer> o_baseOffset = LinkedOptionImpl.<Integer>createBuilder()
+    public static Option<Boolean> o_baseCulling = Option.<Boolean>createBuilder()
+            .name(Text.of("Culled"))
+            .controller(TickBoxControllerBuilderImpl::new)
+            .stateManager(StateManager.createInstant(false, () -> CONFIG.instance().baseCulling, newVal -> CONFIG.instance().baseCulling = newVal))
+            .build();
+    public static Option<Float> o_baseOffset = Option.<Float>createBuilder()
             .name(Text.of("Vertical Offset"))
-            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).range(-10, 10).step(1).formatValue(val -> Text.of(String.format("%.1f", val * 0.2F).replace(".0", "") + (Math.abs(val * 0.2F) == 1 ? " block" : " blocks"))))
-            .stateManager(StateManager.createInstant(-5, () -> CONFIG.instance().baseOffset, newVal -> CONFIG.instance().baseOffset = newVal))
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(-2F, 2F).step(0.1F).formatValue(val -> Text.of(String.format("%.1f", val).replace(".0", "") + (Math.abs(val) == 1 ? " block" : " blocks"))))
+            .stateManager(StateManager.createInstant(-1F, () -> CONFIG.instance().baseOffset, newVal -> CONFIG.instance().baseOffset = newVal))
             .build();
     public static LinkedOptionImpl<Color> o_baseColor = LinkedOptionImpl.<Color>createBuilder()
             .name(Text.of("Color"))
@@ -219,21 +243,33 @@ public class ChamsConfig {
             .build();
     @Updatable
     public static LinkedOptionImpl<Boolean> o_baseRainbow = LinkedOptionImpl.<Boolean>createBuilder()
-            .name(Text.of("Rainbow"))
+            .name(Text.of("Rainbow Enabled"))
             .controller(TickBoxControllerBuilderImpl::new)
             .stateManager(StateManager.createInstant(false, () -> CONFIG.instance().baseRainbow, newVal -> CONFIG.instance().baseRainbow = newVal))
             .build();
     public static LinkedOptionImpl<Integer> o_baseRainbowSpeed = LinkedOptionImpl.<Integer>createBuilder()
-            .name(Text.of("Rainbow Speed"))
+            .name(Text.of("Speed"))
             .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(1, 10).formatValue(value -> Text.of(value + "x")))
             .stateManager(StateManager.createInstant(2, () -> CONFIG.instance().baseRainbowSpeed, newVal -> CONFIG.instance().baseRainbowSpeed = newVal))
             //i don't know why i have to do this now, one day it just broke and i had no idea why
             .available(CONFIG.instance().baseRainbow && CONFIG.instance().showBaseMode != BaseRenderMode.NEVER && CONFIG.instance().modEnabled)
             .build();
     public static LinkedOptionImpl<Integer> o_baseRainbowDelay = LinkedOptionImpl.<Integer>createBuilder()
-            .name(Text.of("Rainbow Delay"))
+            .name(Text.of("Delay"))
             .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-500, 500).formatValue(integer -> Text.of(integer + "ms")))
             .stateManager(StateManager.createInstant(0, () -> CONFIG.instance().baseRainbowDelay, newVal -> CONFIG.instance().baseRainbowDelay = newVal))
+            .available(CONFIG.instance().baseRainbow && CONFIG.instance().showBaseMode != BaseRenderMode.NEVER && CONFIG.instance().modEnabled)
+            .build();
+    public static LinkedOptionImpl<Float> o_baseRainbowSaturation = LinkedOptionImpl.<Float>createBuilder()
+            .name(Text.of("Saturation"))
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(val -> Text.of(String.format("%.0f", val * 100) + "%")))
+            .stateManager(StateManager.createInstant(1F, () -> CONFIG.instance().baseRainbowSaturation, newVal -> CONFIG.instance().baseRainbowSaturation = newVal))
+            .available(CONFIG.instance().baseRainbow && CONFIG.instance().showBaseMode != BaseRenderMode.NEVER && CONFIG.instance().modEnabled)
+            .build();
+    public static LinkedOptionImpl<Float> o_baseRainbowBrightness = LinkedOptionImpl.<Float>createBuilder()
+            .name(Text.of("Brightness"))
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(val -> Text.of(String.format("%.0f", val * 100) + "%")))
+            .stateManager(StateManager.createInstant(1F, () -> CONFIG.instance().baseRainbowBrightness, newVal -> CONFIG.instance().baseRainbowBrightness = newVal))
             .available(CONFIG.instance().baseRainbow && CONFIG.instance().showBaseMode != BaseRenderMode.NEVER && CONFIG.instance().modEnabled)
             .build();
     //keep this one below all other base options
@@ -302,21 +338,40 @@ public class ChamsConfig {
             .controller(renderModeOption -> EnumControllerBuilder.create(renderModeOption).enumClass(RenderMode.class))
             .stateManager(StateManager.createInstant(RenderMode.DEFAULT, () -> CONFIG.instance().coreRenderLayer, newVal -> CONFIG.instance().coreRenderLayer = newVal))
             .build();
+    public static Option<Boolean> o_coreCulling = Option.<Boolean>createBuilder()
+            .name(Text.of("Culled"))
+            .controller(TickBoxControllerBuilderImpl::new)
+            .stateManager(StateManager.createInstant(false, () -> CONFIG.instance().coreCulling, newVal -> CONFIG.instance().coreCulling = newVal))
+            .build();
     @Updatable
     public static LinkedOptionImpl<Boolean> o_coreRainbow = LinkedOptionImpl.<Boolean>createBuilder()
-            .name(Text.of("Rainbow"))
+            .name(Text.of("Rainbow Enabled"))
             .controller(TickBoxControllerBuilderImpl::new)
             .stateManager(StateManager.createInstant(false, () -> CONFIG.instance().coreRainbow, newVal -> CONFIG.instance().coreRainbow = newVal))
             .build();
     public static LinkedOptionImpl<Integer> o_coreRainbowSpeed = LinkedOptionImpl.<Integer>createBuilder()
-            .name(Text.of("Rainbow Speed"))
+            .name(Text.of("Speed"))
             .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(1, 10).formatValue(value -> Text.of(value + "x")))
             .stateManager(StateManager.createInstant(2, () -> CONFIG.instance().coreRainbowSpeed, newVal -> CONFIG.instance().coreRainbowSpeed = newVal))
+            .available(CONFIG.instance().coreRainbow && CONFIG.instance().renderCore && CONFIG.instance().modEnabled)
             .build();
     public static LinkedOptionImpl<Integer> o_coreRainbowDelay = LinkedOptionImpl.<Integer>createBuilder()
-            .name(Text.of("Rainbow Delay"))
+            .name(Text.of("Delay"))
             .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-500, 500).formatValue(integer -> Text.of(integer + "ms")))
             .stateManager(StateManager.createInstant(0, () -> CONFIG.instance().coreRainbowDelay, newVal -> CONFIG.instance().coreRainbowDelay = newVal))
+            .available(CONFIG.instance().coreRainbow && CONFIG.instance().renderCore && CONFIG.instance().modEnabled)
+            .build();
+    public static LinkedOptionImpl<Float> o_coreRainbowSaturation = LinkedOptionImpl.<Float>createBuilder()
+            .name(Text.of("Saturation"))
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(val -> Text.of(String.format("%.0f", val * 100) + "%")))
+            .stateManager(StateManager.createInstant(1F, () -> CONFIG.instance().coreRainbowSaturation, newVal -> CONFIG.instance().coreRainbowSaturation = newVal))
+            .available(CONFIG.instance().coreRainbow && CONFIG.instance().renderCore && CONFIG.instance().modEnabled)
+            .build();
+    public static LinkedOptionImpl<Float> o_coreRainbowBrightness = LinkedOptionImpl.<Float>createBuilder()
+            .name(Text.of("Brightness"))
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(val -> Text.of(String.format("%.0f", val * 100) + "%")))
+            .stateManager(StateManager.createInstant(1F, () -> CONFIG.instance().coreRainbowBrightness, newVal -> CONFIG.instance().coreRainbowBrightness = newVal))
+            .available(CONFIG.instance().coreRainbow && CONFIG.instance().renderCore && CONFIG.instance().modEnabled)
             .build();
     @Updatable
     public static Option<Boolean> o_coreAlphaAnimation = Option.<Boolean>createBuilder()
@@ -429,6 +484,11 @@ public class ChamsConfig {
             .controller(renderModeOption -> EnumControllerBuilder.create(renderModeOption).enumClass(RenderMode.class))
             .stateManager(StateManager.createInstant(RenderMode.DEFAULT, () -> CONFIG.instance().frame1RenderLayer, newVal -> CONFIG.instance().frame1RenderLayer = newVal))
             .build();
+    public static Option<Boolean> o_frame1Culling = Option.<Boolean>createBuilder()
+            .name(Text.of("Culled"))
+            .controller(TickBoxControllerBuilderImpl::new)
+            .stateManager(StateManager.createInstant(false, () -> CONFIG.instance().frame1Culling, newVal -> CONFIG.instance().frame1Culling = newVal))
+            .build();
     @Updatable
     public static LinkedOptionImpl<Boolean> o_frame1Rainbow = LinkedOptionImpl.<Boolean>createBuilder()
             .name(Text.of("Rainbow"))
@@ -445,6 +505,18 @@ public class ChamsConfig {
             .name(Text.of("Rainbow Delay"))
             .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-500, 500).formatValue(integer -> Text.of(integer + "ms")))
             .stateManager(StateManager.createInstant(0, () -> CONFIG.instance().frame1RainbowDelay, newVal -> CONFIG.instance().frame1RainbowDelay = newVal))
+            .available(CONFIG.instance().frame1Rainbow && CONFIG.instance().renderFrame1 && CONFIG.instance().modEnabled)
+            .build();
+    public static LinkedOptionImpl<Float> o_frame1RainbowSaturation = LinkedOptionImpl.<Float>createBuilder()
+            .name(Text.of("Saturation"))
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(val -> Text.of(String.format("%.0f", val * 100) + "%")))
+            .stateManager(StateManager.createInstant(1F, () -> CONFIG.instance().frame1RainbowSaturation, newVal -> CONFIG.instance().frame1RainbowSaturation = newVal))
+            .available(CONFIG.instance().frame1Rainbow && CONFIG.instance().renderFrame1 && CONFIG.instance().modEnabled)
+            .build();
+    public static LinkedOptionImpl<Float> o_frame1RainbowBrightness = LinkedOptionImpl.<Float>createBuilder()
+            .name(Text.of("Brightness"))
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(val -> Text.of(String.format("%.0f", val * 100) + "%")))
+            .stateManager(StateManager.createInstant(1F, () -> CONFIG.instance().frame1RainbowBrightness, newVal -> CONFIG.instance().frame1RainbowBrightness = newVal))
             .available(CONFIG.instance().frame1Rainbow && CONFIG.instance().renderFrame1 && CONFIG.instance().modEnabled)
             .build();
     @Updatable
@@ -505,6 +577,11 @@ public class ChamsConfig {
             .controller(renderModeOption -> EnumControllerBuilder.create(renderModeOption).enumClass(RenderMode.class))
             .stateManager(StateManager.createInstant(RenderMode.DEFAULT, () -> CONFIG.instance().frame2RenderLayer, newVal -> CONFIG.instance().frame2RenderLayer = newVal))
             .build();
+    public static Option<Boolean> o_frame2Culling = Option.<Boolean>createBuilder()
+            .name(Text.of("Culled"))
+            .controller(TickBoxControllerBuilderImpl::new)
+            .stateManager(StateManager.createInstant(false, () -> CONFIG.instance().frame2Culling, newVal -> CONFIG.instance().frame2Culling = newVal))
+            .build();
     @Updatable
     public static LinkedOptionImpl<Boolean> o_frame2Rainbow = LinkedOptionImpl.<Boolean>createBuilder()
             .name(Text.of("Rainbow"))
@@ -515,11 +592,25 @@ public class ChamsConfig {
             .name(Text.of("Rainbow Speed"))
             .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(1, 10).formatValue(value -> Text.of(value + "x")))
             .stateManager(StateManager.createInstant(2, () -> CONFIG.instance().frame2RainbowSpeed, newVal -> CONFIG.instance().frame2RainbowSpeed = newVal))
+            .available(CONFIG.instance().frame2Rainbow && CONFIG.instance().renderFrame1 && CONFIG.instance().modEnabled)
             .build();
     public static LinkedOptionImpl<Integer> o_frame2RainbowDelay = LinkedOptionImpl.<Integer>createBuilder()
             .name(Text.of("Rainbow Delay"))
             .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-500, 500).formatValue(integer -> Text.of(integer + "ms")))
             .stateManager(StateManager.createInstant(0, () -> CONFIG.instance().frame2RainbowDelay, newVal -> CONFIG.instance().frame2RainbowDelay = newVal))
+            .available(CONFIG.instance().frame2Rainbow && CONFIG.instance().renderFrame1 && CONFIG.instance().modEnabled)
+            .build();
+    public static LinkedOptionImpl<Float> o_frame2RainbowSaturation = LinkedOptionImpl.<Float>createBuilder()
+            .name(Text.of("Saturation"))
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(val -> Text.of(String.format("%.0f", val * 100) + "%")))
+            .stateManager(StateManager.createInstant(1F, () -> CONFIG.instance().frame2RainbowSaturation, newVal -> CONFIG.instance().frame2RainbowSaturation = newVal))
+            .available(CONFIG.instance().frame2Rainbow && CONFIG.instance().renderFrame2 && CONFIG.instance().modEnabled)
+            .build();
+    public static LinkedOptionImpl<Float> o_frame2RainbowBrightness = LinkedOptionImpl.<Float>createBuilder()
+            .name(Text.of("Brightness"))
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(val -> Text.of(String.format("%.0f", val * 100) + "%")))
+            .stateManager(StateManager.createInstant(1F, () -> CONFIG.instance().frame2RainbowBrightness, newVal -> CONFIG.instance().frame2RainbowBrightness = newVal))
+            .available(CONFIG.instance().frame2Rainbow && CONFIG.instance().renderFrame2 && CONFIG.instance().modEnabled)
             .build();
     @Updatable
     public static Option<Boolean> o_renderBeam = Option.<Boolean>createBuilder()
@@ -553,11 +644,25 @@ public class ChamsConfig {
             .name(Text.of("Rainbow Speed"))
             .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(1, 10).formatValue(value -> Text.of(value + "x")))
             .stateManager(StateManager.createInstant(2, () -> CONFIG.instance().beam1RainbowSpeed, newVal -> CONFIG.instance().beam1RainbowSpeed = newVal))
+            .available(CONFIG.instance().beam1Rainbow && CONFIG.instance().renderBeam && CONFIG.instance().modEnabled)
             .build();
     public static LinkedOptionImpl<Integer> o_beam1RainbowDelay = LinkedOptionImpl.<Integer>createBuilder()
             .name(Text.of("Rainbow Delay"))
             .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-500, 500).formatValue(integer -> Text.of(integer + "ms")))
             .stateManager(StateManager.createInstant(0, () -> CONFIG.instance().beam1RainbowDelay, newVal -> CONFIG.instance().beam1RainbowDelay = newVal))
+            .available(CONFIG.instance().beam1Rainbow && CONFIG.instance().renderBeam && CONFIG.instance().modEnabled)
+            .build();
+    public static LinkedOptionImpl<Float> o_beam1RainbowSaturation = LinkedOptionImpl.<Float>createBuilder()
+            .name(Text.of("Saturation"))
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(val -> Text.of(String.format("%.0f", val * 100) + "%")))
+            .stateManager(StateManager.createInstant(1F, () -> CONFIG.instance().beam1RainbowSaturation, newVal -> CONFIG.instance().beam1RainbowSaturation = newVal))
+            .available(CONFIG.instance().beam1Rainbow && CONFIG.instance().renderBeam && CONFIG.instance().modEnabled)
+            .build();
+    public static LinkedOptionImpl<Float> o_beam1RainbowBrightness = LinkedOptionImpl.<Float>createBuilder()
+            .name(Text.of("Brightness"))
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(val -> Text.of(String.format("%.0f", val * 100) + "%")))
+            .stateManager(StateManager.createInstant(1F, () -> CONFIG.instance().beam1RainbowBrightness, newVal -> CONFIG.instance().beam1RainbowBrightness = newVal))
+            .available(CONFIG.instance().beam1Rainbow && CONFIG.instance().renderBeam && CONFIG.instance().modEnabled)
             .build();
     public static LinkedOptionImpl<Color> o_beam2Color = LinkedOptionImpl.<Color>createBuilder()
             .name(Text.of("Color"))
@@ -585,11 +690,25 @@ public class ChamsConfig {
             .name(Text.of("Rainbow Speed"))
             .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(1, 10).formatValue(value -> Text.of(value + "x")))
             .stateManager(StateManager.createInstant(2, () -> CONFIG.instance().beam2RainbowSpeed, newVal -> CONFIG.instance().beam2RainbowSpeed = newVal))
+            .available(CONFIG.instance().beam2Rainbow && CONFIG.instance().renderBeam && CONFIG.instance().modEnabled)
             .build();
     public static LinkedOptionImpl<Integer> o_beam2RainbowDelay = LinkedOptionImpl.<Integer>createBuilder()
             .name(Text.of("Rainbow Delay"))
             .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-500, 500).formatValue(integer -> Text.of(integer + "ms")))
             .stateManager(StateManager.createInstant(0, () -> CONFIG.instance().beam2RainbowDelay, newVal -> CONFIG.instance().beam2RainbowDelay = newVal))
+            .available(CONFIG.instance().beam2Rainbow && CONFIG.instance().renderBeam && CONFIG.instance().modEnabled)
+            .build();
+    public static LinkedOptionImpl<Float> o_beam2RainbowSaturation = LinkedOptionImpl.<Float>createBuilder()
+            .name(Text.of("Saturation"))
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(val -> Text.of(String.format("%.0f", val * 100) + "%")))
+            .stateManager(StateManager.createInstant(1F, () -> CONFIG.instance().beam2RainbowSaturation, newVal -> CONFIG.instance().beam2RainbowSaturation = newVal))
+            .available(CONFIG.instance().beam2Rainbow && CONFIG.instance().renderBeam && CONFIG.instance().modEnabled)
+            .build();
+    public static LinkedOptionImpl<Float> o_beam2RainbowBrightness = LinkedOptionImpl.<Float>createBuilder()
+            .name(Text.of("Brightness"))
+            .controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(val -> Text.of(String.format("%.0f", val * 100) + "%")))
+            .stateManager(StateManager.createInstant(1F, () -> CONFIG.instance().beam2RainbowBrightness, newVal -> CONFIG.instance().beam2RainbowBrightness = newVal))
+            .available(CONFIG.instance().beam2Rainbow && CONFIG.instance().renderBeam && CONFIG.instance().modEnabled)
             .build();
     public static LinkedOptionImpl<Float> o_beam1Radius = LinkedOptionImpl.<Float>createBuilder()
             .name(Text.of("Radius"))
@@ -617,6 +736,11 @@ public class ChamsConfig {
             .controller(renderModeOption -> EnumControllerBuilder.create(renderModeOption).enumClass(RenderMode.class))
             .stateManager(StateManager.createInstant(RenderMode.DEFAULT, () -> CONFIG.instance().beamRenderMode, newVal -> CONFIG.instance().beamRenderMode = newVal))
             .build();
+    public static Option<Boolean> o_beamCulling = Option.<Boolean>createBuilder()
+            .name(Text.of("Culled"))
+            .controller(TickBoxControllerBuilderImpl::new)
+            .stateManager(StateManager.createInstant(false, () -> CONFIG.instance().beamCulling, newVal -> CONFIG.instance().beamCulling = newVal))
+            .build();
 
 
     public static void update(Option<Boolean> booleanOption, Boolean aBoolean) {
@@ -643,9 +767,12 @@ public class ChamsConfig {
             o_coreLightLevel.setAvailable(o_renderCore.available() && aBoolean);
             o_coreRenderLayer.setAvailable(o_renderCore.available() && aBoolean);
             o_coreRainbow.setAvailable(o_renderCore.available() && aBoolean);
+            o_coreCulling.setAvailable(o_renderCore.available() && aBoolean);
         } else if (booleanOption.equals(o_coreRainbow)) {
             o_coreRainbowSpeed.setAvailable(o_coreRainbow.available() && aBoolean);
             o_coreRainbowDelay.setAvailable(o_coreRainbow.available() && aBoolean);
+            o_coreRainbowSaturation.setAvailable(o_coreRainbow.available() && aBoolean);
+            o_coreRainbowBrightness.setAvailable(o_coreRainbow.available() && aBoolean);
         } else if (booleanOption.equals(o_renderFrame1)) {
             o_frame1Offset.setAvailable(o_renderFrame1.available() && aBoolean);
             o_frame1RotationSpeed.setAvailable(o_renderFrame1.available() && aBoolean);
@@ -661,6 +788,8 @@ public class ChamsConfig {
         } else if (booleanOption.equals(o_frame1Rainbow)) {
             o_frame1RainbowSpeed.setAvailable(o_frame1Rainbow.available() && aBoolean);
             o_frame1RainbowDelay.setAvailable(o_frame1Rainbow.available() && aBoolean);
+            o_frame1RainbowSaturation.setAvailable(o_frame1Rainbow.available() && aBoolean);
+            o_frame1RainbowBrightness.setAvailable(o_frame1Rainbow.available() && aBoolean);
         } else if (booleanOption.equals(o_renderFrame2)) {
             o_frame2Offset.setAvailable(o_renderFrame2.available() && aBoolean);
             o_frame2RotationSpeed.setAvailable(o_renderFrame2.available() && aBoolean);
@@ -673,9 +802,12 @@ public class ChamsConfig {
             o_frame2LightLevel.setAvailable(o_renderFrame2.available() && aBoolean);
             o_frame2RenderLayer.setAvailable(o_renderFrame2.available() && aBoolean);
             o_frame2Rainbow.setAvailable(o_renderFrame2.available() && aBoolean);
+            o_frame2Culling.setAvailable(o_renderFrame2.available() && aBoolean);
         } else if (booleanOption.equals(o_frame2Rainbow)) {
             o_frame2RainbowSpeed.setAvailable(o_frame2Rainbow.available() && aBoolean);
             o_frame2RainbowDelay.setAvailable(o_frame2Rainbow.available() && aBoolean);
+            o_frame2RainbowSaturation.setAvailable(o_frame2Rainbow.available() && aBoolean);
+            o_frame2RainbowBrightness.setAvailable(o_frame2Rainbow.available() && aBoolean);
         } else if (booleanOption.equals(o_renderBeam)) {
             o_beam1Color.setAvailable(o_renderBeam.available() && aBoolean);
             o_beam1Alpha.setAvailable(o_renderBeam.available() && aBoolean);
@@ -693,12 +825,18 @@ public class ChamsConfig {
         } else if (booleanOption.equals(o_beam1Rainbow)) {
             o_beam1RainbowDelay.setAvailable(o_beam1Rainbow.available() && aBoolean);
             o_beam1RainbowSpeed.setAvailable(o_beam1Rainbow.available() && aBoolean);
+            o_beam1RainbowBrightness.setAvailable(o_beam1Rainbow.available() && aBoolean);
+            o_beam1RainbowSaturation.setAvailable(o_beam1Rainbow.available() && aBoolean);
         } else if (booleanOption.equals(o_beam2Rainbow)) {
             o_beam2RainbowDelay.setAvailable(o_beam2Rainbow.available() && aBoolean);
             o_beam2RainbowSpeed.setAvailable(o_beam2Rainbow.available() && aBoolean);
+            o_beam2RainbowBrightness.setAvailable(o_beam2Rainbow.available() && aBoolean);
+            o_beam2RainbowSaturation.setAvailable(o_beam2Rainbow.available() && aBoolean);
         } else if (booleanOption.equals(o_baseRainbow)) {
             o_baseRainbowSpeed.setAvailable(o_baseRainbow.available() && aBoolean);
             o_baseRainbowDelay.setAvailable(o_baseRainbow.available() && aBoolean);
+            o_baseRainbowSaturation.setAvailable(o_baseRainbow.available() && aBoolean);
+            o_baseRainbowBrightness.setAvailable(o_baseRainbow.available() && aBoolean);
         }
         specialUpdate(o_baseRenderMode, o_baseRenderMode.pendingValue());
     }
@@ -712,25 +850,7 @@ public class ChamsConfig {
         o_baseRenderLayer.setAvailable(baseRenderModeOption.available() && baseRenderMode != BaseRenderMode.NEVER);
         o_baseRainbow.setAvailable(baseRenderModeOption.available() && baseRenderMode != BaseRenderMode.NEVER);
         o_baseRotation.setAvailable(baseRenderModeOption.available() && baseRenderMode != BaseRenderMode.NEVER);
-    }
-
-    public enum RenderMode implements NameableEnum {
-        DEFAULT,
-        GATEWAY,
-        WIREFRAME,
-        NOTEX,
-        CULLED;
-
-        @Override
-        public Text getDisplayName() {
-            return switch (this) {
-                case DEFAULT -> Text.of("Default");
-                case GATEWAY -> Text.of("Gateway");
-                case WIREFRAME -> Text.of("Wireframe");
-                case NOTEX -> Text.of("No Texture Color");
-                case CULLED -> Text.of("Culled");
-            };
-        }
+        o_baseCulling.setAvailable(baseRenderModeOption.available() && baseRenderMode != BaseRenderMode.NEVER);
     }
 
     public enum BaseRenderMode implements NameableEnum {
@@ -762,23 +882,6 @@ public class ChamsConfig {
                                         .option(o_shadowAlpha)
                                         .build())
                                 .group(OptionGroup.createBuilder()
-                                        .name(Text.of("Base"))
-                                        .option(o_baseRenderMode)
-                                        .option(o_baseOffset)
-                                        .option(o_baseScale)
-                                        .option(o_baseRotation)
-                                        .option(o_baseColor)
-                                        .option(o_baseAlpha)
-                                        .option(o_baseLightLevel)
-                                        .option(o_baseRenderLayer)
-                                        .build())
-                                .group(OptionGroup.createBuilder()
-                                        .name(Text.of("Rainbow"))
-                                        .option(o_baseRainbow)
-                                        .option(o_baseRainbowSpeed)
-                                        .option(o_baseRainbowDelay)
-                                        .build())
-                                .group(OptionGroup.createBuilder()
                                         .name(Text.of("Config"))
                                         .option(ButtonOption.createBuilder()
                                                 .name(Text.of("Copy Current Config"))
@@ -808,8 +911,41 @@ public class ChamsConfig {
                                                     }
                                                 })
                                                 .build())
+                                        .option(ButtonOption.createBuilder()
+                                                .name(Text.of("Randomize All Values"))
+                                                .description(OptionDescription.of(Text.of("Can't come up with a good configuration? Randomize every option and see what happens!")))
+                                                .action((yaclScreen, buttonOption) -> CrystalChams.randomizeOptions())
+                                                .build())
                                         .build())
                                 .build())
+                        .category(ConfigCategory.createBuilder()
+                                .name(Text.of("Base"))
+                                .option(o_baseRenderMode)
+                                .group(OptionGroup.createBuilder()
+                                        .name(Text.of("Come up with a name for this one later"))
+                                        .option(o_baseOffset)
+                                        //TODO: animate this
+                                        .option(o_baseRotation)
+                                        .build()
+                                )
+                                .group(MutableOptionGroupImpl.createBuilder()
+                                        .name(Text.of("Rendering"))
+                                        .option(o_baseScale)
+                                        .option(o_baseColor)
+                                        .option(o_baseAlpha)
+                                        .option(o_baseLightLevel)
+                                        .option(o_baseRenderLayer)
+                                        .build())
+                                .group(OptionGroup.createBuilder()
+                                        .name(Text.of("Rainbow"))
+                                        .option(o_baseRainbow)
+                                        .option(o_baseRainbowSpeed)
+                                        .option(o_baseRainbowDelay)
+                                        .option(o_baseRainbowSaturation)
+                                        .option(o_baseRainbowBrightness)
+                                        .build())
+                                .build()
+                        )
                         .category(ConfigCategory.createBuilder()
                                 .name(Text.of("Core"))
                                 .option(o_renderCore)
@@ -821,19 +957,24 @@ public class ChamsConfig {
                                         .option(o_coreBounceSpeed)
                                         .option(o_coreTickDelay)
                                         .build())
-                                .group(OptionGroup.createBuilder()
+                                .group(MutableOptionGroupImpl.createBuilder()
                                         .name(Text.of("Rendering"))
                                         .option(o_coreScale)
-                                        .option(o_coreColor)
-                                        .option(o_coreAlpha)
                                         .option(o_coreLightLevel)
                                         .option(o_coreRenderLayer)
                                         .build())
-                                .group(OptionGroup.createBuilder()
-                                        .name(Text.of("Rainbow"))
+//                                .group(OptionGroup.createBuilder()
+//                                        .name(Text.of("Rainbow"))
+//                                        .option(o_coreRainbowSpeed)
+//                                        .option(o_coreRainbowDelay)
+//                                        .option(o_coreRainbowSaturation)
+//                                        .option(o_coreRainbowBrightness)
+//                                        .build())
+                                .group(MutableOptionGroupImpl.createBuilder()
+                                        .name(Text.of("Color"))
+                                        .option(o_coreColor)
+                                        .option(o_coreAlpha)
                                         .option(o_coreRainbow)
-                                        .option(o_coreRainbowSpeed)
-                                        .option(o_coreRainbowDelay)
                                         .build())
                                 .group(OptionGroup.createBuilder()
                                         .name(Text.of("Animation"))
@@ -847,7 +988,6 @@ public class ChamsConfig {
                                         .option(o_coreScaleAnimDuration)
                                         .option(o_coreScaleDelay)
                                         .option(o_coreScaleEasing)
-
                                         .option(ButtonOption.createBuilder()
                                                 .name(Text.of("Reset Preview"))
                                                 .description(OptionDescription.createBuilder().text(Text.of("Reset the crystal age to preview the animation settings again.")).build())
@@ -866,7 +1006,7 @@ public class ChamsConfig {
                                         .option(o_frame1BounceSpeed)
                                         .option(o_frame1TickDelay)
                                         .build())
-                                .group(OptionGroup.createBuilder()
+                                .group(MutableOptionGroupImpl.createBuilder()
                                         .name(Text.of("Rendering"))
                                         .option(o_frame1Scale)
                                         .option(o_frame1Color)
@@ -879,6 +1019,8 @@ public class ChamsConfig {
                                         .option(o_frame1Rainbow)
                                         .option(o_frame1RainbowSpeed)
                                         .option(o_frame1RainbowDelay)
+                                        .option(o_frame1RainbowSaturation)
+                                        .option(o_frame1RainbowBrightness)
                                         .build())
                                 .build())
                         .category(ConfigCategory.createBuilder()
@@ -892,7 +1034,7 @@ public class ChamsConfig {
                                         .option(o_frame2BounceSpeed)
                                         .option(o_frame2TickDelay)
                                         .build())
-                                .group(OptionGroup.createBuilder()
+                                .group(MutableOptionGroupImpl.createBuilder()
                                         .name(Text.of("Rendering"))
                                         .option(o_frame2Scale)
                                         .option(o_frame2Color)
@@ -905,6 +1047,8 @@ public class ChamsConfig {
                                         .option(o_frame2Rainbow)
                                         .option(o_frame2RainbowSpeed)
                                         .option(o_frame2RainbowDelay)
+                                        .option(o_frame2RainbowSaturation)
+                                        .option(o_frame2RainbowBrightness)
                                         .build())
                                 .build())
                         .category(ConfigCategory.createBuilder()
@@ -919,6 +1063,8 @@ public class ChamsConfig {
                                         .option(o_beam1Rainbow)
                                         .option(o_beam1RainbowSpeed)
                                         .option(o_beam1RainbowDelay)
+                                        .option(o_beam1RainbowSaturation)
+                                        .option(o_beam1RainbowBrightness)
                                         .build())
                                 .group(OptionGroup.createBuilder()
                                         .name(Text.of("End"))
@@ -929,6 +1075,8 @@ public class ChamsConfig {
                                         .option(o_beam2Rainbow)
                                         .option(o_beam2RainbowSpeed)
                                         .option(o_beam2RainbowDelay)
+                                        .option(o_beam2RainbowSaturation)
+                                        .option(o_beam2RainbowBrightness)
                                         .build())
                                 .group(OptionGroup.createBuilder()
                                         .name(Text.of("Extras"))

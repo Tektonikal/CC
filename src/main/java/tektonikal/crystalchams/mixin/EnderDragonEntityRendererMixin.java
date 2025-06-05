@@ -26,13 +26,15 @@ import tektonikal.crystalchams.config.ChamsConfig;
 
 import java.awt.*;
 
+import static tektonikal.crystalchams.CrystalChams.getLayer;
+
 @Mixin(EnderDragonEntityRenderer.class)
 public abstract class EnderDragonEntityRendererMixin extends EntityRenderer<EnderDragonEntity> {
 
-    @Shadow
-    @Final
-    public static Identifier CRYSTAL_BEAM_TEXTURE;
 
+    @Shadow @Final private static Identifier TEXTURE;
+
+    @Shadow @Final public static Identifier CRYSTAL_BEAM_TEXTURE;
 
     protected EnderDragonEntityRendererMixin(EntityRendererFactory.Context ctx) {
         super(ctx);
@@ -63,13 +65,7 @@ public abstract class EnderDragonEntityRendererMixin extends EntityRenderer<Ende
         matrices.translate(0.0F, 2.0F, 0.0F);
         matrices.multiply(RotationAxis.POSITIVE_Y.rotation((float) (-Math.atan2((double) dz, (double) dx)) - (float) (Math.PI / 2)));
         matrices.multiply(RotationAxis.POSITIVE_X.rotation((float) (-Math.atan2((double) f, (double) dy)) - (float) (Math.PI / 2)));
-        VertexConsumer vertexConsumer;
-        switch (ChamsConfig.CONFIG.instance().beamRenderMode) {
-            case WIREFRAME -> vertexConsumer = vertexConsumers.getBuffer(CrystalChams.getDebugLineStrip(10));
-            case GATEWAY -> vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getEndGateway());
-            case CULLED -> vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getItemEntityTranslucentCull(CRYSTAL_BEAM_TEXTURE));
-            default -> vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getEntityTranslucent(CRYSTAL_BEAM_TEXTURE));
-        }
+        VertexConsumer vertexConsumer = getLayer(vertexConsumers, ChamsConfig.CONFIG.instance().beamRenderMode, true, CRYSTAL_BEAM_TEXTURE);
         float h = -(tickDelta + age) * (0.01F * ChamsConfig.CONFIG.instance().beamScrollSpeed);
         float i = MathHelper.sqrt(v) / 32.0F - (tickDelta + age) * (0.01F * ChamsConfig.CONFIG.instance().beamScrollSpeed);
         float k = 0.0F;
@@ -81,8 +77,8 @@ public abstract class EnderDragonEntityRendererMixin extends EntityRenderer<Ende
             float o = MathHelper.sin((float) n * (float) (Math.PI * 2) / ChamsConfig.CONFIG.instance().beamSides);
             float p = MathHelper.cos((float) n * (float) (Math.PI * 2) / ChamsConfig.CONFIG.instance().beamSides);
             float q = (float) n / ChamsConfig.CONFIG.instance().beamSides;
-            Color rainbowCol1 = new Color(CrystalChams.getRainbow(ChamsConfig.CONFIG.instance().beam1RainbowDelay, ChamsConfig.CONFIG.instance().beam1RainbowSpeed));
-            Color rainbowCol2 = new Color(CrystalChams.getRainbow(ChamsConfig.CONFIG.instance().beam2RainbowDelay, ChamsConfig.CONFIG.instance().beam2RainbowSpeed));
+            Color rainbowCol1 = new Color(CrystalChams.getRainbow(ChamsConfig.CONFIG.instance().beam1RainbowDelay, ChamsConfig.CONFIG.instance().beam1RainbowSpeed, ChamsConfig.CONFIG.instance().beam1RainbowSaturation, ChamsConfig.CONFIG.instance().beam1RainbowBrightness));
+            Color rainbowCol2 = new Color(CrystalChams.getRainbow(ChamsConfig.CONFIG.instance().beam2RainbowDelay, ChamsConfig.CONFIG.instance().beam2RainbowSpeed, ChamsConfig.CONFIG.instance().beam2RainbowSaturation, ChamsConfig.CONFIG.instance().beam2RainbowBrightness));
             int startCol = ChamsConfig.CONFIG.instance().beam1Rainbow ? ColorHelper.Argb.getArgb((int) (ChamsConfig.CONFIG.instance().beam1Alpha * 255F), rainbowCol1.getRed(), rainbowCol1.getGreen(), rainbowCol1.getBlue()) : ColorHelper.Argb.getArgb((int) (ChamsConfig.CONFIG.instance().beam1Alpha * 255F), ChamsConfig.CONFIG.instance().beam1Color.getRed(), ChamsConfig.CONFIG.instance().beam1Color.getGreen(), ChamsConfig.CONFIG.instance().beam1Color.getBlue());
             int endCol = ChamsConfig.CONFIG.instance().beam2Rainbow ? ColorHelper.Argb.getArgb((int) (ChamsConfig.CONFIG.instance().beam2Alpha * 255F), rainbowCol2.getRed(), rainbowCol2.getGreen(), rainbowCol2.getBlue()) : ColorHelper.Argb.getArgb((int) (ChamsConfig.CONFIG.instance().beam2Alpha * 255F), ChamsConfig.CONFIG.instance().beam2Color.getRed(), ChamsConfig.CONFIG.instance().beam2Color.getGreen(), ChamsConfig.CONFIG.instance().beam2Color.getBlue());
             vertexConsumer.vertex(entry, k * ChamsConfig.CONFIG.instance().beam2Radius, l * ChamsConfig.CONFIG.instance().beam2Radius, 0.0F).color(endCol).texture(m, h).overlay(OverlayTexture.DEFAULT_UV).light(ChamsConfig.CONFIG.instance().beam2LightLevel != -1 ? ChamsConfig.CONFIG.instance().beam2LightLevel : light).normal(entry, 0.0F, -1.0F, 0.0F);
