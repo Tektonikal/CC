@@ -44,6 +44,7 @@ public class ChamsConfig {
     //@formatter:off
     //General:
     @SerialEntry  public boolean modEnabled = true;
+    @SerialEntry  public boolean showAnimations = true;
         @SerialEntry public boolean randomizeAge = true;
         //Shadow
         @SerialEntry public float shadowRadius = 0.5F;
@@ -177,13 +178,18 @@ public class ChamsConfig {
     @Updatable
     public static Option<Boolean> o_modEnabled = Option.<Boolean>createBuilder()
             .name(Text.of("Mod Enabled"))
-            .controller(TickBoxControllerBuilderImpl::new)
+            .controller(CustomTickBoxControllerBuilder::new)
             .stateManager(StateManager.createInstant(true, () -> CONFIG.instance().modEnabled, newVal -> CONFIG.instance().modEnabled = newVal))
+            .build();
+    public static Option<Boolean> o_showAnimations = Option.<Boolean>createBuilder()
+            .name(Text.of("UI Animations"))
+            .controller(CustomTickBoxControllerBuilder::new)
+            .stateManager(StateManager.createInstant(true, () -> CONFIG.instance().showAnimations, newVal -> CONFIG.instance().showAnimations = newVal))
             .build();
     public static Option<Boolean> o_randomizeAge = Option.<Boolean>createBuilder()
             .name(Text.of("Randomize Age"))
             //TODO: add proper description
-            .controller(TickBoxControllerBuilderImpl::new)
+            .controller(CustomTickBoxControllerBuilder::new)
             .stateManager(StateManager.createInstant(true, () -> CONFIG.instance().randomizeAge, newVal -> CONFIG.instance().randomizeAge = newVal))
             .build();
     public static Option<Float> o_shadowRadius = Option.<Float>createBuilder()
@@ -217,7 +223,7 @@ public class ChamsConfig {
             .build();
     public static Option<Boolean> o_baseCulling = Option.<Boolean>createBuilder()
             .name(Text.of("Culled"))
-            .controller(TickBoxControllerBuilderImpl::new)
+            .controller(CustomTickBoxControllerBuilder::new)
             .stateManager(StateManager.createInstant(false, () -> CONFIG.instance().baseCulling, newVal -> CONFIG.instance().baseCulling = newVal))
             .build();
     public static Option<Float> o_baseOffset = Option.<Float>createBuilder()
@@ -244,7 +250,7 @@ public class ChamsConfig {
     @Updatable
     public static LinkedOptionImpl<Boolean> o_baseRainbow = LinkedOptionImpl.<Boolean>createBuilder()
             .name(Text.of("Rainbow Enabled"))
-            .controller(TickBoxControllerBuilderImpl::new)
+            .controller(CustomTickBoxControllerBuilder::new)
             .stateManager(StateManager.createInstant(false, () -> CONFIG.instance().baseRainbow, newVal -> CONFIG.instance().baseRainbow = newVal))
             .build();
     public static LinkedOptionImpl<Integer> o_baseRainbowSpeed = LinkedOptionImpl.<Integer>createBuilder()
@@ -283,7 +289,7 @@ public class ChamsConfig {
     @Updatable
     public static Option<Boolean> o_renderCore = Option.<Boolean>createBuilder()
             .name(Text.of("Render Core"))
-            .controller(TickBoxControllerBuilderImpl::new)
+            .controller(CustomTickBoxControllerBuilder::new)
             .stateManager(StateManager.createInstant(true, () -> CONFIG.instance().renderCore, newVal -> CONFIG.instance().renderCore = newVal))
             .build();
     public static LinkedOptionImpl<Float> o_coreOffset = LinkedOptionImpl.<Float>createBuilder()
@@ -340,13 +346,13 @@ public class ChamsConfig {
             .build();
     public static Option<Boolean> o_coreCulling = Option.<Boolean>createBuilder()
             .name(Text.of("Culled"))
-            .controller(TickBoxControllerBuilderImpl::new)
+            .controller(CustomTickBoxControllerBuilder::new)
             .stateManager(StateManager.createInstant(false, () -> CONFIG.instance().coreCulling, newVal -> CONFIG.instance().coreCulling = newVal))
             .build();
     @Updatable
     public static LinkedOptionImpl<Boolean> o_coreRainbow = LinkedOptionImpl.<Boolean>createBuilder()
             .name(Text.of("Rainbow Enabled"))
-            .controller(TickBoxControllerBuilderImpl::new)
+            .controller(CustomTickBoxControllerBuilder::new)
             .stateManager(StateManager.createInstant(false, () -> CONFIG.instance().coreRainbow, newVal -> CONFIG.instance().coreRainbow = newVal))
             .build();
     public static LinkedOptionImpl<Integer> o_coreRainbowSpeed = LinkedOptionImpl.<Integer>createBuilder()
@@ -376,7 +382,7 @@ public class ChamsConfig {
     @Updatable
     public static Option<Boolean> o_coreAlphaAnimation = Option.<Boolean>createBuilder()
             .name(Text.of("Animation Enabled"))
-            .controller(TickBoxControllerBuilderImpl::new)
+            .controller(CustomTickBoxControllerBuilder::new)
             .stateManager(StateManager.createInstant(false, () -> CONFIG.instance().coreAlphaAnimation, newVal -> CONFIG.instance().coreAlphaAnimation = newVal))
             .build();
     public static Option<Float> o_coreStartOpacity = Option.<Float>createBuilder()
@@ -402,7 +408,7 @@ public class ChamsConfig {
     @Updatable
     public static Option<Boolean> o_coreScaleAnimation = Option.<Boolean>createBuilder()
             .name(Text.of("Animation Enabled"))
-            .controller(TickBoxControllerBuilderImpl::new)
+            .controller(CustomTickBoxControllerBuilder::new)
             .stateManager(StateManager.createInstant(false, () -> CONFIG.instance().coreScaleAnimation, newVal -> CONFIG.instance().coreScaleAnimation = newVal))
             .build();
     public static Option<Float> o_coreStartScale = Option.<Float>createBuilder()
@@ -429,7 +435,7 @@ public class ChamsConfig {
     @Updatable
     public static Option<Boolean> o_renderFrame1 = Option.<Boolean>createBuilder()
             .name(Text.of("Render Frame 1"))
-            .controller(TickBoxControllerBuilderImpl::new)
+            .controller(CustomTickBoxControllerBuilder::new)
             .stateManager(StateManager.createInstant(true, () -> CONFIG.instance().renderFrame1, newVal -> CONFIG.instance().renderFrame1 = newVal))
             .build();
     public static LinkedOptionImpl<Float> o_frame1Offset = LinkedOptionImpl.<Float>createBuilder()
@@ -486,13 +492,13 @@ public class ChamsConfig {
             .build();
     public static Option<Boolean> o_frame1Culling = Option.<Boolean>createBuilder()
             .name(Text.of("Culled"))
-            .controller(TickBoxControllerBuilderImpl::new)
+            .controller(CustomTickBoxControllerBuilder::new)
             .stateManager(StateManager.createInstant(false, () -> CONFIG.instance().frame1Culling, newVal -> CONFIG.instance().frame1Culling = newVal))
             .build();
     @Updatable
     public static LinkedOptionImpl<Boolean> o_frame1Rainbow = LinkedOptionImpl.<Boolean>createBuilder()
             .name(Text.of("Rainbow"))
-            .controller(TickBoxControllerBuilderImpl::new)
+            .controller(CustomTickBoxControllerBuilder::new)
             .stateManager(StateManager.createInstant(false, () -> CONFIG.instance().frame1Rainbow, newVal -> CONFIG.instance().frame1Rainbow = newVal))
             .build();
     public static LinkedOptionImpl<Integer> o_frame1RainbowSpeed = LinkedOptionImpl.<Integer>createBuilder()
@@ -522,7 +528,7 @@ public class ChamsConfig {
     @Updatable
     public static Option<Boolean> o_renderFrame2 = Option.<Boolean>createBuilder()
             .name(Text.of("Render Frame 2"))
-            .controller(TickBoxControllerBuilderImpl::new)
+            .controller(CustomTickBoxControllerBuilder::new)
             .stateManager(StateManager.createInstant(true, () -> CONFIG.instance().renderFrame2, newVal -> CONFIG.instance().renderFrame2 = newVal))
             .build();
     public static LinkedOptionImpl<Float> o_frame2Offset = LinkedOptionImpl.<Float>createBuilder()
@@ -579,13 +585,13 @@ public class ChamsConfig {
             .build();
     public static Option<Boolean> o_frame2Culling = Option.<Boolean>createBuilder()
             .name(Text.of("Culled"))
-            .controller(TickBoxControllerBuilderImpl::new)
+            .controller(CustomTickBoxControllerBuilder::new)
             .stateManager(StateManager.createInstant(false, () -> CONFIG.instance().frame2Culling, newVal -> CONFIG.instance().frame2Culling = newVal))
             .build();
     @Updatable
     public static LinkedOptionImpl<Boolean> o_frame2Rainbow = LinkedOptionImpl.<Boolean>createBuilder()
             .name(Text.of("Rainbow"))
-            .controller(TickBoxControllerBuilderImpl::new)
+            .controller(CustomTickBoxControllerBuilder::new)
             .stateManager(StateManager.createInstant(false, () -> CONFIG.instance().frame2Rainbow, newVal -> CONFIG.instance().frame2Rainbow = newVal))
             .build();
     public static LinkedOptionImpl<Integer> o_frame2RainbowSpeed = LinkedOptionImpl.<Integer>createBuilder()
@@ -615,7 +621,7 @@ public class ChamsConfig {
     @Updatable
     public static Option<Boolean> o_renderBeam = Option.<Boolean>createBuilder()
             .name(Text.of("Render Beam"))
-            .controller(TickBoxControllerBuilderImpl::new)
+            .controller(CustomTickBoxControllerBuilder::new)
             .stateManager(StateManager.createInstant(true, () -> CONFIG.instance().renderBeam, newVal -> CONFIG.instance().renderBeam = newVal))
             .build();
     public static LinkedOptionImpl<Color> o_beam1Color = LinkedOptionImpl.<Color>createBuilder()
@@ -637,7 +643,7 @@ public class ChamsConfig {
     @Updatable
     public static LinkedOptionImpl<Boolean> o_beam1Rainbow = LinkedOptionImpl.<Boolean>createBuilder()
             .name(Text.of("Rainbow"))
-            .controller(TickBoxControllerBuilderImpl::new)
+            .controller(CustomTickBoxControllerBuilder::new)
             .stateManager(StateManager.createInstant(false, () -> CONFIG.instance().beam1Rainbow, newVal -> CONFIG.instance().beam1Rainbow = newVal))
             .build();
     public static LinkedOptionImpl<Integer> o_beam1RainbowSpeed = LinkedOptionImpl.<Integer>createBuilder()
@@ -683,7 +689,7 @@ public class ChamsConfig {
     @Updatable
     public static LinkedOptionImpl<Boolean> o_beam2Rainbow = LinkedOptionImpl.<Boolean>createBuilder()
             .name(Text.of("Rainbow"))
-            .controller(TickBoxControllerBuilderImpl::new)
+            .controller(CustomTickBoxControllerBuilder::new)
             .stateManager(StateManager.createInstant(false, () -> CONFIG.instance().beam2Rainbow, newVal -> CONFIG.instance().beam2Rainbow = newVal))
             .build();
     public static LinkedOptionImpl<Integer> o_beam2RainbowSpeed = LinkedOptionImpl.<Integer>createBuilder()
@@ -738,7 +744,7 @@ public class ChamsConfig {
             .build();
     public static Option<Boolean> o_beamCulling = Option.<Boolean>createBuilder()
             .name(Text.of("Culled"))
-            .controller(TickBoxControllerBuilderImpl::new)
+            .controller(CustomTickBoxControllerBuilder::new)
             .stateManager(StateManager.createInstant(false, () -> CONFIG.instance().beamCulling, newVal -> CONFIG.instance().beamCulling = newVal))
             .build();
 

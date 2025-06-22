@@ -25,13 +25,13 @@ import tektonikal.crystalchams.config.LinkedOptionImpl;
 
 import java.util.List;
 
-@Mixin(value = OptionListWidget.class, remap = false)
+@Mixin(value = OptionListWidget.class)
 public interface OptionListWidgetAccessor {
 
     @Accessor(remap = false)
     YACLScreen getYaclScreen();
 
-    @Mixin(value = OptionListWidget.OptionEntry.class, remap = false)
+    @Mixin(value = OptionListWidget.OptionEntry.class)
     abstract class OptionListWidgetEntryMixin {
         @Shadow(remap = false)
         @Final
@@ -62,7 +62,7 @@ public interface OptionListWidgetAccessor {
             }
         }
 
-        @Inject(method = "render", at = @At("TAIL"), remap = false)
+        @Inject(method = "render", at = @At("TAIL"))
         private void onRender(DrawContext graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta, CallbackInfo ci) {
             if (applyAllButton != null) {
                 applyAllButton.setY(y);
@@ -73,14 +73,14 @@ public interface OptionListWidgetAccessor {
 
         }
 
-        @Inject(method = "selectableChildren", at = @At("HEAD"), cancellable = true, remap = false)
+        @Inject(method = "selectableChildren", at = @At("HEAD"), cancellable = true)
         private void onSelectableChildren(CallbackInfoReturnable<List<? extends Selectable>> cir) {
             if (option instanceof LinkedOptionImpl<?>) {
                 cir.cancel();
                 cir.setReturnValue(ImmutableList.of(widget, applyAllButton, resetButton));
             }
         }
-        @Inject(method = "children", at = @At("HEAD"), cancellable = true, remap = false)
+        @Inject(method = "children", at = @At("HEAD"), cancellable = true)
         private void onChildren(CallbackInfoReturnable<List<? extends Selectable>> cir) {
             if (option instanceof LinkedOptionImpl<?>) {
                 cir.cancel();

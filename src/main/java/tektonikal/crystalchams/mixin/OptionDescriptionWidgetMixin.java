@@ -37,7 +37,7 @@ public abstract class OptionDescriptionWidgetMixin extends ClickableWidget {
     public OptionDescriptionWidgetMixin(int x, int y, int width, int height, Text message) {
         super(x, y, width, height, message);
     }
-    @Inject(method = "renderWidget", at = @At(value = "HEAD"), remap = false)
+    @Inject(method = "renderWidget", at = @At(value = "HEAD"))
     public void redir(DrawContext drawContext, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         if(MinecraftClient.getInstance().currentScreen instanceof YACLScreen) {
             if (!((YACLScreen) MinecraftClient.getInstance().currentScreen).config.title().equals(Text.of("Custom End Crystals"))) {

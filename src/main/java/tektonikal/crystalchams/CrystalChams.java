@@ -185,4 +185,7 @@ public class CrystalChams implements ModInitializer {
             return midpoint + plus_minus * rand.nextFloat() * half_range;
         }
     }
+    public static double ease(double start, double end, float speed) {
+        return (start + (end - start) * (1 - Math.exp(-(1.0F / MinecraftClient.getInstance().getCurrentFps()) * speed)));
+    }
 }

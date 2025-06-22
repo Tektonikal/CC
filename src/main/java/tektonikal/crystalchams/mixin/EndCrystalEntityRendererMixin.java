@@ -23,6 +23,7 @@ import tektonikal.crystalchams.interfaces.EndCrystalEntityMixinInterface;
 
 import java.awt.*;
 
+import static tektonikal.crystalchams.CrystalChams.ease;
 import static tektonikal.crystalchams.CrystalChams.getLayer;
 
 @Mixin(EndCrystalEntityRenderer.class)
@@ -204,11 +205,6 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
             frame1Colors[2] = (float) ease(frame1Colors[2], ChamsConfig.CONFIG.instance().frame1Color.getBlue(), 7.5F);
         }
 //        frame1RainbowSpeed = (float) ease(frame1RainbowSpeed, ChamsConfig.CONFIG.instance().frame1RainbowSpeed, 7.5F);
-    }
-
-    @Unique
-    private static double ease(double start, double end, float speed) {
-        return (start + (end - start) * (1 - Math.exp(-(1.0F / MinecraftClient.getInstance().getCurrentFps()) * speed)));
     }
 
     @Unique
