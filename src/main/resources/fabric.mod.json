@@ -5,6 +5,7 @@
   "name": "Custom End Crystals",
   "description": "Customize how your end crystals look!",
   "authors": ["Tektonikal"],
+  "contributors": ["Kwag - Rubber Duck"],
   "license": "LGPL-3.0",
   "icon": "icon.png",
   "environment": "client",

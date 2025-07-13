@@ -6,7 +6,8 @@
   "mixins": [
     "ControllerWidgetMixin",
     "EndCrystalEntityMixin",
-    "OptionDescriptionWidgetMixin"
+    "OptionDescriptionWidgetMixin",
+    "ShaderMapMixin"
   ],
   "injectors": {
     "defaultRequire": 1
@@ -16,6 +17,7 @@
     "ElementListWidgetExtMixin",
     "EndCrystalEntityRendererMixin",
     "EnderDragonEntityRendererMixin",
+    "MinecraftClientMixin",
     "ModelPartMixin",
     "OptionListWidgetAccessor",
     "OptionListWidgetAccessor$OptionListWidgetEntryMixin",

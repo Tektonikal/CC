@@ -57,8 +57,7 @@ public interface OptionListWidgetAccessor {
                     ((LinkedOptionImpl<?>) option).syncLinkedOptions();
                     button.active = false;
                 });
-                this.applyAllButton.setTooltip(Tooltip.of(Text.of("Apply To All")));
-                this.applyAllButton.active = !((LinkedOptionImpl<?>) option).linkedOptionsSynced();
+                this.applyAllButton.active = !((LinkedOptionImpl<?>) option).linkedOptionsSynced() && option.available();
             }
         }
 
@@ -67,7 +66,8 @@ public interface OptionListWidgetAccessor {
             if (applyAllButton != null) {
                 applyAllButton.setY(y);
                 //not the greatest of ways to do it, but whatever
-                applyAllButton.active = !((LinkedOptionImpl<?>) option).linkedOptionsSynced();
+                applyAllButton.active = !((LinkedOptionImpl<?>) option).linkedOptionsSynced() && option.available();
+                applyAllButton.setTooltip(applyAllButton.active ? Tooltip.of(Text.of("Apply To All")) : null);
                 applyAllButton.render(graphics, mouseX, mouseY, tickDelta);
             }
 

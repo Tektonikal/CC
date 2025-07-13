@@ -21,24 +21,9 @@ public abstract class PopupControllerScreenMixin extends Screen {
     @Final
     private YACLScreen backgroundYaclScreen;
 
-
-    @Shadow(remap = false) @Final private ControllerPopupWidget<?> controllerPopup;
-
     protected PopupControllerScreenMixin(Text title) {
         super(title);
     }
-
-//    @Inject(method = "render", at = @At("HEAD"), cancellable = true, remap = false)
-//    private void ough(DrawContext graphics, int mouseX, int mouseY, float delta, CallbackInfo ci) {
-//        if (backgroundYaclScreen.config.title().equals(Text.of("Custom End Crystals"))) {
-//            //TODO: i'll let xander gaslight the other options, i can just get the mouse position myself
-//            controllerPopup.renderBackground(graphics, mouseX, mouseY, delta);
-//            this.backgroundYaclScreen.render(graphics, mouseX, mouseY, delta);
-//            super.render(graphics, mouseX, mouseY, delta);
-//            ci.cancel();
-//        }
-//    }
-
     @Override
     public void tick() {
         if (backgroundYaclScreen.config.title().equals(Text.of("Custom End Crystals"))) {

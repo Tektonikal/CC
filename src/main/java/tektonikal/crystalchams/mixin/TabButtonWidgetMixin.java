@@ -57,7 +57,7 @@ public abstract class TabButtonWidgetMixin extends ClickableWidget {
 
     @Inject(method = "renderWidget", at = @At("TAIL"))
     public void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
-        hoverProgress = (float) CrystalChams.ease(hoverProgress, hovered && this.active ? 1 : 0, 10F);
+        hoverProgress = (float) CrystalChams.ease(hoverProgress, hovered || (isFocused() && MinecraftClient.getInstance().getNavigationType().isKeyboard()) && this.active ? 1 : 0, 10F);
         selectedProgress = (float) CrystalChams.ease(selectedProgress, isCurrentTab() && this.active ? 1 : 0, 10F);
     }
 
@@ -67,7 +67,7 @@ public abstract class TabButtonWidgetMixin extends ClickableWidget {
             int i = Math.min(textRenderer.getWidth(this.getMessage()), this.getWidth() - 4);
             float j = this.getX() + ((this.getWidth() - i) / 2F);
             int k = this.getY() + this.getHeight() - 2;
-            fillFloat(context, MathHelper.lerp(hoverProgress * selectedProgress, j + (i / 2F), j), k - (hoverProgress * selectedProgress) + 1, MathHelper.lerp(hoverProgress * selectedProgress, j + (i / 2F), (j + i)), k + 1, ColorHelper.Argb.lerp(hoverProgress * selectedProgress, 0x00000000, this.active ? -1 : -6250336));
+            fillFloat(context, MathHelper.lerp(selectedProgress, j + (i / 2F), j), k - (selectedProgress) + 1, MathHelper.lerp(selectedProgress, j + (i / 2F), (j + i)), k + 1, ColorHelper.Argb.lerp(selectedProgress, 0x00000000, this.active ? -1 : -6250336));
             ci.cancel();
         }
     }

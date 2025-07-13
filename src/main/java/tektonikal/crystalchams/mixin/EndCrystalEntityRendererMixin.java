@@ -1,6 +1,9 @@
 package tektonikal.crystalchams.mixin;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.irisshaders.iris.layer.BufferSourceWrapper;
+import net.irisshaders.iris.layer.EntityRenderStateShard;
+import net.irisshaders.iris.layer.OuterWrappedRenderType;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.*;
@@ -23,8 +26,7 @@ import tektonikal.crystalchams.interfaces.EndCrystalEntityMixinInterface;
 
 import java.awt.*;
 
-import static tektonikal.crystalchams.CrystalChams.ease;
-import static tektonikal.crystalchams.CrystalChams.getLayer;
+import static tektonikal.crystalchams.CrystalChams.*;
 
 @Mixin(EndCrystalEntityRenderer.class)
 public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCrystalEntity> {

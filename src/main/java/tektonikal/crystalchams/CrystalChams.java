@@ -5,6 +5,11 @@ import dev.isxander.yacl3.gui.controllers.slider.FloatSliderController;
 import dev.isxander.yacl3.gui.controllers.slider.IntegerSliderController;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.CoreShaderRegistrationCallback;
+import net.irisshaders.iris.Iris;
+import net.irisshaders.iris.api.v0.IrisApi;
+import net.irisshaders.iris.layer.BufferSourceWrapper;
+import net.irisshaders.iris.layer.EntityRenderStateShard;
+import net.irisshaders.iris.layer.OuterWrappedRenderType;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.ShaderProgram;
 import net.minecraft.client.render.*;
@@ -44,7 +49,6 @@ public class CrystalChams implements ModInitializer {
     });
     public static EndCrystalEntity entity = new EndCrystalEntity(MinecraftClient.getInstance().world, 0.5, 0, 0.5);
 
-
     public static float getYOffset(float age, float offset, float bounceSpeed, float bounceHeight, float tickDelay) {
         //?????
         float g = (MathHelper.sin((age + tickDelay) % ((float) (Math.PI * 2F) / (0.2F * bounceSpeed)) * (0.2F * bounceSpeed)) / 2.0F) + 0.5F;
@@ -65,6 +69,9 @@ public class CrystalChams implements ModInitializer {
             return vcp.getBuffer(layer.getFunction().apply(1.0));
         }
     }
+
+    public static float crystalRotX;
+    public static float crystalRotY;
 
 
     @Override

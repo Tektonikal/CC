@@ -754,109 +754,126 @@ public class ChamsConfig {
             o_shadowAlpha.setAvailable(aBoolean);
             o_shadowRadius.setAvailable(aBoolean);
             o_randomizeAge.setAvailable(aBoolean);
+            //TODO: UI animations toggle (maybe)
 
             o_baseRenderMode.setAvailable(aBoolean);
-            o_baseRenderLayer.setAvailable(aBoolean);
             o_renderCore.setAvailable(aBoolean);
             o_renderFrame1.setAvailable(aBoolean);
             o_renderFrame2.setAvailable(aBoolean);
             o_renderBeam.setAvailable(aBoolean);
         } else if (booleanOption.equals(o_renderCore)) {
-            o_coreOffset.setAvailable(o_renderCore.available() && aBoolean);
-            o_coreRotationSpeed.setAvailable(o_renderCore.available() && aBoolean);
-            o_coreBounceHeight.setAvailable(o_renderCore.available() && aBoolean);
-            o_coreBounceSpeed.setAvailable(o_renderCore.available() && aBoolean);
-            o_coreTickDelay.setAvailable(o_renderCore.available() && aBoolean);
-            o_coreScale.setAvailable(o_renderCore.available() && aBoolean);
-            o_coreColor.setAvailable(o_renderCore.available() && aBoolean);
-            o_coreAlpha.setAvailable(o_renderCore.available() && aBoolean);
-            o_coreLightLevel.setAvailable(o_renderCore.available() && aBoolean);
-            o_coreRenderLayer.setAvailable(o_renderCore.available() && aBoolean);
-            o_coreRainbow.setAvailable(o_renderCore.available() && aBoolean);
-            o_coreCulling.setAvailable(o_renderCore.available() && aBoolean);
+            boolean available = o_renderCore.available() && aBoolean;
+            o_coreOffset.setAvailable(available);
+            o_coreRotationSpeed.setAvailable(available);
+            o_coreBounceHeight.setAvailable(available);
+            o_coreBounceSpeed.setAvailable(available);
+            o_coreTickDelay.setAvailable(available);
+            o_coreScale.setAvailable(available);
+            o_coreColor.setAvailable(available);
+            o_coreAlpha.setAvailable(available);
+            o_coreLightLevel.setAvailable(available);
+            o_coreRenderLayer.setAvailable(available);
+            o_coreRainbow.setAvailable(available);
+            o_coreCulling.setAvailable(available);
         } else if (booleanOption.equals(o_coreRainbow)) {
-            o_coreRainbowSpeed.setAvailable(o_coreRainbow.available() && aBoolean);
-            o_coreRainbowDelay.setAvailable(o_coreRainbow.available() && aBoolean);
-            o_coreRainbowSaturation.setAvailable(o_coreRainbow.available() && aBoolean);
-            o_coreRainbowBrightness.setAvailable(o_coreRainbow.available() && aBoolean);
+            boolean available = o_coreRainbow.available() && aBoolean;
+            o_coreRainbowSpeed.setAvailable(available);
+            o_coreRainbowDelay.setAvailable(available);
+            o_coreRainbowSaturation.setAvailable(available);
+            o_coreRainbowBrightness.setAvailable(available);
+            o_coreColor.setAvailable(!available && o_renderCore.available());
         } else if (booleanOption.equals(o_renderFrame1)) {
-            o_frame1Offset.setAvailable(o_renderFrame1.available() && aBoolean);
-            o_frame1RotationSpeed.setAvailable(o_renderFrame1.available() && aBoolean);
-            o_frame1BounceHeight.setAvailable(o_renderFrame1.available() && aBoolean);
-            o_frame1BounceSpeed.setAvailable(o_renderFrame1.available() && aBoolean);
-            o_frame1TickDelay.setAvailable(o_renderFrame1.available() && aBoolean);
-            o_frame1Scale.setAvailable(o_renderFrame1.available() && aBoolean);
-            o_frame1Color.setAvailable(o_renderFrame1.available() && aBoolean);
-            o_frame1Alpha.setAvailable(o_renderFrame1.available() && aBoolean);
-            o_frame1LightLevel.setAvailable(o_renderFrame1.available() && aBoolean);
-            o_frame1RenderLayer.setAvailable(o_renderFrame1.available() && aBoolean);
-            o_frame1Rainbow.setAvailable(o_renderFrame1.available() && aBoolean);
+            boolean available = o_renderFrame1.available() && aBoolean;
+            o_frame1Offset.setAvailable(available);
+            o_frame1RotationSpeed.setAvailable(available);
+            o_frame1BounceHeight.setAvailable(available);
+            o_frame1BounceSpeed.setAvailable(available);
+            o_frame1TickDelay.setAvailable(available);
+            o_frame1Scale.setAvailable(available);
+            o_frame1Color.setAvailable(available);
+            o_frame1Alpha.setAvailable(available);
+            o_frame1LightLevel.setAvailable(available);
+            o_frame1RenderLayer.setAvailable(available);
+            o_frame1Rainbow.setAvailable(available);
         } else if (booleanOption.equals(o_frame1Rainbow)) {
-            o_frame1RainbowSpeed.setAvailable(o_frame1Rainbow.available() && aBoolean);
-            o_frame1RainbowDelay.setAvailable(o_frame1Rainbow.available() && aBoolean);
-            o_frame1RainbowSaturation.setAvailable(o_frame1Rainbow.available() && aBoolean);
-            o_frame1RainbowBrightness.setAvailable(o_frame1Rainbow.available() && aBoolean);
+            boolean available = o_frame1Rainbow.available() && aBoolean;
+            o_frame1Color.setAvailable(!o_frame1Rainbow.available() && o_renderFrame1.available() && o_modEnabled.available());
+            o_frame1RainbowSpeed.setAvailable(available);
+            o_frame1RainbowDelay.setAvailable(available);
+            o_frame1RainbowSaturation.setAvailable(available);
+            o_frame1RainbowBrightness.setAvailable(available);
         } else if (booleanOption.equals(o_renderFrame2)) {
-            o_frame2Offset.setAvailable(o_renderFrame2.available() && aBoolean);
-            o_frame2RotationSpeed.setAvailable(o_renderFrame2.available() && aBoolean);
-            o_frame2BounceHeight.setAvailable(o_renderFrame2.available() && aBoolean);
-            o_frame2BounceSpeed.setAvailable(o_renderFrame2.available() && aBoolean);
-            o_frame2TickDelay.setAvailable(o_renderFrame2.available() && aBoolean);
-            o_frame2Scale.setAvailable(o_renderFrame2.available() && aBoolean);
-            o_frame2Color.setAvailable(o_renderFrame2.available() && aBoolean);
-            o_frame2Alpha.setAvailable(o_renderFrame2.available() && aBoolean);
-            o_frame2LightLevel.setAvailable(o_renderFrame2.available() && aBoolean);
-            o_frame2RenderLayer.setAvailable(o_renderFrame2.available() && aBoolean);
-            o_frame2Rainbow.setAvailable(o_renderFrame2.available() && aBoolean);
-            o_frame2Culling.setAvailable(o_renderFrame2.available() && aBoolean);
+            boolean available = o_renderFrame2.available() && aBoolean;
+            o_frame2Offset.setAvailable(available);
+            o_frame2RotationSpeed.setAvailable(available);
+            o_frame2BounceHeight.setAvailable(available);
+            o_frame2BounceSpeed.setAvailable(available);
+            o_frame2TickDelay.setAvailable(available);
+            o_frame2Scale.setAvailable(available);
+            o_frame2Color.setAvailable(available);
+            o_frame2Alpha.setAvailable(available);
+            o_frame2LightLevel.setAvailable(available);
+            o_frame2RenderLayer.setAvailable(available);
+            o_frame2Rainbow.setAvailable(available);
+            o_frame2Culling.setAvailable(available);
         } else if (booleanOption.equals(o_frame2Rainbow)) {
-            o_frame2RainbowSpeed.setAvailable(o_frame2Rainbow.available() && aBoolean);
-            o_frame2RainbowDelay.setAvailable(o_frame2Rainbow.available() && aBoolean);
-            o_frame2RainbowSaturation.setAvailable(o_frame2Rainbow.available() && aBoolean);
-            o_frame2RainbowBrightness.setAvailable(o_frame2Rainbow.available() && aBoolean);
+            boolean available = o_frame2Rainbow.available() && aBoolean;
+            o_frame2RainbowSpeed.setAvailable(available);
+            o_frame2RainbowDelay.setAvailable(available);
+            o_frame2RainbowSaturation.setAvailable(available);
+            o_frame2RainbowBrightness.setAvailable(available);
+            o_frame2Color.setAvailable(!(available));
         } else if (booleanOption.equals(o_renderBeam)) {
-            o_beam1Color.setAvailable(o_renderBeam.available() && aBoolean);
-            o_beam1Alpha.setAvailable(o_renderBeam.available() && aBoolean);
-            o_beam1Rainbow.setAvailable(o_renderBeam.available() && aBoolean);
-            o_beam1Radius.setAvailable(o_renderBeam.available() && aBoolean);
-            o_beam1LightLevel.setAvailable(o_renderBeam.available() && aBoolean);
-            o_beam2Color.setAvailable(o_renderBeam.available() && aBoolean);
-            o_beam2Alpha.setAvailable(o_renderBeam.available() && aBoolean);
-            o_beam2Rainbow.setAvailable(o_renderBeam.available() && aBoolean);
-            o_beam2Radius.setAvailable(o_renderBeam.available() && aBoolean);
-            o_beam2LightLevel.setAvailable(o_renderBeam.available() && aBoolean);
-            o_beamSides.setAvailable(o_renderBeam.available() && aBoolean);
-            o_beamScrollSpeed.setAvailable(o_renderBeam.available() && aBoolean);
-            o_beamRenderLayer.setAvailable(o_renderBeam.available() && aBoolean);
+            boolean available = o_renderBeam.available() && aBoolean;
+            o_beam1Color.setAvailable(available);
+            o_beam1Alpha.setAvailable(available);
+            o_beam1Rainbow.setAvailable(available);
+            o_beam1Radius.setAvailable(available);
+            o_beam1LightLevel.setAvailable(available);
+            o_beam2Color.setAvailable(available);
+            o_beam2Alpha.setAvailable(available);
+            o_beam2Rainbow.setAvailable(available);
+            o_beam2Radius.setAvailable(available);
+            o_beam2LightLevel.setAvailable(available);
+            o_beamSides.setAvailable(available);
+            o_beamScrollSpeed.setAvailable(available);
+            o_beamRenderLayer.setAvailable(available);
         } else if (booleanOption.equals(o_beam1Rainbow)) {
-            o_beam1RainbowDelay.setAvailable(o_beam1Rainbow.available() && aBoolean);
-            o_beam1RainbowSpeed.setAvailable(o_beam1Rainbow.available() && aBoolean);
-            o_beam1RainbowBrightness.setAvailable(o_beam1Rainbow.available() && aBoolean);
-            o_beam1RainbowSaturation.setAvailable(o_beam1Rainbow.available() && aBoolean);
+            boolean available = o_beam1Rainbow.available() && aBoolean;
+            o_beam1RainbowDelay.setAvailable(available);
+            o_beam1RainbowSpeed.setAvailable(available);
+            o_beam1RainbowBrightness.setAvailable(available);
+            o_beam1RainbowSaturation.setAvailable(available);
+            o_beam1Color.setAvailable(available);
         } else if (booleanOption.equals(o_beam2Rainbow)) {
-            o_beam2RainbowDelay.setAvailable(o_beam2Rainbow.available() && aBoolean);
-            o_beam2RainbowSpeed.setAvailable(o_beam2Rainbow.available() && aBoolean);
-            o_beam2RainbowBrightness.setAvailable(o_beam2Rainbow.available() && aBoolean);
-            o_beam2RainbowSaturation.setAvailable(o_beam2Rainbow.available() && aBoolean);
+            boolean available = o_beam2Rainbow.available() && aBoolean;
+            o_beam2RainbowDelay.setAvailable(available);
+            o_beam2RainbowSpeed.setAvailable(available);
+            o_beam2RainbowBrightness.setAvailable(available);
+            o_beam2RainbowSaturation.setAvailable(available);
+            o_beam2Color.setAvailable(available);
         } else if (booleanOption.equals(o_baseRainbow)) {
-            o_baseRainbowSpeed.setAvailable(o_baseRainbow.available() && aBoolean);
-            o_baseRainbowDelay.setAvailable(o_baseRainbow.available() && aBoolean);
-            o_baseRainbowSaturation.setAvailable(o_baseRainbow.available() && aBoolean);
-            o_baseRainbowBrightness.setAvailable(o_baseRainbow.available() && aBoolean);
+            boolean available = o_baseRainbow.available() && aBoolean;
+            o_baseRainbowSpeed.setAvailable(available);
+            o_baseRainbowDelay.setAvailable(available);
+            o_baseRainbowSaturation.setAvailable(available);
+            o_baseRainbowBrightness.setAvailable(available);
+            o_baseColor.setAvailable(available);
         }
         specialUpdate(o_baseRenderMode, o_baseRenderMode.pendingValue());
     }
 
     private static void specialUpdate(Option<BaseRenderMode> baseRenderModeOption, BaseRenderMode baseRenderMode) {
-        o_baseOffset.setAvailable(baseRenderModeOption.available() && baseRenderMode != BaseRenderMode.NEVER);
-        o_baseScale.setAvailable(baseRenderModeOption.available() && baseRenderMode != BaseRenderMode.NEVER);
-        o_baseColor.setAvailable(baseRenderModeOption.available() && baseRenderMode != BaseRenderMode.NEVER);
-        o_baseAlpha.setAvailable(baseRenderModeOption.available() && baseRenderMode != BaseRenderMode.NEVER);
-        o_baseLightLevel.setAvailable(baseRenderModeOption.available() && baseRenderMode != BaseRenderMode.NEVER);
-        o_baseRenderLayer.setAvailable(baseRenderModeOption.available() && baseRenderMode != BaseRenderMode.NEVER);
-        o_baseRainbow.setAvailable(baseRenderModeOption.available() && baseRenderMode != BaseRenderMode.NEVER);
-        o_baseRotation.setAvailable(baseRenderModeOption.available() && baseRenderMode != BaseRenderMode.NEVER);
-        o_baseCulling.setAvailable(baseRenderModeOption.available() && baseRenderMode != BaseRenderMode.NEVER);
+        boolean available = baseRenderModeOption.available() && baseRenderMode != BaseRenderMode.NEVER;
+        o_baseOffset.setAvailable(available);
+        o_baseScale.setAvailable(available);
+        o_baseColor.setAvailable(available);
+        o_baseAlpha.setAvailable(available);
+        o_baseLightLevel.setAvailable(available);
+        o_baseRenderLayer.setAvailable(available);
+        o_baseRainbow.setAvailable(available);
+        o_baseRotation.setAvailable(available);
+        o_baseCulling.setAvailable(available);
     }
 
     public enum BaseRenderMode implements NameableEnum {
@@ -930,7 +947,6 @@ public class ChamsConfig {
                                 .group(OptionGroup.createBuilder()
                                         .name(Text.of("Come up with a name for this one later"))
                                         .option(o_baseOffset)
-                                        //TODO: animate this
                                         .option(o_baseRotation)
                                         .build()
                                 )

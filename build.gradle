@@ -35,6 +35,11 @@ dependencies {
     modImplementation "dev.isxander:yet-another-config-lib:${project.yacl_version}"
 //    implementation "dev.isxander.yacl:yet-another-config-lib-fabric:3.1.1+1.19.4"
     modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
+    modImplementation "maven.modrinth:iris:${project.iris_version}"
+    modImplementation "maven.modrinth:sodium:${project.sodium_version}"
+    implementation("org.antlr:antlr4-runtime:4.13.1")
+    implementation("io.github.douira:glsl-transformer:2.0.1")
+    implementation("org.anarres:jcpp:1.4.14")
     }
 
 processResources {
