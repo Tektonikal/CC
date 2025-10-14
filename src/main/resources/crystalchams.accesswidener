@@ -1,3 +1,4 @@
 accessWidener v2 named
 accessible field net/minecraft/client/render/RenderTickCounter$Dynamic tickDelta F
 accessible class net/minecraft/client/gui/widget/EntryListWidget$Entry
+accessible method net/minecraft/client/render/entity/EntityRenderDispatcher renderHitbox (Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;Lnet/minecraft/entity/Entity;FFFF)V

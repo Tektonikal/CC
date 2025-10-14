@@ -19,7 +19,7 @@ public abstract class OptionDescriptionWidgetMixin extends ClickableWidget {
 
     @Inject(method = "tick()V", at = @At("TAIL"), remap = false)
     private void CC$OUGHHHHHHH(CallbackInfo ci) {
-        CrystalChams.entity.age++;
-        CrystalChams.entity.endCrystalAge++;
+        CrystalChams.previewCrystalEntity.age++;
+        CrystalChams.previewCrystalEntity.endCrystalAge++;
     }
 }

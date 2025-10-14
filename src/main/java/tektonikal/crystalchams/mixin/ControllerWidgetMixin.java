@@ -5,7 +5,6 @@ import dev.isxander.yacl3.gui.AbstractWidget;
 import dev.isxander.yacl3.gui.YACLScreen;
 import dev.isxander.yacl3.gui.controllers.ControllerWidget;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -14,6 +13,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import tektonikal.crystalchams.CrystalChams;
+import tektonikal.crystalchams.config.ChamsConfig;
 
 import java.awt.*;
 
@@ -37,7 +37,7 @@ public abstract class ControllerWidgetMixin extends AbstractWidget {
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Ldev/isxander/yacl3/gui/controllers/ControllerWidget;drawButtonRect(Lnet/minecraft/client/gui/DrawContext;IIIIZZ)V", shift = At.Shift.AFTER))
     private void CC$OUGHHH(DrawContext graphics, int mouseX, int mouseY, float delta, CallbackInfo ci) {
-        if (screen.config.title().equals(Text.of("Custom End Crystals"))) {
+        if (CrystalChams.isThisMyScreen(screen) && ChamsConfig.CONFIG.instance().showAnimations) {
             hoverProgress = (float) CrystalChams.ease(hoverProgress, isAvailable() && isHovered() ? 1 : 0, 10F);
             drawOutline(graphics, getDimension().x(), getDimension().y(), getDimension().xLimit(), getDimension().yLimit(), 1, new Color(hoverProgress, hoverProgress, hoverProgress).getRGB());
         }

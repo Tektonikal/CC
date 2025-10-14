@@ -34,21 +34,27 @@ public class CustomTickBoxController extends TickBoxController {
 
         @Override
         protected void drawHoveredControl(DrawContext graphics, int mouseX, int mouseY, float delta) {
-            int outlineSize = 10;
-            int outlineX1 = getDimension().xLimit() - getXPadding() - outlineSize;
-            int outlineY1 = getDimension().centerY() - outlineSize / 2;
-            int outlineX2 = getDimension().xLimit() - getXPadding();
-            int outlineY2 = getDimension().centerY() + outlineSize / 2;
+                int outlineSize = 10;
+                int outlineX1 = getDimension().xLimit() - getXPadding() - outlineSize;
+                int outlineY1 = getDimension().centerY() - outlineSize / 2;
+                int outlineX2 = getDimension().xLimit() - getXPadding();
+                int outlineY2 = getDimension().centerY() + outlineSize / 2;
 
-            int color = getValueColor();
-            int shadowColor = multiplyColor(color, 0.25f);
+                int color = getValueColor();
+                int shadowColor = multiplyColor(color, 0.25f);
 
-            drawOutline(graphics, outlineX1 + 1, outlineY1 + 1, outlineX2 + 1, outlineY2 + 1, 1, shadowColor);
-            drawOutline(graphics, outlineX1, outlineY1, outlineX2, outlineY2, 1, color);
-//            if (control.option().pendingValue()) {
+                drawOutline(graphics, outlineX1 + 1, outlineY1 + 1, outlineX2 + 1, outlineY2 + 1, 1, shadowColor);
+                drawOutline(graphics, outlineX1, outlineY1, outlineX2, outlineY2, 1, color);
+            if (ChamsConfig.CONFIG.instance().showAnimations) {
                 graphics.fill(outlineX1 + 3, outlineY1 + 3, outlineX2 - 1, outlineY2 - 1, enabledState >= 0.5F ? ColorHelper.Argb.lerp(enabledState, 0x00000000, shadowColor) : 0x00000000);
                 graphics.fill(outlineX1 + 2, outlineY1 + 2, outlineX2 - 2, outlineY2 - 2, ColorHelper.Argb.lerp(enabledState, 0x00000000, color));
-//            }
+            }
+            else{
+                if (control.option().pendingValue()) {
+                    graphics.fill(outlineX1 + 3, outlineY1 + 3, outlineX2 - 1, outlineY2 - 1, shadowColor);
+                    graphics.fill(outlineX1 + 2, outlineY1 + 2, outlineX2 - 2, outlineY2 - 2, color);
+                }
+            }
         }
 
     }

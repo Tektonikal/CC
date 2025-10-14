@@ -1,7 +1,6 @@
 package tektonikal.crystalchams.mixin;
 
 import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EndCrystalEntityRenderer;
@@ -17,9 +16,10 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import tektonikal.crystalchams.CrystalChams;
 import tektonikal.crystalchams.config.ChamsConfig;
@@ -63,9 +63,9 @@ public abstract class EnderDragonEntityRendererMixin extends EntityRenderer<Ende
         float g = MathHelper.sqrt(v);
         matrices.push();
         matrices.translate(0.0F, 2.0F, 0.0F);
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotation((float) (-Math.atan2((double) dz, (double) dx)) - (float) (Math.PI / 2)));
-        matrices.multiply(RotationAxis.POSITIVE_X.rotation((float) (-Math.atan2((double) f, (double) dy)) - (float) (Math.PI / 2)));
-        VertexConsumer vertexConsumer = getLayer(vertexConsumers, ChamsConfig.CONFIG.instance().beamRenderMode, true, CRYSTAL_BEAM_TEXTURE);
+        matrices.multiply(RotationAxis.POSITIVE_Y.rotation((float) (-Math.atan2(dz, dx)) - (float) (Math.PI / 2)));
+        matrices.multiply(RotationAxis.POSITIVE_X.rotation((float) (-Math.atan2(f, dy)) - (float) (Math.PI / 2)));
+        VertexConsumer vertexConsumer = getLayer(vertexConsumers, ChamsConfig.CONFIG.instance().beamRenderMode, ChamsConfig.CONFIG.instance().beamCulling, CRYSTAL_BEAM_TEXTURE);
         float h = -(tickDelta + age) * (0.01F * ChamsConfig.CONFIG.instance().beamScrollSpeed);
         float i = MathHelper.sqrt(v) / 32.0F - (tickDelta + age) * (0.01F * ChamsConfig.CONFIG.instance().beamScrollSpeed);
         float k = 0.0F;

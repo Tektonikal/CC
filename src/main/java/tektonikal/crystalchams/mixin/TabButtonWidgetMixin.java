@@ -23,6 +23,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 import tektonikal.crystalchams.CrystalChams;
+import tektonikal.crystalchams.config.ChamsConfig;
 
 @Mixin(TabButtonWidget.class)
 public abstract class TabButtonWidgetMixin extends ClickableWidget {
@@ -49,8 +50,7 @@ public abstract class TabButtonWidgetMixin extends ClickableWidget {
 
     @ModifyArgs(method = "renderWidget", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Lnet/minecraft/util/Identifier;IIII)V"))
     public void CC$OUGH(Args args) {
-        if (MinecraftClient.getInstance().currentScreen instanceof YACLScreen && ((YACLScreen) MinecraftClient.getInstance().currentScreen).config.title().equals(Text.of("Custom End Crystals"))) {
-
+        if (CrystalChams.isThisMyScreen() && ChamsConfig.CONFIG.instance().showAnimations) {
             args.set(0, altTextures.get(this.isCurrentTab(), this.isSelected()));
         }
     }
@@ -63,18 +63,18 @@ public abstract class TabButtonWidgetMixin extends ClickableWidget {
 
     @Inject(method = "drawCurrentTabLine", at = @At("HEAD"), cancellable = true)
     private void drawCurrentTabLine(DrawContext context, TextRenderer textRenderer, int color, CallbackInfo ci) {
-        if (MinecraftClient.getInstance().currentScreen instanceof YACLScreen && ((YACLScreen) MinecraftClient.getInstance().currentScreen).config.title().equals(Text.of("Custom End Crystals"))) {
+        if (CrystalChams.isThisMyScreen() && ChamsConfig.CONFIG.instance().showAnimations) {
             int i = Math.min(textRenderer.getWidth(this.getMessage()), this.getWidth() - 4);
             float j = this.getX() + ((this.getWidth() - i) / 2F);
             int k = this.getY() + this.getHeight() - 2;
-            fillFloat(context, MathHelper.lerp(selectedProgress, j + (i / 2F), j), k - (selectedProgress) + 1, MathHelper.lerp(selectedProgress, j + (i / 2F), (j + i)), k + 1, ColorHelper.Argb.lerp(selectedProgress, 0x00000000, this.active ? -1 : -6250336));
+            fillFloat(context, MathHelper.lerp(selectedProgress, j + (i / 2F), (int)j), k - (selectedProgress) + 1, MathHelper.lerp(selectedProgress, j + (i / 2F), (int)(j + i)), k + 1, ColorHelper.Argb.lerp(selectedProgress, 0x00000000, this.active ? -1 : -6250336));
             ci.cancel();
         }
     }
 
     @Inject(method = "renderWidget", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Lnet/minecraft/util/Identifier;IIII)V", shift = At.Shift.AFTER))
     public void CC$OUGHHHHHHHHH(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
-        if (MinecraftClient.getInstance().currentScreen instanceof YACLScreen && ((YACLScreen) MinecraftClient.getInstance().currentScreen).config.title().equals(Text.of("Custom End Crystals"))) {
+        if (CrystalChams.isThisMyScreen() && ChamsConfig.CONFIG.instance().showAnimations) {
             drawBorder(context, this.getX() + 1, isCurrentTab() ? this.getY() + 1 : this.getY() + 5, this.width - 2, isCurrentTab() ? this.height - 2 : this.height - 7, ColorHelper.Argb.lerp(hoverProgress, 0x00333333, 0xFFFFFFFF), !isCurrentTab());
         }
     }

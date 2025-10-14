@@ -7,7 +7,6 @@ import net.minecraft.client.gui.widget.Widget;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.gen.Accessor;
 import tektonikal.crystalchams.interfaces.ElementListWidgetExtInterface;
 
 @Mixin(ElementListWidgetExt.class)

@@ -14,6 +14,7 @@
   },
   "client": [
     "ButtonWidgetMixin",
+    "CategoryTabAccessor",
     "ElementListWidgetExtMixin",
     "EndCrystalEntityRendererMixin",
     "EnderDragonEntityRendererMixin",
@@ -21,8 +22,8 @@
     "ModelPartMixin",
     "OptionListWidgetAccessor",
     "OptionListWidgetAccessor$OptionListWidgetEntryMixin",
+    "PopupControllerScreenAccessor",
     "PopupControllerScreenMixin",
-    "PopupControllerScreenMixin$PopupControllerScreenAccessor",
     "TabButtonWidgetMixin",
     "YACLSCreenMixin",
     "YACLSCreenMixin$CategoryTabMixin"
