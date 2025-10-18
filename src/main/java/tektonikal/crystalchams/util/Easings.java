@@ -2,6 +2,7 @@ package tektonikal.crystalchams.util;
 
 import dev.isxander.yacl3.api.NameableEnum;
 import net.minecraft.text.Text;
+import tektonikal.crystalchams.CrystalChams;
 
 import java.util.function.Function;
 
@@ -11,6 +12,7 @@ import static java.lang.Math.*;
 // https://gist.github.com/dev-hydrogen/21a66f83f0386123e0c0acf107254843
 public enum Easings implements NameableEnum {
     OFF(x -> x),
+    //TODO: figure out how to slide exponential smoothing in here
     easeInSine(x -> 1 - cos((x * PI) / 2)),
     easeOutSine(x -> sin((x * PI) / 2)),
     easeInOutSine(x -> -(cos(PI * x) - 1) / 2),
@@ -49,6 +51,7 @@ public enum Easings implements NameableEnum {
 
     @Override
     public Text getDisplayName() {
+        //TODO!
         return Text.of(this.name());
     }
 }

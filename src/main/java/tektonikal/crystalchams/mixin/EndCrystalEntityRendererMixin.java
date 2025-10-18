@@ -73,7 +73,7 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
         matrixStack.push();
         matrixStack.multiply(RotationAxis.POSITIVE_Y.rotation((float) (Math.PI / 180.0) * ChamsConfig.o_baseRotation.pendingValue()));
         //translate before scaling because fuck you
-        matrixStack.translate(0.0F, ChamsConfig.o_baseOffset.pendingValue(), 0.0F);
+        matrixStack.translate(0.0F, ChamsConfig.o_baseOffset.pendingValue() - 1, 0.0F);
         matrixStack.scale(baseScale * 2, baseScale * 2, baseScale * 2);
         int overlay = OverlayTexture.DEFAULT_UV;
         if ((endCrystalEntity.shouldShowBottom() && ChamsConfig.o_baseRenderMode.pendingValue() == ChamsConfig.BaseRenderMode.DEFAULT) || ChamsConfig.o_baseRenderMode.pendingValue() == ChamsConfig.BaseRenderMode.ALWAYS) {

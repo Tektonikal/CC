@@ -6,8 +6,8 @@
   "mixins": [
     "ControllerWidgetMixin",
     "EndCrystalEntityMixin",
-    "OptionDescriptionWidgetMixin",
-    "ShaderMapMixin"
+    "ListOptionImplMixin",
+    "OptionDescriptionWidgetMixin"
   ],
   "injectors": {
     "defaultRequire": 1

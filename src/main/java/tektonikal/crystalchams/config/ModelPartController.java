@@ -2,7 +2,6 @@ package tektonikal.crystalchams.config;
 
 import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.EnumControllerBuilder;
-import net.minecraft.stat.Stat;
 import tektonikal.crystalchams.stupidfuckingboilerplate.CustomFloatSliderControllerBuilder;
 import dev.isxander.yacl3.api.controller.IntegerSliderControllerBuilder;
 import dev.isxander.yacl3.api.utils.Dimension;
@@ -16,7 +15,6 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.Text;
 import tektonikal.crystalchams.CrystalChams;
 import tektonikal.crystalchams.stupidfuckingboilerplate.CustomTickBoxControllerBuilder;
-import tektonikal.crystalchams.util.Easings;
 
 import java.awt.*;
 
@@ -92,6 +90,8 @@ public class ModelPartController implements Controller<ModelPartOptions> {
 
     @Override
     public AbstractWidget provideWidget(YACLScreen screen, Dimension<Integer> widgetDimension) {
+        //            System.out.println(ChamsConfig.o_frameList.isPendingValueDefault());
+        //            ((ListOptionImplAccessor) ChamsConfig.o_frameList).triggerListener(OptionEventListener.Event.STATE_CHANGE, false);
         subScreen = YetAnotherConfigLib.createBuilder().title(Text.of("Custom End Crystals")).category(ConfigCategory.createBuilder().name(Text.of("Edit Frame")).option(o_render).group(OptionGroup.createBuilder().name(Text.of("Movement")).option(o_offset).option(o_rotationSpeed).option(o_bounceHeight).option(o_bounceSpeed).option(o_tickDelay).build()).group(OptionGroup.createBuilder().name(Text.of("Evil Rendering")).option(o_scale).option(o_color).option(o_alpha).option(o_lightLevel).option(o_renderLayer).option(o_culling).option(o_funnyOption).build()).group(OptionGroup.createBuilder().name(Text.of("Evil Rainbow")).option(o_rainbow).option(o_rainbowSpeed).option(o_rainbowDelay).option(o_rainbowSaturation).option(o_rainbowBrightness).build()).build()).save(ChamsConfig.CONFIG::save).build();
         return new ModelPartOptionElement(this, screen, widgetDimension);
     }

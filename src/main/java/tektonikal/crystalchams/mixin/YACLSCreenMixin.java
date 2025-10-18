@@ -71,10 +71,6 @@ public abstract class YACLSCreenMixin extends Screen {
         @Shadow(remap = false)
         private OptionDescriptionWidget descriptionWidget;
 
-        @Shadow
-        @Final
-        private ScreenRect rightPaneDim;
-
         @Inject(method = "<init>", at = @At("TAIL"), remap = false)
         private void cc$OUGHHHHHHH(YACLScreen screen, ConfigCategory category, ScreenRect tabArea, CallbackInfo ci, @Local(ordinal = 1) int padding, @Local(ordinal = 2) int paddedWidth, @Local MutableDimension<Integer> actionDim) {
             if (CrystalChams.isThisMyScreen(screen)) {
@@ -112,6 +108,7 @@ public abstract class YACLSCreenMixin extends Screen {
             if (CrystalChams.isThisMyScreen(screen)) {
                 //this is terrible but I don't care anymore
                 consumer.accept(optionList);
+                //TODO!!!!!!!!!
 //              consumer.accept(undoButton);
 //              consumer.accept(searchField);
                 consumer.accept(resetAnimButton);
@@ -134,71 +131,6 @@ public abstract class YACLSCreenMixin extends Screen {
         private void CC$renderBackground(DrawContext drawContext, CallbackInfo ci) {
             if (Calendar.getInstance().get(Calendar.MONTH) == Calendar.APRIL && Calendar.getInstance().get(Calendar.DAY_OF_MONTH) == 1) {
                 GuiUtils.blitGuiTex(drawContext, Identifier.of("crystalchams:custom/bg.png"), 0, 0, 1920, 1080, 1920, 1080, MinecraftClient.getInstance().getWindow().getScaledWidth(), MinecraftClient.getInstance().getWindow().getScaledHeight());
-            }
-            double amount = optionList.getList().getScrollAmount();
-            if (CrystalChams.isThisMyScreen(screen)) {
-                int currentTab = screen.tabNavigationBar != null
-                        ? screen.tabNavigationBar.getTabs().indexOf(screen.tabManager.getCurrentTab())
-                        : 0;
-                if (currentTab == -1) {
-                    currentTab = 0;
-                }
-                screen.config.categories().get(currentTab).groups().forEach(group -> {
-                    if (group instanceof MutableOptionGroupImpl) {
-                        group.options().forEach(option -> {
-                            if (option.name().equals(Text.of("Render Mode"))) {
-                                Option<?> optionToAdd = null;
-                                if (option.equals(ChamsConfig.o_baseRenderLayer)) {
-                                    optionToAdd = ChamsConfig.o_baseCulling;
-                                } else if (option.equals(ChamsConfig.o_coreRenderLayer)) {
-                                    optionToAdd = ChamsConfig.o_coreCulling;
-                                } else if (option.equals(ChamsConfig.o_beamRenderLayer)) {
-                                    optionToAdd = ChamsConfig.o_beamCulling;
-                                }
-                                if (((RenderMode) option.stateManager().get()).canCull()) {
-                                    if (!((MutableOptionGroupImpl) group).options.contains(optionToAdd)) {
-                                        ((MutableOptionGroupImpl) group).options.add(optionToAdd);
-                                        optionList.getList().refreshOptions();
-                                        optionList.getList().setScrollAmount(amount);
-                                        ((ElementListWidgetExtInterface) optionList.getList()).setSmoothScrollAmount(amount);
-                                    }
-                                } else {
-                                    if (((MutableOptionGroupImpl) group).options.contains(optionToAdd)) {
-                                        ((MutableOptionGroupImpl) group).options.remove(optionToAdd);
-                                        optionList.getList().refreshOptions();
-                                        optionList.getList().setScrollAmount(amount);
-                                        ((ElementListWidgetExtInterface) optionList.getList()).setSmoothScrollAmount(amount);
-                                    }
-                                }
-                            }
-                            if (option.equals(ChamsConfig.o_coreRainbow)) {
-                                if ((boolean) option.stateManager().get()) {
-                                    if (!((MutableOptionGroupImpl) group).options.contains(ChamsConfig.o_coreRainbowSpeed)) {
-                                        ((MutableOptionGroupImpl) group).options.add(ChamsConfig.o_coreRainbowSpeed);
-                                        ((MutableOptionGroupImpl) group).options.add(ChamsConfig.o_coreRainbowDelay);
-                                        ((MutableOptionGroupImpl) group).options.add(ChamsConfig.o_coreRainbowBrightness);
-                                        ((MutableOptionGroupImpl) group).options.add(ChamsConfig.o_coreRainbowSaturation);
-                                        ChamsConfig.o_coreColor.setAvailable(false);
-                                        optionList.getList().refreshOptions();
-                                        optionList.getList().setScrollAmount(amount);
-                                        ((ElementListWidgetExtInterface) optionList.getList()).setSmoothScrollAmount(amount);
-                                    }
-                                } else {
-                                    if (((MutableOptionGroupImpl) group).options.contains(ChamsConfig.o_coreRainbowSpeed)) {
-                                        ((MutableOptionGroupImpl) group).options.remove(ChamsConfig.o_coreRainbowSpeed);
-                                        ((MutableOptionGroupImpl) group).options.remove(ChamsConfig.o_coreRainbowDelay);
-                                        ((MutableOptionGroupImpl) group).options.remove(ChamsConfig.o_coreRainbowBrightness);
-                                        ((MutableOptionGroupImpl) group).options.remove(ChamsConfig.o_coreRainbowSaturation);
-                                        ChamsConfig.o_coreColor.setAvailable(true);
-                                        optionList.getList().refreshOptions();
-                                        optionList.getList().setScrollAmount(amount);
-                                        ((ElementListWidgetExtInterface) optionList.getList()).setSmoothScrollAmount(amount);
-                                    }
-                                }
-                            }
-                        });
-                    }
-                });
             }
         }
     }
