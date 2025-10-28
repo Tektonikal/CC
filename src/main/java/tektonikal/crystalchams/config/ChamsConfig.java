@@ -6,22 +6,18 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.EnumControllerBuilder;
-import dev.isxander.yacl3.api.controller.IntegerSliderControllerBuilder;
 import dev.isxander.yacl3.config.v2.api.ConfigClassHandler;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
 import dev.isxander.yacl3.config.v2.api.serializer.GsonConfigSerializerBuilder;
 import dev.isxander.yacl3.config.v2.impl.serializer.GsonConfigSerializer;
 import dev.isxander.yacl3.impl.controller.ColorControllerBuilderImpl;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import tektonikal.crystalchams.CrystalChams;
 import tektonikal.crystalchams.annotation.Updatable;
-import tektonikal.crystalchams.stupidfuckingboilerplate.CustomFloatSliderControllerBuilder;
-import tektonikal.crystalchams.stupidfuckingboilerplate.CustomTickBoxControllerBuilder;
-import tektonikal.crystalchams.stupidfuckingboilerplate.ModelPartControllerBuilder;
+import tektonikal.crystalchams.stupidfuckingboilerplate.*;
 import tektonikal.crystalchams.util.Easings;
 
 import java.awt.*;
@@ -79,7 +75,7 @@ public class ChamsConfig {
             @SerialEntry public float coreRotationSpeed = 1F;
             @SerialEntry public float coreBounceHeight = 1f;
             @SerialEntry public float coreBounceSpeed = 1f;
-            @SerialEntry public float coreTickDelay = 0;
+            @SerialEntry public float coreDelay = 0;
             //Core Rendering
             @SerialEntry public float coreScale = 1F;
             @SerialEntry public Color coreColor = Color.decode("#ffffff");
@@ -140,27 +136,18 @@ public class ChamsConfig {
 
     //@formatter:on
     @Updatable
-    public static Option<Boolean> o_modEnabled = Option.<Boolean>createBuilder()
-            .name(Text.of("Mod Enabled"))
-            .description(OptionDescription.of(Text.of("I wonder what this one does!")))
-            .controller(CustomTickBoxControllerBuilder::new)
-            .stateManager(StateManager.createSimple(true, () -> CONFIG.instance().modEnabled, newVal -> CONFIG.instance().modEnabled = newVal))
-            .build();
-    public static Option<Boolean> o_showAnimations = Option.<Boolean>createBuilder()
-            .name(Text.of("UI Animations"))
-            .description(OptionDescription.of(Text.of("Toggle some neat little animations for the UI.")))
-            .controller(CustomTickBoxControllerBuilder::new)
-            .stateManager(StateManager.createSimple(true, () -> CONFIG.instance().showAnimations, newVal -> CONFIG.instance().showAnimations = newVal))
-            .build();
-    public static Option<Boolean> o_renderHitbox = Option.<Boolean>createBuilder()
-            .name(Text.of("Render Hitbox"))
-            .controller(CustomTickBoxControllerBuilder::new)
-            .description(OptionDescription.of(Text.of("Renders the crystal's hitbox, regardless of the game's setting. Compatible with hitbox mods.")))
-            .stateManager(StateManager.createSimple(false, () -> CONFIG.instance().renderHitbox, newVal -> CONFIG.instance().renderHitbox = newVal))
-            .build();
+    public static Option<Boolean> o_modEnabled = CrystalChams.createBooleanOption("Mod Enabled",
+            "I wonder what this one does!",
+            StateManager.createSimple(true, () -> CONFIG.instance().modEnabled, newVal -> CONFIG.instance().modEnabled = newVal));
+    public static Option<Boolean> o_showAnimations = CrystalChams.createBooleanOption("UI Animations",
+            "Toggle some neat little animations for the UI.",
+            StateManager.createSimple(true, () -> CONFIG.instance().showAnimations, newVal -> CONFIG.instance().showAnimations = newVal));
+    public static Option<Boolean> o_renderHitbox = CrystalChams.createBooleanOption("Render Hitbox",
+            "Renders the crystal's hitbox, regardless of the game's setting. Compatible with hitbox mods.",
+            StateManager.createSimple(false, () -> CONFIG.instance().renderHitbox, newVal -> CONFIG.instance().renderHitbox = newVal));
     public static Option<Float> o_previewScale = Option.<Float>createBuilder()
             .name(Text.of("Preview Scale"))
-            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 2f).step(0.01f).formatValue(val -> Text.of(String.format("%.0f", val * 100) + "%")))
+            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 2f).step(0.01f).formatValue(CrystalChams.PERCENT_FORMATTER))
             .stateManager(StateManager.createSimple(1F, () -> CONFIG.instance().previewScale, newVal -> CONFIG.instance().previewScale = newVal))
             .build();
     public static Option<Boolean> o_randomizeAge = Option.<Boolean>createBuilder()
@@ -171,18 +158,18 @@ public class ChamsConfig {
             .build();
     public static Option<Float> o_shadowRadius = Option.<Float>createBuilder()
             .name(Text.of("Shadow Radius"))
-            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 2f).step(0.1f).formatValue(val -> Text.of(String.format("%.1f", val).replace(".0", "") + (val == 1 ? " block" : " blocks"))))
+            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 2f).step(0.1f).formatValue(CrystalChams.BLOCKS_FORMATTER))
             .stateManager(StateManager.createSimple(0.5F, () -> CONFIG.instance().shadowRadius, newVal -> CONFIG.instance().shadowRadius = newVal))
             .build();
     public static Option<Float> o_shadowAlpha = CrystalChams.createFloatOptionPercent("Shadow Opacity", "", StateManager.createSimple(0.5F, () -> CONFIG.instance().shadowAlpha, newVal -> CONFIG.instance().shadowAlpha = newVal));
     public static EvilOption<Float> o_baseScale = EvilOption.<Float>createBuilder()
             .name(Text.of("Scale"))
-            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 2f).step(0.05f).formatValue(val -> Text.of(String.format("%.2f", val) + "x")))
+            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 2f).step(0.05f).formatValue(CrystalChams.MULTIPLIER_FORMATTER))
             .stateManager(StateManager.createSimple(1F, () -> CONFIG.instance().baseScale, newVal -> CONFIG.instance().baseScale = newVal))
             .build();
     public static EvilOption<Integer> o_baseRotation = EvilOption.<Integer>createBuilder()
             .name(Text.of("Rotation"))
-            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(0, 360).formatValue(value -> Text.of(value + "°")))
+            .controller(integerOption -> CustomIntegerSliderControllerBuilder.create(integerOption).step(1).range(0, 360).formatValue(value -> Text.of(value + "°")))
             .stateManager(StateManager.createSimple(0, () -> CONFIG.instance().baseRotation, newVal -> CONFIG.instance().baseRotation = newVal))
             //i don't know why i have to do this now, one day it just broke and i had no idea why
             .available(CONFIG.instance().baseRainbow && CONFIG.instance().baseRenderMode != BaseRenderMode.NEVER && CONFIG.instance().modEnabled)
@@ -200,7 +187,7 @@ public class ChamsConfig {
             .build();
     public static Option<Float> o_baseOffset = Option.<Float>createBuilder()
             .name(Text.of("Vertical Offset"))
-            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(-2F, 2F).step(0.1F).formatValue(val -> Text.of(String.format("%.1f", val).replace(".0", "") + (Math.abs(val) == 1 ? " block" : " blocks"))))
+            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(-2F, 2F).step(0.1F).formatValue(CrystalChams.BLOCKS_FORMATTER))
             .stateManager(StateManager.createSimple(0F, () -> CONFIG.instance().baseOffset, newVal -> CONFIG.instance().baseOffset = newVal))
             .build();
     public static EvilOption<Color> o_baseColor = EvilOption.<Color>createBuilder()
@@ -212,7 +199,7 @@ public class ChamsConfig {
     public static EvilOption<Integer> o_baseLightLevel = EvilOption.<Integer>createBuilder()
             .name(Text.of("Light Level"))
             .description(OptionDescription.createBuilder().text(Text.of("How brightly lit the object is. -1 uses the world's lighting, while 0-255 is mapped respectively.")).build())
-            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-1, 255).formatValue(value -> Text.of(value == -1 ? "Use World Light" : value + "")))
+            .controller(integerOption -> CustomIntegerSliderControllerBuilder.create(integerOption).step(1).range(-1, 255).formatValue(CrystalChams.LIGHT_FORMATTER))
             .stateManager(StateManager.createSimple(-1, () -> CONFIG.instance().baseLightLevel, newVal -> CONFIG.instance().baseLightLevel = newVal))
             .build();
     @Updatable
@@ -223,27 +210,21 @@ public class ChamsConfig {
             .build();
     public static EvilOption<Float> o_baseRainbowSpeed = EvilOption.<Float>createBuilder()
             .name(Text.of("Speed"))
-            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 10f).step(0.1f).formatValue(value -> Text.of(String.format("%.1f", value) + "x")))
-//            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(1, 10).formatValue(value -> Text.of(value + "x")))
+            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 10f).step(0.1f).formatValue(CrystalChams.MULTIPLIER_FORMATTER_ONE_PLACE))
+//            .controller(integerOption -> CustomIntegerSliderController.create(integerOption).step(1).range(1, 10).formatValue(value -> Text.of(value + "x")))
             .stateManager(StateManager.createSimple(2F, () -> CONFIG.instance().baseRainbowSpeed, newVal -> CONFIG.instance().baseRainbowSpeed = newVal))
             //i don't know why i have to do this now, one day it just broke and i had no idea why
             .available(CONFIG.instance().baseRainbow && CONFIG.instance().baseRenderMode != BaseRenderMode.NEVER && CONFIG.instance().modEnabled)
             .build();
     public static EvilOption<Float> o_baseRainbowDelay = EvilOption.<Float>createBuilder()
             .name(Text.of("Delay"))
-            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(-2.5f, 2.5f).step(0.1f).formatValue(val -> Text.of(String.format("%.1f", val).replace(".0", "") + (Math.abs(val) == 1 ? " second" : " seconds"))))
-//            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-500, 500).formatValue(integer -> Text.of(integer + "ms")))
+            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(-2.5f, 2.5f).step(0.1f).formatValue(CrystalChams.SECONDS_FORMATTER))
+//            .controller(integerOption -> CustomIntegerSliderController.create(integerOption).step(1).range(-500, 500).formatValue(integer -> Text.of(integer + "ms")))
             .stateManager(StateManager.createSimple(0F, () -> CONFIG.instance().baseRainbowDelay, newVal -> CONFIG.instance().baseRainbowDelay = newVal))
             .available(CONFIG.instance().baseRainbow && CONFIG.instance().baseRenderMode != BaseRenderMode.NEVER && CONFIG.instance().modEnabled)
             .build();
     public static EvilOption<Float> o_baseRainbowSaturation = CrystalChams.createFloatOptionPercent("Saturation", "", StateManager.createSimple(1f, () -> CONFIG.instance().baseRainbowSaturation, newVal -> CONFIG.instance().baseRainbowSaturation = newVal));
-    //TODO:
-    public static EvilOption<Float> o_baseRainbowBrightness = EvilOption.<Float>createBuilder()
-            .name(Text.of("Brightness"))
-            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(val -> Text.of(String.format("%.0f", val * 100) + "%")))
-            .stateManager(StateManager.createSimple(1F, () -> CONFIG.instance().baseRainbowBrightness, newVal -> CONFIG.instance().baseRainbowBrightness = newVal))
-            .available(CONFIG.instance().baseRainbow && CONFIG.instance().baseRenderMode != BaseRenderMode.NEVER && CONFIG.instance().modEnabled)
-            .build();
+    public static EvilOption<Float> o_baseRainbowBrightness = CrystalChams.createFloatOptionPercent("Brightness", "", StateManager.createSimple(1F, () -> CONFIG.instance().baseRainbowBrightness, newVal -> CONFIG.instance().baseRainbowBrightness = newVal));
     //keep this one below all other base options
     public static Option<BaseRenderMode> o_baseRenderMode = Option.<BaseRenderMode>createBuilder()
             .name(Text.of("Show"))
@@ -260,7 +241,7 @@ public class ChamsConfig {
             .build();
     public static EvilOption<Float> o_coreOffset = EvilOption.<Float>createBuilder()
             .name(Text.of("Vertical Offset"))
-            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(-2.5f, 2.5f).step(0.1f).formatValue(val -> Text.of(String.format("%.1f", val).replace(".0", "") + (Math.abs(val) == 1 ? " block" : " blocks"))))
+            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(-2.5f, 2.5f).step(0.1f).formatValue(CrystalChams.BLOCKS_FORMATTER))
             .stateManager(StateManager.createSimple(0F, () -> CONFIG.instance().coreOffset, newVal -> CONFIG.instance().coreOffset = newVal))
             .build();
     public static EvilOption<Float> o_coreRotationSpeed = EvilOption.<Float>createBuilder()
@@ -270,22 +251,22 @@ public class ChamsConfig {
             .build();
     public static EvilOption<Float> o_coreBounceHeight = EvilOption.<Float>createBuilder()
             .name(Text.of("Bounce Height"))
-            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 2f).step(0.05f).formatValue(val -> Text.of(String.format("%.2f", val) + "x")))
+            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 2.5f).step(0.05f).formatValue(val -> Text.of(String.format("%.2f", val) + "x")))
             .stateManager(StateManager.createSimple(1F, () -> CONFIG.instance().coreBounceHeight, newVal -> CONFIG.instance().coreBounceHeight = newVal))
             .build();
     public static EvilOption<Float> o_coreBounceSpeed = EvilOption.<Float>createBuilder()
             .name(Text.of("Bounce Speed"))
-            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 2f).step(0.05f).formatValue(val -> Text.of(String.format("%.2f", val) + "x")))
+            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 2.5f).step(0.05f).formatValue(val -> Text.of(String.format("%.2f", val) + "x")))
             .stateManager(StateManager.createSimple(1F, () -> CONFIG.instance().coreBounceSpeed, newVal -> CONFIG.instance().coreBounceSpeed = newVal))
             .build();
-    public static EvilOption<Float> o_coreTickDelay = EvilOption.<Float>createBuilder()
-            .name(Text.of("Tick Delay"))
-            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(-20f, 20f).step(0.1f).formatValue(val -> Text.of(String.format("%.1f", val) + " ticks")))
-            .stateManager(StateManager.createSimple(0F, () -> CONFIG.instance().coreTickDelay, newVal -> CONFIG.instance().coreTickDelay = newVal))
+    public static EvilOption<Float> o_coreDelay = EvilOption.<Float>createBuilder()
+            .name(Text.of("Delay"))
+            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(-2.5f, 2.5f).step(0.1f).formatValue(CrystalChams.SECONDS_FORMATTER))
+            .stateManager(StateManager.createSimple(0F, () -> CONFIG.instance().coreDelay, newVal -> CONFIG.instance().coreDelay = newVal))
             .build();
     public static EvilOption<Float> o_coreScale = EvilOption.<Float>createBuilder()
             .name(Text.of("Scale"))
-            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 2f).step(0.05f).formatValue(val -> Text.of(String.format("%.2f", val) + "x")))
+            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 2.5f).step(0.05f).formatValue(val -> Text.of(String.format("%.2f", val) + "x")))
             .stateManager(StateManager.createSimple(1F, () -> CONFIG.instance().coreScale, newVal -> CONFIG.instance().coreScale = newVal))
             .build();
     public static EvilOption<Color> o_coreColor = EvilOption.<Color>createBuilder()
@@ -297,7 +278,7 @@ public class ChamsConfig {
     public static EvilOption<Integer> o_coreLightLevel = EvilOption.<Integer>createBuilder()
             .name(Text.of("Light Level"))
             .description(OptionDescription.createBuilder().text(Text.of("How brightly lit the object is. -1 uses the world's lighting, while 0-255 is mapped respectively.")).build())
-            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-1, 255).formatValue(value -> Text.of(value == -1 ? "Use World Light" : value + "")))
+            .controller(integerOption -> CustomIntegerSliderControllerBuilder.create(integerOption).step(1).range(-1, 255).formatValue(value -> Text.of(value == -1 ? "Use World Light" : value + "")))
             .stateManager(StateManager.createSimple(-1, () -> CONFIG.instance().coreLightLevel, newVal -> CONFIG.instance().coreLightLevel = newVal))
             .build();
     public static EvilOption<RenderMode> o_coreRenderLayer = EvilOption.<RenderMode>createBuilder()
@@ -318,21 +299,18 @@ public class ChamsConfig {
             .stateManager(StateManager.createSimple(false, () -> CONFIG.instance().coreRainbow, newVal -> CONFIG.instance().coreRainbow = newVal))
             .build();
     public static EvilOption<Float> o_coreRainbowSpeed = EvilOption.<Float>createBuilder()
-            .name(Text.of("Speed"))
-            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 10f).step(0.1f).formatValue(value -> Text.of(String.format("%.1f", value) + "x")))
-//            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(1, 10).formatValue(value -> Text.of(value + "x")))
+            .name(Text.of("├Speed"))
+            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 10f).step(0.1f).formatValue(CrystalChams.MULTIPLIER_FORMATTER_ONE_PLACE))
+//            .controller(integerOption -> CustomIntegerSliderController.create(integerOption).step(1).range(1, 10).formatValue(value -> Text.of(value + "x")))
             .stateManager(StateManager.createSimple(2F, () -> CONFIG.instance().coreRainbowSpeed, newVal -> CONFIG.instance().coreRainbowSpeed = newVal))
-            .available(CONFIG.instance().coreRainbow && CONFIG.instance().renderCore && CONFIG.instance().modEnabled)
             .build();
     public static EvilOption<Float> o_coreRainbowDelay = EvilOption.<Float>createBuilder()
-            .name(Text.of("Delay"))
+            .name(Text.of("├Delay"))
             .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(-2.5f, 2.5f).step(0.1f).formatValue(val -> Text.of(String.format("%.1f", val).replace(".0", "") + (Math.abs(val) == 1 ? " second" : " seconds"))))
-//            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-500, 500).formatValue(integer -> Text.of(integer + "ms")))
             .stateManager(StateManager.createSimple(0F, () -> CONFIG.instance().coreRainbowDelay, newVal -> CONFIG.instance().coreRainbowDelay = newVal))
-            .available(CONFIG.instance().coreRainbow && CONFIG.instance().renderCore && CONFIG.instance().modEnabled)
             .build();
-    public static EvilOption<Float> o_coreRainbowSaturation = CrystalChams.createFloatOptionPercent("Saturation", "", StateManager.createSimple(1F, () -> CONFIG.instance().coreRainbowSaturation, newVal -> CONFIG.instance().coreRainbowSaturation = newVal));
-    public static EvilOption<Float> o_coreRainbowBrightness = CrystalChams.createFloatOptionPercent("Brightness", "", StateManager.createSimple(1F, () -> CONFIG.instance().coreRainbowBrightness, newVal -> CONFIG.instance().coreRainbowBrightness = newVal));
+    public static EvilOption<Float> o_coreRainbowSaturation = CrystalChams.createFloatOptionPercent("├Saturation", "", StateManager.createSimple(1F, () -> CONFIG.instance().coreRainbowSaturation, newVal -> CONFIG.instance().coreRainbowSaturation = newVal));
+    public static EvilOption<Float> o_coreRainbowBrightness = CrystalChams.createFloatOptionPercent("└ ▙ ┕ ┖ ┗ Brightness", "", StateManager.createSimple(1F, () -> CONFIG.instance().coreRainbowBrightness, newVal -> CONFIG.instance().coreRainbowBrightness = newVal));
     @Updatable
     public static Option<Boolean> o_coreAlphaAnimation = Option.<Boolean>createBuilder()
             .name(Text.of("Animation Enabled"))
@@ -403,7 +381,7 @@ public class ChamsConfig {
     public static EvilOption<Integer> o_beam1LightLevel = EvilOption.<Integer>createBuilder()
             .name(Text.of("Light Level"))
             .description(OptionDescription.createBuilder().text(Text.of("How brightly lit the object is. -1 uses the world's lighting, while 0-255 is mapped respectively.")).build())
-            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-1, 255).formatValue(value -> Text.of(value == -1 ? "Use World Light" : value + "")))
+            .controller(integerOption -> CustomIntegerSliderControllerBuilder.create(integerOption).step(1).range(-1, 255).formatValue(value -> Text.of(value == -1 ? "Use World Light" : value + "")))
             .stateManager(StateManager.createSimple(-1, () -> CONFIG.instance().beam1LightLevel, newVal -> CONFIG.instance().beam1LightLevel = newVal))
             .build();
     @Updatable
@@ -414,38 +392,29 @@ public class ChamsConfig {
             .build();
     public static EvilOption<Float> o_beam1RainbowSpeed = EvilOption.<Float>createBuilder()
             .name(Text.of("Rainbow Speed"))
-            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 10f).step(0.1f).formatValue(value -> Text.of(String.format("%.1f", value) + "x")))
+            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 10f).step(0.1f).formatValue(CrystalChams.MULTIPLIER_FORMATTER_ONE_PLACE))
             .stateManager(StateManager.createSimple(2F, () -> CONFIG.instance().beam1RainbowSpeed, newVal -> CONFIG.instance().beam1RainbowSpeed = newVal))
             .available(CONFIG.instance().beam1Rainbow && CONFIG.instance().renderBeam && CONFIG.instance().modEnabled)
             .build();
     public static EvilOption<Float> o_beam1RainbowDelay = EvilOption.<Float>createBuilder()
             .name(Text.of("Rainbow Delay"))
-//            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-500, 500).formatValue(integer -> Text.of(integer + "ms")))
+//            .controller(integerOption -> CustomIntegerSliderController.create(integerOption).step(1).range(-500, 500).formatValue(integer -> Text.of(integer + "ms")))
             .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(-2.5f, 2.5f).step(0.1f).formatValue(val -> Text.of(String.format("%.1f", val).replace(".0", "") + (Math.abs(val) == 1 ? " second" : " seconds"))))
             .stateManager(StateManager.createSimple(0F, () -> CONFIG.instance().beam1RainbowDelay, newVal -> CONFIG.instance().beam1RainbowDelay = newVal))
             .available(CONFIG.instance().beam1Rainbow && CONFIG.instance().renderBeam && CONFIG.instance().modEnabled)
             .build();
     public static EvilOption<Float> o_beam1RainbowSaturation = CrystalChams.createFloatOptionPercent("Saturation", "", StateManager.createSimple(1F, () -> CONFIG.instance().beam1RainbowSaturation, newVal -> CONFIG.instance().beam1RainbowSaturation = newVal));
-    public static EvilOption<Float> o_beam1RainbowBrightness = EvilOption.<Float>createBuilder()
-            .name(Text.of("Brightness"))
-            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(val -> Text.of(String.format("%.0f", val * 100) + "%")))
-            .stateManager(StateManager.createSimple(1F, () -> CONFIG.instance().beam1RainbowBrightness, newVal -> CONFIG.instance().beam1RainbowBrightness = newVal))
-            .available(CONFIG.instance().beam1Rainbow && CONFIG.instance().renderBeam && CONFIG.instance().modEnabled)
-            .build();
+    public static EvilOption<Float> o_beam1RainbowBrightness = CrystalChams.createFloatOptionPercent("Brightness", "", StateManager.createSimple(1F, () -> CONFIG.instance().beam1RainbowBrightness, newVal -> CONFIG.instance().beam1RainbowBrightness = newVal));
     public static EvilOption<Color> o_beam2Color = EvilOption.<Color>createBuilder()
             .name(Text.of("Color"))
             .controller(ColorControllerBuilderImpl::new)
             .stateManager(StateManager.createSimple(new Color(0, 0, 0), () -> CONFIG.instance().beam2Color, newVal -> CONFIG.instance().beam2Color = newVal))
             .build();
-    public static EvilOption<Float> o_beam2Alpha = EvilOption.<Float>createBuilder()
-            .name(Text.of("Opacity"))
-            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(val -> Text.of(String.format("%.0f", val * 100) + "%")))
-            .stateManager(StateManager.createSimple(1F, () -> CONFIG.instance().beam2Alpha, newVal -> CONFIG.instance().beam2Alpha = newVal))
-            .build();
+    public static EvilOption<Float> o_beam2Alpha = CrystalChams.createFloatOptionPercent("Opacity", "", StateManager.createSimple(1F, () -> CONFIG.instance().beam2Alpha, newVal -> CONFIG.instance().beam2Alpha = newVal));
     public static EvilOption<Integer> o_beam2LightLevel = EvilOption.<Integer>createBuilder()
             .name(Text.of("Light Level"))
             .description(OptionDescription.createBuilder().text(Text.of("How brightly lit the object is. -1 uses the world's lighting, while 0-255 is mapped respectively.")).build())
-            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-1, 255).formatValue(value -> Text.of(value == -1 ? "Use World Light" : value + "")))
+            .controller(integerOption -> CustomIntegerSliderControllerBuilder.create(integerOption).step(1).range(-1, 255).formatValue(value -> Text.of(value == -1 ? "Use World Light" : value + "")))
             .stateManager(StateManager.createSimple(-1, () -> CONFIG.instance().beam2LightLevel, newVal -> CONFIG.instance().beam2LightLevel = newVal))
             .build();
     @Updatable
@@ -456,47 +425,36 @@ public class ChamsConfig {
             .build();
     public static EvilOption<Float> o_beam2RainbowSpeed = EvilOption.<Float>createBuilder()
             .name(Text.of("Rainbow Speed"))
-            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 10f).step(0.1f).formatValue(value -> Text.of(String.format("%.1f", value) + "x")))
+            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 10f).step(0.1f).formatValue(CrystalChams.MULTIPLIER_FORMATTER_ONE_PLACE))
             .stateManager(StateManager.createSimple(2F, () -> CONFIG.instance().beam2RainbowSpeed, newVal -> CONFIG.instance().beam2RainbowSpeed = newVal))
             .available(CONFIG.instance().beam2Rainbow && CONFIG.instance().renderBeam && CONFIG.instance().modEnabled)
             .build();
     public static EvilOption<Float> o_beam2RainbowDelay = EvilOption.<Float>createBuilder()
             .name(Text.of("Rainbow Delay"))
-//            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-500, 500).formatValue(integer -> Text.of(integer + "ms")))
             .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(-2.5f, 2.5f).step(0.1f).formatValue(val -> Text.of(String.format("%.1f", val).replace(".0", "") + (Math.abs(val) == 1 ? " second" : " seconds"))))
             .stateManager(StateManager.createSimple(0F, () -> CONFIG.instance().beam2RainbowDelay, newVal -> CONFIG.instance().beam2RainbowDelay = newVal))
             .available(CONFIG.instance().beam2Rainbow && CONFIG.instance().renderBeam && CONFIG.instance().modEnabled)
             .build();
-    public static EvilOption<Float> o_beam2RainbowSaturation = EvilOption.<Float>createBuilder()
-            .name(Text.of("Saturation"))
-            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(val -> Text.of(String.format("%.0f", val * 100) + "%")))
-            .stateManager(StateManager.createSimple(1F, () -> CONFIG.instance().beam2RainbowSaturation, newVal -> CONFIG.instance().beam2RainbowSaturation = newVal))
-            .available(CONFIG.instance().beam2Rainbow && CONFIG.instance().renderBeam && CONFIG.instance().modEnabled)
-            .build();
-    public static EvilOption<Float> o_beam2RainbowBrightness = EvilOption.<Float>createBuilder()
-            .name(Text.of("Brightness"))
-            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(val -> Text.of(String.format("%.0f", val * 100) + "%")))
-            .stateManager(StateManager.createSimple(1F, () -> CONFIG.instance().beam2RainbowBrightness, newVal -> CONFIG.instance().beam2RainbowBrightness = newVal))
-            .available(CONFIG.instance().beam2Rainbow && CONFIG.instance().renderBeam && CONFIG.instance().modEnabled)
-            .build();
+    public static EvilOption<Float> o_beam2RainbowSaturation = CrystalChams.createFloatOptionPercent("Saturation", "", StateManager.createSimple(1F, () -> CONFIG.instance().beam2RainbowSaturation, newVal -> CONFIG.instance().beam2RainbowSaturation = newVal));
+    public static EvilOption<Float> o_beam2RainbowBrightness = CrystalChams.createFloatOptionPercent("Brightness", "", StateManager.createSimple(1F, () -> CONFIG.instance().beam2RainbowBrightness, newVal -> CONFIG.instance().beam2RainbowBrightness = newVal));
     public static EvilOption<Float> o_beam1Radius = EvilOption.<Float>createBuilder()
             .name(Text.of("Radius"))
-            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(-1f, 1f).step(0.05f).formatValue(val -> Text.of(String.format("%.2f", val).replace(".0", "") + (val == 1 ? " block" : " blocks"))))
+            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(-1f, 1f).step(0.05f).formatValue(CrystalChams.BLOCKS_FORMATTER_TWO_PLACES))
             .stateManager(StateManager.createSimple(0.75F, () -> CONFIG.instance().beam1Radius, newVal -> CONFIG.instance().beam1Radius = newVal))
             .build();
     public static EvilOption<Float> o_beam2Radius = EvilOption.<Float>createBuilder()
             .name(Text.of("Radius"))
-            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(-1f, 1f).step(0.05f).formatValue(val -> Text.of(String.format("%.2f", val).replace(".0", "") + (val == 1 ? " block" : " blocks"))))
+            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(-1f, 1f).step(0.05f).formatValue(CrystalChams.BLOCKS_FORMATTER_TWO_PLACES))
             .stateManager(StateManager.createSimple(0.15F, () -> CONFIG.instance().beam2Radius, newVal -> CONFIG.instance().beam2Radius = newVal))
             .build();
     public static Option<Integer> o_beamSides = Option.<Integer>createBuilder()
             .name(Text.of("Sides"))
-            .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(2, 64))
+            .controller(integerOption -> CustomIntegerSliderControllerBuilder.create(integerOption).step(1).range(2, 64))
             .stateManager(StateManager.createSimple(8, () -> CONFIG.instance().beamSides, newVal -> CONFIG.instance().beamSides = newVal))
             .build();
     public static Option<Float> o_beamScrollSpeed = Option.<Float>createBuilder()
             .name(Text.of("Scroll Speed"))
-            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(-2f, 2f).step(0.05f).formatValue(val -> Text.of(String.format("%.2f", val))))
+            .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(-2f, 2f).step(0.05f).formatValue(CrystalChams.MULTIPLIER_FORMATTER))
             .stateManager(StateManager.createSimple(1F, () -> CONFIG.instance().beamScrollSpeed, newVal -> CONFIG.instance().beamScrollSpeed = newVal))
             .build();
     public static EvilOption<RenderMode> o_beamRenderLayer = EvilOption.<RenderMode>createBuilder()
@@ -534,7 +492,7 @@ public class ChamsConfig {
             o_coreRotationSpeed.setAvailable(available);
             o_coreBounceHeight.setAvailable(available);
             o_coreBounceSpeed.setAvailable(available);
-            o_coreTickDelay.setAvailable(available);
+            o_coreDelay.setAvailable(available);
             o_coreScale.setAvailable(available);
             o_coreColor.setAvailable(available);
             o_coreAlpha.setAvailable(available);
@@ -638,7 +596,7 @@ public class ChamsConfig {
                                         .option(ButtonOption.createBuilder()
                                                 .name(Text.of("Copy Current Config"))
                                                 .description(OptionDescription.createBuilder().text(Text.of("Copies the current configuration as text to your clipboard. Go share your configs with your buddies! (Make sure to save the config first)")).build())
-                                                .action((yaclScreen, buttonOption) -> MinecraftClient.getInstance().keyboard.setClipboard(gson.toJson(CONFIG.instance())))
+                                                .action((yaclScreen, buttonOption) -> CrystalChams.mc.keyboard.setClipboard(gson.toJson(CONFIG.instance())))
                                                 .text(Text.of("Copy"))
                                                 .build())
                                         .option(ButtonOption.createBuilder()
@@ -648,7 +606,7 @@ public class ChamsConfig {
                                                 .action((yaclScreen, buttonOption) -> {
                                                     //this sucks but it works!!
                                                     try {
-                                                        gson.fromJson(MinecraftClient.getInstance().keyboard.getClipboard(), ChamsConfig.class);
+                                                        gson.fromJson(CrystalChams.mc.keyboard.getClipboard(), ChamsConfig.class);
                                                     } catch (JsonSyntaxException e) {
                                                         System.out.println("invalid config!!!");
                                                         return;
@@ -657,7 +615,7 @@ public class ChamsConfig {
                                                         Path path = FabricLoader.getInstance().getConfigDir().resolve("crystalchams.json");
                                                         Files.delete(path);
                                                         Files.createFile(path);
-                                                        Files.writeString(path, MinecraftClient.getInstance().keyboard.getClipboard(), StandardCharsets.UTF_8);
+                                                        Files.writeString(path, CrystalChams.mc.keyboard.getClipboard(), StandardCharsets.UTF_8);
                                                         ChamsConfig.CONFIG.load();
                                                         CrystalChams.unleashHell();
                                                     } catch (IOException e) {
@@ -694,9 +652,9 @@ public class ChamsConfig {
                                         .option(o_coreRotationSpeed)
                                         .option(o_coreBounceHeight)
                                         .option(o_coreBounceSpeed)
-                                        .option(o_coreTickDelay)
+                                        .option(o_coreDelay)
                                         .build())
-                                .group(MutableOptionGroupImpl.createBuilder()
+                                .group(OptionGroup.createBuilder()
                                         .name(Text.of("Color"))
                                         .option(o_coreColor)
                                         .option(o_coreAlpha)
@@ -706,7 +664,7 @@ public class ChamsConfig {
                                         .option(o_coreRainbowSaturation)
                                         .option(o_coreRainbowBrightness)
                                         .build())
-                                .group(MutableOptionGroupImpl.createBuilder()
+                                .group(OptionGroup.createBuilder()
                                         .name(Text.of("Rendering"))
                                         .option(o_coreLightLevel)
                                         .option(o_coreRenderLayer)
@@ -719,7 +677,6 @@ public class ChamsConfig {
                                         .option(o_coreAlphaAnimDuration)
                                         .option(o_coreAlphaDelay)
                                         .option(o_coreAlphaEasing)
-                                        .option(LabelOption.create(Text.of("testing.")))
                                         .option(o_coreScaleAnimation)
                                         .option(o_coreStartScale)
                                         .option(o_coreScaleAnimDuration)
@@ -741,7 +698,7 @@ public class ChamsConfig {
                                         .option(o_baseRotation)
                                         .build()
                                 )
-                                .group(MutableOptionGroupImpl.createBuilder()
+                                .group(OptionGroup.createBuilder()
                                         .name(Text.of("Rendering"))
                                         .option(o_baseScale)
                                         .option(o_baseColor)

@@ -6,17 +6,17 @@ import dev.isxander.yacl3.gui.controllers.ControllerWidget;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
-import org.joml.Matrix4f;
 import tektonikal.crystalchams.CrystalChams;
 import tektonikal.crystalchams.stupidfuckingboilerplate.CustomFloatSliderController;
 import tektonikal.crystalchams.stupidfuckingboilerplate.ICustomSliderController;
+import tektonikal.crystalchams.stupidfuckingboilerplate.CustomIntegerSliderController;
 
-public class CustomSliderControllerElement extends ControllerWidget<ICustomSliderController<?>> {
+import static tektonikal.crystalchams.CrystalChams.fillFloat;
+
+public class CustomFloatSliderControllerElement extends ControllerWidget<ICustomSliderController<?>> {
     private final double min, max, interval;
 
     private float interpolation;
@@ -29,7 +29,7 @@ public class CustomSliderControllerElement extends ControllerWidget<ICustomSlide
 
     private boolean mouseDown = false;
 
-    public CustomSliderControllerElement(ICustomSliderController<?> option, YACLScreen screen, Dimension<Integer> dim, double min, double max, double interval) {
+    public CustomFloatSliderControllerElement(ICustomSliderController<?> option, YACLScreen screen, Dimension<Integer> dim, double min, double max, double interval) {
         super(option, screen, dim);
         this.min = min;
         this.max = max;
@@ -42,6 +42,7 @@ public class CustomSliderControllerElement extends ControllerWidget<ICustomSlide
     public void render(DrawContext graphics, int mouseX, int mouseY, float delta) {
         super.render(graphics, mouseX, mouseY, delta);
         interpolatedValue = CrystalChams.ease(interpolatedValue, control.pendingValue(), 20);
+        //this is so fucking stupid
         focusedTime = (float) CrystalChams.ease(focusedTime, (this.hovered || this.focused) && this.isAvailable() ? 1 : 0, 7.5F);
         fasterFocusedTime = (float) CrystalChams.ease(fasterFocusedTime, this.hovered || this.focused ? 1 : 0, 12.5F);
         calculateInterpolation();
@@ -61,15 +62,23 @@ public class CustomSliderControllerElement extends ControllerWidget<ICustomSlide
     @Override
     protected void drawValueText(DrawContext graphics, int mouseX, int mouseY, float delta) {
         graphics.getMatrices().push();
-        Text valueText = ((CustomFloatSliderController) (control)).valueFormatter.format((float) interpolatedValue);
+        //this is fucking stupid. but i have to do it. trust me, future me.
+        float value = (float) (Math.round(interpolatedValue / interval) * interval);
+        Text valueText;
+        //this also fucking sucks, but it works.
+        try {
+            valueText = ((CustomFloatSliderController) (control)).valueFormatter.format(value);
+        } catch (ClassCastException e) {
+            valueText = ((CustomIntegerSliderController) (control)).valueFormatter.format((int) value);
+
+        }
         textRenderer.draw(valueText, (getDimension().xLimit() - textRenderer.getWidth(valueText) - getXPadding() - (sliderBounds.width() + 6 + getThumbWidth() / 2f) * focusedTime), getTextY(), getValueColor(), true, graphics.getMatrices().peek().getPositionMatrix(), graphics.getVertexConsumers(), TextRenderer.TextLayerType.NORMAL, 0, 15728880);
         graphics.getMatrices().pop();
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (!isAvailable() || button != 0 || !sliderBounds.isPointInside((int) mouseX, (int) mouseY))
-            return false;
+        if (!isAvailable() || button != 0 || !sliderBounds.isPointInside((int) mouseX, (int) mouseY)) return false;
 
         mouseDown = true;
 
@@ -79,8 +88,7 @@ public class CustomSliderControllerElement extends ControllerWidget<ICustomSlide
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (!isAvailable() || button != 0 || !mouseDown)
-            return false;
+        if (!isAvailable() || button != 0 || !mouseDown) return false;
 
         setValueFromMouse(mouseX);
         return true;
@@ -102,8 +110,7 @@ public class CustomSliderControllerElement extends ControllerWidget<ICustomSlide
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (isAvailable() && mouseDown)
-            playDownSound();
+        if (isAvailable() && mouseDown) playDownSound();
         mouseDown = false;
 
         return super.mouseReleased(mouseX, mouseY, button);
@@ -111,8 +118,7 @@ public class CustomSliderControllerElement extends ControllerWidget<ICustomSlide
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (!focused)
-            return false;
+        if (!focused) return false;
 
         switch (keyCode) {
             case InputUtil.GLFW_KEY_LEFT -> incrementValue(-1);
@@ -153,8 +159,7 @@ public class CustomSliderControllerElement extends ControllerWidget<ICustomSlide
     public void setDimension(Dimension<Integer> dim) {
         super.setDimension(dim);
         int trackWidth = dim.width() / 3;
-        if (optionNameString.isEmpty())
-            trackWidth = dim.width() / 2;
+        if (optionNameString.isEmpty()) trackWidth = dim.width() / 2;
 
         sliderBounds = Dimension.ofInt(dim.xLimit() - getXPadding() - getThumbWidth() / 2 - trackWidth, dim.centerY() - 5, trackWidth, 10);
     }
@@ -167,13 +172,4 @@ public class CustomSliderControllerElement extends ControllerWidget<ICustomSlide
         return 4;
     }
 
-    public void fillFloat(DrawContext context, float x1, float y1, float x2, float y2, int color) {
-        Matrix4f matrix4f = context.getMatrices().peek().getPositionMatrix();
-        VertexConsumer vertexConsumer = context.getVertexConsumers().getBuffer(RenderLayer.getGui());
-        vertexConsumer.vertex(matrix4f, x1, y1, 0).color(color);
-        vertexConsumer.vertex(matrix4f, x1, y2, 0).color(color);
-        vertexConsumer.vertex(matrix4f, x2, y2, 0).color(color);
-        vertexConsumer.vertex(matrix4f, x2, y1, 0).color(color);
-        context.draw();
-    }
 }

@@ -6,7 +6,7 @@ import dev.isxander.yacl3.api.utils.Dimension;
 import dev.isxander.yacl3.gui.AbstractWidget;
 import dev.isxander.yacl3.gui.YACLScreen;
 import dev.isxander.yacl3.gui.controllers.slider.SliderControllerElement;
-import tektonikal.crystalchams.config.CustomSliderControllerElement;
+import tektonikal.crystalchams.config.CustomFloatSliderControllerElement;
 
 /**
  * Simple custom slider implementation that shifts the current value across when shown.
@@ -52,6 +52,6 @@ public interface ICustomSliderController<T extends Number> extends Controller<T>
      */
     @Override
     default AbstractWidget provideWidget(YACLScreen screen, Dimension<Integer> widgetDimension) {
-        return new CustomSliderControllerElement(this, screen, widgetDimension, min(), max(), interval());
+        return new CustomFloatSliderControllerElement(this, screen, widgetDimension, min(), max(), interval());
     }
 }

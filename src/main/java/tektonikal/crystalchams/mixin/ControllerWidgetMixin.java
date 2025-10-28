@@ -37,7 +37,7 @@ public abstract class ControllerWidgetMixin extends AbstractWidget {
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Ldev/isxander/yacl3/gui/controllers/ControllerWidget;drawButtonRect(Lnet/minecraft/client/gui/DrawContext;IIIIZZ)V", shift = At.Shift.AFTER))
     private void CC$OUGHHH(DrawContext graphics, int mouseX, int mouseY, float delta, CallbackInfo ci) {
-        if (CrystalChams.isThisMyScreen(screen) && ChamsConfig.CONFIG.instance().showAnimations) {
+        if (CrystalChams.isThisMyScreen(screen) && ChamsConfig.o_showAnimations.pendingValue()) {
             hoverProgress = (float) CrystalChams.ease(hoverProgress, isAvailable() && isHovered() ? 1 : 0, 10F);
             drawOutline(graphics, getDimension().x(), getDimension().y(), getDimension().xLimit(), getDimension().yLimit(), 1, new Color(hoverProgress, hoverProgress, hoverProgress).getRGB());
         }

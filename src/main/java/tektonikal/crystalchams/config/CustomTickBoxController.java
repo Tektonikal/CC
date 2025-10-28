@@ -45,7 +45,7 @@ public class CustomTickBoxController extends TickBoxController {
 
                 drawOutline(graphics, outlineX1 + 1, outlineY1 + 1, outlineX2 + 1, outlineY2 + 1, 1, shadowColor);
                 drawOutline(graphics, outlineX1, outlineY1, outlineX2, outlineY2, 1, color);
-            if (ChamsConfig.CONFIG.instance().showAnimations) {
+            if (ChamsConfig.o_showAnimations.pendingValue()) {
                 graphics.fill(outlineX1 + 3, outlineY1 + 3, outlineX2 - 1, outlineY2 - 1, enabledState >= 0.5F ? ColorHelper.Argb.lerp(enabledState, 0x00000000, shadowColor) : 0x00000000);
                 graphics.fill(outlineX1 + 2, outlineY1 + 2, outlineX2 - 2, outlineY2 - 2, ColorHelper.Argb.lerp(enabledState, 0x00000000, color));
             }

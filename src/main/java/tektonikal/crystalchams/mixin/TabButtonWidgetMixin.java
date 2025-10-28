@@ -25,6 +25,8 @@ import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 import tektonikal.crystalchams.CrystalChams;
 import tektonikal.crystalchams.config.ChamsConfig;
 
+import static tektonikal.crystalchams.CrystalChams.fillFloat;
+
 @Mixin(TabButtonWidget.class)
 public abstract class TabButtonWidgetMixin extends ClickableWidget {
 
@@ -50,20 +52,20 @@ public abstract class TabButtonWidgetMixin extends ClickableWidget {
 
     @ModifyArgs(method = "renderWidget", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Lnet/minecraft/util/Identifier;IIII)V"))
     public void CC$OUGH(Args args) {
-        if (CrystalChams.isThisMyScreen() && ChamsConfig.CONFIG.instance().showAnimations) {
+        if (CrystalChams.isThisMyScreen() && ChamsConfig.o_showAnimations.pendingValue()) {
             args.set(0, altTextures.get(this.isCurrentTab(), this.isSelected()));
         }
     }
 
     @Inject(method = "renderWidget", at = @At("TAIL"))
     public void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
-        hoverProgress = (float) CrystalChams.ease(hoverProgress, hovered || (isFocused() && MinecraftClient.getInstance().getNavigationType().isKeyboard()) && this.active ? 1 : 0, 10F);
+        hoverProgress = (float) CrystalChams.ease(hoverProgress, hovered || (isFocused() && CrystalChams.mc.getNavigationType().isKeyboard()) && this.active ? 1 : 0, 10F);
         selectedProgress = (float) CrystalChams.ease(selectedProgress, isCurrentTab() && this.active ? 1 : 0, 10F);
     }
 
     @Inject(method = "drawCurrentTabLine", at = @At("HEAD"), cancellable = true)
     private void drawCurrentTabLine(DrawContext context, TextRenderer textRenderer, int color, CallbackInfo ci) {
-        if (CrystalChams.isThisMyScreen() && ChamsConfig.CONFIG.instance().showAnimations) {
+        if (CrystalChams.isThisMyScreen() && ChamsConfig.o_showAnimations.pendingValue()) {
             int i = Math.min(textRenderer.getWidth(this.getMessage()), this.getWidth() - 4);
             float j = this.getX() + ((this.getWidth() - i) / 2F);
             int k = this.getY() + this.getHeight() - 2;
@@ -74,7 +76,7 @@ public abstract class TabButtonWidgetMixin extends ClickableWidget {
 
     @Inject(method = "renderWidget", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Lnet/minecraft/util/Identifier;IIII)V", shift = At.Shift.AFTER))
     public void CC$OUGHHHHHHHHH(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
-        if (CrystalChams.isThisMyScreen() && ChamsConfig.CONFIG.instance().showAnimations) {
+        if (CrystalChams.isThisMyScreen() && ChamsConfig.o_showAnimations.pendingValue()) {
             drawBorder(context, this.getX() + 1, isCurrentTab() ? this.getY() + 1 : this.getY() + 5, this.width - 2, isCurrentTab() ? this.height - 2 : this.height - 7, ColorHelper.Argb.lerp(hoverProgress, 0x00333333, 0xFFFFFFFF), !isCurrentTab());
         }
     }
@@ -89,14 +91,5 @@ public abstract class TabButtonWidgetMixin extends ClickableWidget {
         fillFloat(context, x + width - 1, y + 1, x + width, y + height, color);
     }
 
-    @Unique
-    public void fillFloat(DrawContext context, float x1, float y1, float x2, float y2, int color) {
-        Matrix4f matrix4f = context.getMatrices().peek().getPositionMatrix();
-        VertexConsumer vertexConsumer = context.getVertexConsumers().getBuffer(RenderLayer.getGui());
-        vertexConsumer.vertex(matrix4f, x1, y1, 0).color(color);
-        vertexConsumer.vertex(matrix4f, x1, y2, 0).color(color);
-        vertexConsumer.vertex(matrix4f, x2, y2, 0).color(color);
-        vertexConsumer.vertex(matrix4f, x2, y1, 0).color(color);
-        context.draw();
-    }
+
 }

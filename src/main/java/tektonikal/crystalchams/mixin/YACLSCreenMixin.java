@@ -2,7 +2,6 @@ package tektonikal.crystalchams.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import dev.isxander.yacl3.api.ConfigCategory;
-import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
 import dev.isxander.yacl3.api.YetAnotherConfigLib;
 import dev.isxander.yacl3.api.utils.Dimension;
@@ -13,7 +12,6 @@ import dev.isxander.yacl3.gui.OptionListWidget;
 import dev.isxander.yacl3.gui.YACLScreen;
 import dev.isxander.yacl3.gui.tab.ListHolderWidget;
 import dev.isxander.yacl3.gui.utils.GuiUtils;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.client.gui.screen.Screen;
@@ -28,10 +26,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import tektonikal.crystalchams.CrystalChams;
-import tektonikal.crystalchams.config.ChamsConfig;
-import tektonikal.crystalchams.config.MutableOptionGroupImpl;
-import tektonikal.crystalchams.config.RenderMode;
-import tektonikal.crystalchams.interfaces.ElementListWidgetExtInterface;
 
 import java.util.Calendar;
 import java.util.function.Consumer;
@@ -49,6 +43,7 @@ public abstract class YACLSCreenMixin extends Screen {
 
     @Mixin(YACLScreen.CategoryTab.class)
     public abstract static class CategoryTabMixin implements Tab {
+        @Mutable
         @Shadow
         @Final
         public ButtonWidget undoButton;
@@ -76,10 +71,10 @@ public abstract class YACLSCreenMixin extends Screen {
             if (CrystalChams.isThisMyScreen(screen)) {
                 packsButton = ButtonWidget.builder(Text.literal("Resource Packs"), btn -> {
                     screen.finishOrSave();
-                    MinecraftClient.getInstance().setScreen(new PackScreen(MinecraftClient.getInstance().getResourcePackManager(), resourcePackManager -> {
-                        MinecraftClient.getInstance().options.refreshResourcePacks(resourcePackManager);
-                        MinecraftClient.getInstance().setScreen(screen);
-                    }, MinecraftClient.getInstance().getResourcePackDir(), Text.translatable("resourcePack.title")));
+                    CrystalChams.mc.setScreen(new PackScreen(CrystalChams.mc.getResourcePackManager(), resourcePackManager -> {
+                        CrystalChams.mc.options.refreshResourcePacks(resourcePackManager);
+                        CrystalChams.mc.setScreen(screen);
+                    }, CrystalChams.mc.getResourcePackDir(), Text.translatable("resourcePack.title")));
                 }).position(undoButton.getX(), undoButton.getY()).size(actionDim.width(), actionDim.height()).build();
 
                 resetAnimButton = ButtonWidget.builder(Text.literal("Reset Animation"), btn -> CrystalChams.previewCrystalEntity.age = 0).position(undoButton.getX(), undoButton.getY() - 22).size(actionDim.width(), actionDim.height()).build();
@@ -93,6 +88,7 @@ public abstract class YACLSCreenMixin extends Screen {
                         ),
                         DescriptionWithName.of(Text.of(""), OptionDescription.of())
                 );
+                undoButton.setPosition(cancelResetButton.getX(), cancelResetButton.getY() - 22);
                 //force done button to save
                 actionDim = Dimension.ofInt(screen.width / 3 * 2 + screen.width / 6, screen.height - padding - 20, paddedWidth, 20);
                 saveFinishedButton = ButtonWidget.builder(Text.literal("Done"), btn -> {
@@ -109,7 +105,7 @@ public abstract class YACLSCreenMixin extends Screen {
                 //this is terrible but I don't care anymore
                 consumer.accept(optionList);
                 //TODO!!!!!!!!!
-//              consumer.accept(undoButton);
+              consumer.accept(undoButton);
 //              consumer.accept(searchField);
                 consumer.accept(resetAnimButton);
                 consumer.accept(cancelResetButton);
@@ -120,17 +116,11 @@ public abstract class YACLSCreenMixin extends Screen {
             }
         }
 
-        @Inject(method = "updateButtons", at = @At("TAIL"), remap = false)
-        private void CC$updateButtons(CallbackInfo ci) {
-            if (CrystalChams.isThisMyScreen(screen)) {
-                cancelResetButton.setTooltip(null);
-            }
-        }
 
         @Inject(method = "renderBackground", at = @At("TAIL"))
         private void CC$renderBackground(DrawContext drawContext, CallbackInfo ci) {
             if (Calendar.getInstance().get(Calendar.MONTH) == Calendar.APRIL && Calendar.getInstance().get(Calendar.DAY_OF_MONTH) == 1) {
-                GuiUtils.blitGuiTex(drawContext, Identifier.of("crystalchams:custom/bg.png"), 0, 0, 1920, 1080, 1920, 1080, MinecraftClient.getInstance().getWindow().getScaledWidth(), MinecraftClient.getInstance().getWindow().getScaledHeight());
+                GuiUtils.blitGuiTex(drawContext, Identifier.of("crystalchams:custom/bg.png"), 0, 0, 1920, 1080, 1920, 1080, CrystalChams.mc.getWindow().getScaledWidth(), CrystalChams.mc.getWindow().getScaledHeight());
             }
         }
     }

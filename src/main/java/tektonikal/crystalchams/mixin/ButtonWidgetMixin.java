@@ -1,7 +1,6 @@
 package tektonikal.crystalchams.mixin;
 
 import dev.isxander.yacl3.gui.LowProfileButtonWidget;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
@@ -34,8 +33,8 @@ public abstract class ButtonWidgetMixin{
     float hoverProgress;
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/ClickableWidget;renderWidget(Lnet/minecraft/client/gui/DrawContext;IIF)V", shift = At.Shift.AFTER))
     private void CC$OUGHHHH(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci){
-        if(CrystalChams.isThisMyScreen() && ((ClickableWidget)(Object)this) instanceof ButtonWidget && !(((ClickableWidget)(Object)this) instanceof LowProfileButtonWidget) && ChamsConfig.CONFIG.instance().showAnimations){
-                hoverProgress = (float) CrystalChams.ease(hoverProgress, (hovered || focused && MinecraftClient.getInstance().getNavigationType().isKeyboard()) && active ? 1 : 0, 10F);
+        if(CrystalChams.isThisMyScreen() && ((ClickableWidget)(Object)this) instanceof ButtonWidget && !(((ClickableWidget)(Object)this) instanceof LowProfileButtonWidget) && ChamsConfig.o_showAnimations.pendingValue()){
+                hoverProgress = (float) CrystalChams.ease(hoverProgress, (hovered || focused && CrystalChams.mc.getNavigationType().isKeyboard()) && active ? 1 : 0, 10F);
             context.drawBorder(x, y, width, height, new Color(hoverProgress, hoverProgress, hoverProgress).getRGB());
         }
     }

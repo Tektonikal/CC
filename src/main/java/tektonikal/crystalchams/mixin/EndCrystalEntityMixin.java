@@ -40,14 +40,14 @@ public abstract class EndCrystalEntityMixin extends Entity implements EndCrystal
 
     @Inject(method = "<init>(Lnet/minecraft/entity/EntityType;Lnet/minecraft/world/World;)V", at = @At(value = "TAIL"))
     private void CC$ough(EntityType<? extends EndCrystalEntity> entityType, World world, CallbackInfo ci){
-        if(!ChamsConfig.CONFIG.instance().randomizeAge){
+        if(!ChamsConfig.o_randomizeAge.pendingValue()){
             this.endCrystalAge = 0;
         }
     }
 
 //    @Inject(method = "tick", at = @At("TAIL"))
 //    public void tick(CallbackInfo info) {
-//        rotation = (endCrystalAge + ((RenderTickCounter.Dynamic) MinecraftClient.getInstance().getRenderTickCounter()).tickDelta) * 3;
+//        rotation = (endCrystalAge + ((RenderTickCounter.Dynamic) CrystalChams.mc.getRenderTickCounter()).tickDelta) * 3;
 //    }
 //
 //    @Unique

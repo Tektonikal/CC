@@ -1,16 +1,19 @@
 package tektonikal.crystalchams.mixin;
 
-import dev.isxander.yacl3.api.Controller;
 import dev.isxander.yacl3.api.ListOptionEntry;
 import dev.isxander.yacl3.impl.ListOptionEntryImpl;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.render.*;
+import net.minecraft.client.render.OverlayTexture;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.*;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.*;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ColorHelper;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RotationAxis;
 import org.joml.Quaternionf;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
@@ -20,6 +23,7 @@ import tektonikal.crystalchams.CrystalChams;
 import tektonikal.crystalchams.config.ChamsConfig;
 import tektonikal.crystalchams.config.ModelPartController;
 import tektonikal.crystalchams.config.ModelPartOptions;
+import tektonikal.crystalchams.config.ValueAnimator;
 
 import java.awt.*;
 
@@ -52,6 +56,8 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
     private static float baseScale = ChamsConfig.CONFIG.instance().baseScale;
     @Unique
     private static float coreScale = ChamsConfig.CONFIG.instance().coreScale;
+    @Unique
+    private static ValueAnimator coreVerticalOffsetAnimator = new ValueAnimator(() -> ChamsConfig.o_coreOffset.pendingValue());
 
     public EndCrystalEntityRendererMixin(EntityRendererFactory.Context context) {
         super(context);
@@ -144,13 +150,13 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
         //core
         if (ChamsConfig.o_renderCore.pendingValue()) {
             matrixStack.push();
-            matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(((realAge + ChamsConfig.o_coreTickDelay.pendingValue()) * (ChamsConfig.o_coreRotationSpeed.pendingValue() * 3)) % 360));
-            matrixStack.translate(0.0F, 2F + CrystalChams.getYOffset(endCrystalEntity.endCrystalAge + tickDelta, ChamsConfig.o_coreOffset.pendingValue(), ChamsConfig.o_coreBounceSpeed.pendingValue(), ChamsConfig.o_coreBounceHeight.pendingValue(), ChamsConfig.o_coreTickDelay.pendingValue()), 0.0F);
+            matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(((realAge + ChamsConfig.o_coreDelay.pendingValue()) * (ChamsConfig.o_coreRotationSpeed.pendingValue() * 3)) % 360));
+            matrixStack.translate(0.0F, 2F + CrystalChams.getYOffset(endCrystalEntity.endCrystalAge + tickDelta, ChamsConfig.o_coreOffset.pendingValue(), ChamsConfig.o_coreBounceSpeed.pendingValue(), ChamsConfig.o_coreBounceHeight.pendingValue(), ChamsConfig.o_coreDelay.pendingValue()), 0.0F);
             matrixStack.multiply((new Quaternionf()).setAngleAxis(1.0471976F, SINE_45_DEGREES, 0.0F, SINE_45_DEGREES));
             matrixStack.multiply((new Quaternionf()).setAngleAxis(1.0471976F, SINE_45_DEGREES, 0.0F, SINE_45_DEGREES));
-            matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(((realAge + ChamsConfig.o_coreTickDelay.pendingValue()) * (ChamsConfig.o_coreRotationSpeed.pendingValue() * 3)) % 360));
+            matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(((realAge + ChamsConfig.o_coreDelay.pendingValue()) * (ChamsConfig.o_coreRotationSpeed.pendingValue() * 3)) % 360));
             matrixStack.multiply((new Quaternionf()).setAngleAxis(1.0471976F, SINE_45_DEGREES, 0.0F, SINE_45_DEGREES));
-            matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(((realAge + ChamsConfig.o_coreTickDelay.pendingValue()) * (ChamsConfig.o_coreRotationSpeed.pendingValue() * 3)) % 360));
+            matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(((realAge + ChamsConfig.o_coreDelay.pendingValue()) * (ChamsConfig.o_coreRotationSpeed.pendingValue() * 3)) % 360));
             float v = ChamsConfig.o_coreScaleAnimation.pendingValue() ? MathHelper.lerp(ChamsConfig.o_coreScaleEasing.pendingValue().getFunction().apply((double) MathHelper.clamp((endCrystalEntity.age + tickDelta - (ChamsConfig.o_coreScaleDelay.pendingValue() * 20)) / (20 * ChamsConfig.o_coreScaleAnimDuration.pendingValue()), 0, 1)).floatValue(), ChamsConfig.o_coreStartScale.pendingValue(), coreScale) : coreScale;
             matrixStack.scale(v * 1.53125F, v * 1.53125F, v * 1.53125F);
             Color col = new Color(CrystalChams.getRainbow(ChamsConfig.o_coreRainbowDelay.pendingValue(), ChamsConfig.o_coreRainbowSpeed.pendingValue(), ChamsConfig.o_coreRainbowSaturation.pendingValue(), ChamsConfig.o_coreRainbowBrightness.pendingValue()));
@@ -169,13 +175,14 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
             float q = (float) ((double) n - endCrystalEntity.getY());
             float r = (float) ((double) o - endCrystalEntity.getZ());
             matrixStack.translate(p, q, r);
-            EnderDragonEntityRenderer.renderCrystalBeam(-p, -q + CrystalChams.getYOffset(endCrystalEntity.endCrystalAge + tickDelta, ChamsConfig.o_coreOffset.pendingValue(), ChamsConfig.o_coreBounceSpeed.pendingValue(), ChamsConfig.o_coreBounceHeight.pendingValue(), ChamsConfig.o_coreTickDelay.pendingValue()), -r, tickDelta, endCrystalEntity.endCrystalAge, matrixStack, vertexConsumerProvider, light);
+            EnderDragonEntityRenderer.renderCrystalBeam(-p, -q + CrystalChams.getYOffset(endCrystalEntity.endCrystalAge + tickDelta, ChamsConfig.o_coreOffset.pendingValue(), ChamsConfig.o_coreBounceSpeed.pendingValue(), ChamsConfig.o_coreBounceHeight.pendingValue(), ChamsConfig.o_coreDelay.pendingValue()), -r, tickDelta, endCrystalEntity.endCrystalAge, matrixStack, vertexConsumerProvider, light);
         }
         super.render(endCrystalEntity, yaw, tickDelta, matrixStack, vertexConsumerProvider, light);
-        if (ChamsConfig.o_renderHitbox.pendingValue() && !MinecraftClient.getInstance().getEntityRenderDispatcher().shouldRenderHitboxes()) {
+        if (ChamsConfig.o_renderHitbox.pendingValue() && !CrystalChams.mc.getEntityRenderDispatcher().shouldRenderHitboxes()) {
             //potentially add custom line renderer layer to here
             EntityRenderDispatcher.renderHitbox(matrixStack, vertexConsumerProvider.getBuffer(RenderLayer.getLines()), endCrystalEntity, tickDelta, 1, 1, 1);
         }
+        coreVerticalOffsetAnimator.update();
         ci.cancel();
     }
 
