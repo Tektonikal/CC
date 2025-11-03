@@ -44,9 +44,9 @@ import tektonikal.crystalchams.stupidfuckingboilerplate.CustomTickBoxControllerB
 import tektonikal.crystalchams.util.Easings;
 
 import java.awt.*;
+import java.awt.List;
 import java.lang.Math;
-import java.util.Arrays;
-import java.util.OptionalDouble;
+import java.util.*;
 import java.util.Random;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -61,6 +61,7 @@ public class CrystalChams implements ModInitializer {
     public static ShaderProgram END_PORTAL_TEX;
     public static ShaderProgram CUSTOM_IMAGE;
     public static final float PREVIEW_EASING_SPEED = 12.5F;
+    public static final EnumMap<OptionGroups, ArrayList<EvilOption>> optionGroups = new  EnumMap<>(OptionGroups.class);
     public static final ValueFormatter<Integer> LIGHT_FORMATTER = value -> Text.of(value == -1 ? "Use World Light" : value + "");
     public static final ValueFormatter<Float> PERCENT_FORMATTER = value -> Text.of((int) (value * 100) + "%");
     public static final ValueFormatter<Float> MULTIPLIER_FORMATTER = val -> Text.of(String.format("%.2f", val) + "x");
@@ -133,20 +134,20 @@ public class CrystalChams implements ModInitializer {
         return isThisMyScreen(CrystalChams.mc.currentScreen);
     }
 
-    public static EvilOption<Boolean> createBooleanOption(String name, String description, StateManager<Boolean> stateManager) {
-        return EvilOption.<Boolean>createBuilder().name(Text.of(name)).stateManager(stateManager).description(OptionDescription.of(Text.of(description))).controller(CustomTickBoxControllerBuilder::new).build();
+    public static EvilOption<Boolean> createBooleanOption(String name, String description, StateManager<Boolean> stateManager, OptionGroups group) {
+        return EvilOption.<Boolean>createBuilder().name(Text.of(name)).stateManager(stateManager).description(OptionDescription.of(Text.of(description))).controller(CustomTickBoxControllerBuilder::new).group(group).build();
     }
 
-    public static EvilOption<Float> createFloatOptionSeconds(String name, String description, StateManager<Float> stateManager) {
-        return EvilOption.<Float>createBuilder().name(Text.of(name)).description(OptionDescription.of(Text.of(description))).stateManager(stateManager).controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(-2.5f, 2.5f).step(0.1f).formatValue(SECONDS_FORMATTER)).build();
+    public static EvilOption<Float> createFloatOptionSeconds(String name, String description, StateManager<Float> stateManager, OptionGroups group) {
+        return EvilOption.<Float>createBuilder().name(Text.of(name)).description(OptionDescription.of(Text.of(description))).stateManager(stateManager).controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(-2.5f, 2.5f).step(0.1f).formatValue(SECONDS_FORMATTER)).group(group).build();
     }
 
-    public static EvilOption<Float> createFloatOptionPercent(String name, String description, StateManager<Float> stateManager) {
-        return EvilOption.<Float>createBuilder().name(Text.of(name)).description(OptionDescription.of(Text.of(description))).stateManager(stateManager).controller(PERCENT).build();
+    public static EvilOption<Float> createFloatOptionPercent(String name, String description, StateManager<Float> stateManager, OptionGroups group) {
+        return EvilOption.<Float>createBuilder().name(Text.of(name)).description(OptionDescription.of(Text.of(description))).stateManager(stateManager).controller(PERCENT).group(group).build();
     }
 
-    public static EvilOption<Easings> createEasingOption(String name, String description, StateManager<Easings> stateManager) {
-        return EvilOption.<Easings>createBuilder().name(Text.of(name)).description(OptionDescription.of(Text.of(description))).stateManager(stateManager).controller(easingsOption -> EnumControllerBuilder.create(easingsOption).enumClass(Easings.class)).build();
+    public static EvilOption<Easings> createEasingOption(String name, String description, StateManager<Easings> stateManager, OptionGroups group) {
+        return EvilOption.<Easings>createBuilder().name(Text.of(name)).description(OptionDescription.of(Text.of(description))).stateManager(stateManager).controller(easingsOption -> EnumControllerBuilder.create(easingsOption).enumClass(Easings.class)).group(group).build();
     }
 
     @Override
@@ -213,29 +214,13 @@ public class CrystalChams implements ModInitializer {
         CoreShaderRegistrationCallback.EVENT.register(context -> context.register(id("crystalchams_entity_translucent_notex"), VertexFormats.POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL, shaderProgram -> ENTITY_TRANSLUCENT_NOTEX = shaderProgram));
         CoreShaderRegistrationCallback.EVENT.register(context -> context.register(id("crystalchams_end_gateway_tex"), VertexFormats.POSITION_TEXTURE_COLOR, shaderProgram -> END_PORTAL_TEX = shaderProgram));
         CoreShaderRegistrationCallback.EVENT.register(context -> context.register(id("crystalchams_image"), VertexFormats.POSITION_TEXTURE, shaderProgram -> CUSTOM_IMAGE = shaderProgram));
-
+        for(OptionGroups g : OptionGroups.values()) {
+            optionGroups.put(g, new ArrayList<>());
+        }
         armSecuritySystem();
         unleashHell();
-        linkOptions();
     }
 
-    private static void linkOptions() {
-        ChamsConfig.o_baseScale.linkOptions(ChamsConfig.o_coreScale);
-        ChamsConfig.o_baseColor.linkOptions(ChamsConfig.o_coreColor, ChamsConfig.o_beam1Color, ChamsConfig.o_beam2Color);
-        ChamsConfig.o_baseAlpha.linkOptions(ChamsConfig.o_coreAlpha, ChamsConfig.o_beam1Alpha, ChamsConfig.o_beam2Alpha);
-        ChamsConfig.o_baseLightLevel.linkOptions(ChamsConfig.o_coreLightLevel, ChamsConfig.o_beam1LightLevel, ChamsConfig.o_beam2LightLevel);
-        ChamsConfig.o_baseRenderLayer.linkOptions(ChamsConfig.o_coreRenderLayer, ChamsConfig.o_beamRenderLayer);
-        ChamsConfig.o_baseRainbow.linkOptions(ChamsConfig.o_coreRainbow, ChamsConfig.o_beam1Rainbow, ChamsConfig.o_beam2Rainbow);
-        ChamsConfig.o_baseRainbowSpeed.linkOptions(ChamsConfig.o_coreRainbowSpeed, ChamsConfig.o_beam1RainbowSpeed, ChamsConfig.o_beam2RainbowSpeed);
-        ChamsConfig.o_baseRainbowDelay.linkOptions(ChamsConfig.o_coreRainbowDelay, ChamsConfig.o_beam1RainbowDelay, ChamsConfig.o_beam2RainbowDelay);
-        ChamsConfig.o_baseRainbowBrightness.linkOptions(ChamsConfig.o_coreRainbowBrightness, ChamsConfig.o_beam1RainbowBrightness, ChamsConfig.o_beam2RainbowBrightness);
-        ChamsConfig.o_baseRainbowSaturation.linkOptions(ChamsConfig.o_coreRainbowSaturation, ChamsConfig.o_beam1RainbowSaturation, ChamsConfig.o_beam2RainbowSaturation);
-        //don't link vertical offset of crystal with base because why the fuck would you do that you fucking idiot fuck you
-        ChamsConfig.o_beam1Radius.linkOptions(ChamsConfig.o_beam2Radius);
-        ChamsConfig.o_baseCulling.linkOptions(ChamsConfig.o_coreCulling, ChamsConfig.o_beamCulling);
-        //uhhh i can't link the base with the other options, future me will deal with this
-        ChamsConfig.o_renderBeam.linkOptions(ChamsConfig.o_renderCore);
-    }
 
     public static Identifier id(String path) {
         return Identifier.of("crystalchams", path);
@@ -258,6 +243,9 @@ public class CrystalChams implements ModInitializer {
         Arrays.stream(ChamsConfig.class.getDeclaredFields()).filter(field -> field.getName().startsWith("o_")).forEach(field -> {
             try {
                 Object value = field.get(null);
+                if (value instanceof EvilOption) {
+                    optionGroups.get(((EvilOption<?>) value).group()).add((EvilOption) value);
+                }
                 ((Option) value).requestSet(((Option<?>) value).binding().getValue());
             } catch (IllegalAccessException e) {
                 System.out.println("what the hell");

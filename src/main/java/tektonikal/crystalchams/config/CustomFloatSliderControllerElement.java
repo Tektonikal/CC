@@ -66,11 +66,11 @@ public class CustomFloatSliderControllerElement extends ControllerWidget<ICustom
         float value = (float) (Math.round(interpolatedValue / interval) * interval);
         Text valueText;
         //this also fucking sucks, but it works.
-        try {
-            valueText = ((CustomFloatSliderController) (control)).valueFormatter.format(value);
-        } catch (ClassCastException e) {
+        if(control instanceof CustomIntegerSliderController) {
             valueText = ((CustomIntegerSliderController) (control)).valueFormatter.format((int) value);
-
+        }
+        else{
+            valueText = ((CustomFloatSliderController) (control)).valueFormatter.format(value);
         }
         textRenderer.draw(valueText, (getDimension().xLimit() - textRenderer.getWidth(valueText) - getXPadding() - (sliderBounds.width() + 6 + getThumbWidth() / 2f) * focusedTime), getTextY(), getValueColor(), true, graphics.getMatrices().peek().getPositionMatrix(), graphics.getVertexConsumers(), TextRenderer.TextLayerType.NORMAL, 0, 15728880);
         graphics.getMatrices().pop();

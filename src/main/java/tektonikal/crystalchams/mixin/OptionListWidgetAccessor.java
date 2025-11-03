@@ -19,6 +19,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import tektonikal.crystalchams.CrystalChams;
+import tektonikal.crystalchams.OptionGroups;
 import tektonikal.crystalchams.config.EvilOption;
 
 import java.util.List;
@@ -49,14 +51,19 @@ public interface OptionListWidgetAccessor {
 
         @Inject(method = "<init>", at = @At("TAIL"), remap = false)
         private void onInit(OptionListWidget this$0, Option<?> option, ConfigCategory category, OptionGroup group, OptionListWidget.GroupSeparatorEntry groupSeparatorEntry, AbstractWidget widget, CallbackInfo ci) {
-            if (option instanceof EvilOption<?> && !((EvilOption<?>) option).getLinkedOptions().isEmpty()) {
+            if (option instanceof EvilOption<?> && !CrystalChams.optionGroups.get(((EvilOption<?>) option).group()).isEmpty()) {
                 this.widget.setDimension(this.widget.getDimension().expanded(-20, 0));
                 this.applyAllButton = new TextScaledButtonWidget(((OptionListWidgetAccessor) this$0).getYaclScreen(), widget.getDimension().xLimit(), -50, 20, 20, 2f, Text.literal("⇛"), button -> {
-                    ((EvilOption<?>) option).syncLinkedOptions();
+//                    ((EvilOption<?>) option).syncLinkedOptions();
+                    syncLinkedOptions(((EvilOption<?>) option).group());
                     button.active = false;
                 });
                 this.applyAllButton.active = ((EvilOption<?>) option).linkedOptionsSynced() && option.available();
             }
+        }
+
+        private void syncLinkedOptions(OptionGroups group) {
+            CrystalChams.optionGroups.get(group).forEach(evilOption -> evilOption.stateManager().set(option.pendingValue()));
         }
 
         @Inject(method = "render", at = @At("TAIL"))
@@ -78,6 +85,7 @@ public interface OptionListWidgetAccessor {
                 cir.setReturnValue(ImmutableList.of(widget, applyAllButton, resetButton));
             }
         }
+
         @Inject(method = "children", at = @At("HEAD"), cancellable = true)
         private void onChildren(CallbackInfoReturnable<List<? extends Selectable>> cir) {
             if (option instanceof EvilOption<?> && !((EvilOption<?>) option).getLinkedOptions().isEmpty()) {
