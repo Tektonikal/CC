@@ -125,6 +125,10 @@ public class CrystalChams implements ModInitializer {
         return screen instanceof PopupControllerScreen && ((PopupControllerScreenAccessor) (screen)).getBackgroundYaclScreen().config.title().equals(Text.of("Custom End Crystals"));
     }
 
+    public static boolean isThisMyScreenExcludingPopups(Screen screen) {
+        return screen instanceof YACLScreen && (((YACLScreen) screen).config.title().equals(Text.of("Custom End Crystals")));
+    }
+
     public static boolean isThisMyScreen() {
         return isThisMyScreen(CrystalChams.mc.currentScreen);
     }
@@ -150,6 +154,10 @@ public class CrystalChams implements ModInitializer {
         ChamsConfig.CONFIG.load();
         ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
             if (isThisMyScreen(screen)) {
+                //reset age when opening preview
+                if (isThisMyScreenExcludingPopups(screen)) {
+                    previewCrystalEntity.age = 0;
+                }
                 ScreenEvents.afterRender(screen).register((screen1, drawContext, mouseX, mouseY, tickDelta) -> {
                     YACLScreen yaclScreen;
                     ScreenRect rightPaneDim;

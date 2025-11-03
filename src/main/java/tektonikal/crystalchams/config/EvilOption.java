@@ -11,6 +11,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import tektonikal.crystalchams.OptionGroups;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -30,7 +31,7 @@ public class EvilOption<T> implements Option<T> {
     private final StateManager<T> stateManager;
     private final List<OptionEventListener<T>> listeners;
     private int currentListenerDepth;
-    private final List<Option<T>> linkedOptions;
+    private final OptionGroups group;
 
     public EvilOption(
             @NotNull Text name,
@@ -39,7 +40,8 @@ public class EvilOption<T> implements Option<T> {
             @NotNull StateManager<T> stateManager,
             boolean available,
             ImmutableSet<OptionFlag> flags,
-            @NotNull Collection<OptionEventListener<T>> listeners, List<Option<T>> linkedOptions
+            @NotNull Collection<OptionEventListener<T>> listeners,
+            OptionGroups group
     ) {
         this.name = name;
         this.available = available;
@@ -48,7 +50,7 @@ public class EvilOption<T> implements Option<T> {
 
         this.stateManager = stateManager;
         this.controller = controlGetter.apply(this);
-        this.linkedOptions = linkedOptions;
+        this.group = group;
 
         this.stateManager.addListener((oldValue, newValue) ->
                 triggerListener(OptionEventListener.Event.STATE_CHANGE, false));
@@ -61,9 +63,6 @@ public class EvilOption<T> implements Option<T> {
         return name;
     }
 
-    public List<Option<T>> getLinkedOptions() {
-        return linkedOptions;
-    }
 
     @Override
     public @NotNull OptionDescription description() {
@@ -73,6 +72,10 @@ public class EvilOption<T> implements Option<T> {
     @Override
     public @NotNull Text tooltip() {
         return description.text();
+    }
+
+    public OptionGroups group() {
+        return this.group;
     }
 
     @Override
@@ -97,31 +100,6 @@ public class EvilOption<T> implements Option<T> {
     @Override
     public boolean available() {
         return available;
-    }
-
-
-    public void addLinkedOption(Option<T> option) {
-        if (option != this) {
-            linkedOptions.add(option);
-        }
-    }
-    @SafeVarargs
-    public final void linkOptions(EvilOption<T>... options) {
-        options = ArrayUtils.addAll(options, this);
-        for (EvilOption<T> option : options) {
-            option.addLinkedOptions(options);
-        }
-    }
-
-    @SafeVarargs
-    public final void addLinkedOptions(EvilOption<T>... options) {
-        for (Option<T> option : options) {
-            addLinkedOption(option);
-        }
-    }
-
-    public void syncLinkedOptions() {
-        linkedOptions.forEach(tOption -> tOption.requestSet(this.pendingValue()));
     }
 
     @Override
@@ -216,15 +194,6 @@ public class EvilOption<T> implements Option<T> {
         return new EvilOptionBuilder<>();
     }
 
-    public boolean linkedOptionsSynced() {
-        for (Option<T> option : linkedOptions) {
-            if (!option.stateManager().get().equals(this.stateManager.get())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
 
     public static class EvilOptionBuilder<T> implements Builder<T> {
         private Text name = Text.literal("Name not specified!").formatted(Formatting.RED);
@@ -233,7 +202,7 @@ public class EvilOption<T> implements Option<T> {
 
         private Function<Option<T>, Controller<T>> controlGetter;
 
-        private List<Option<T>> linkedOptions = new ArrayList<>();
+        private OptionGroups group;
 
         private boolean available = true;
 
@@ -262,11 +231,6 @@ public class EvilOption<T> implements Option<T> {
         @Override
         public EvilOptionBuilder<T> description(@NotNull Function<T, OptionDescription> descriptionFunction) {
             this.descriptionFunction = descriptionFunction;
-            return this;
-        }
-
-        public EvilOptionBuilder<T> linkedOptions(@NotNull List<Option<T>> linkedOptions) {
-            this.linkedOptions = linkedOptions;
             return this;
         }
 
@@ -335,6 +299,10 @@ public class EvilOption<T> implements Option<T> {
             this.flags.addAll(flags);
             return this;
         }
+        public EvilOptionBuilder<T> group(OptionGroups group) {
+            this.group = group;
+            return this;
+        }
 
         @Override
         @Deprecated
@@ -400,7 +368,7 @@ public class EvilOption<T> implements Option<T> {
 
             Validate.isTrue(!stateManager.isAlwaysSynced() || flags.isEmpty(), "Always synced state managers do not support option flags.");
 
-            return new EvilOption<>(name, descriptionFunction, controlGetter, stateManager, available, ImmutableSet.copyOf(flags), listeners, linkedOptions);
+            return new EvilOption<>(name, descriptionFunction, controlGetter, stateManager, available, ImmutableSet.copyOf(flags), listeners, group);
         }
     }
 }
