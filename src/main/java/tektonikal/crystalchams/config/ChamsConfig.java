@@ -16,6 +16,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import tektonikal.crystalchams.CrystalChams;
+import tektonikal.crystalchams.OptionGroups;
 import tektonikal.crystalchams.annotation.Updatable;
 import tektonikal.crystalchams.stupidfuckingboilerplate.*;
 import tektonikal.crystalchams.util.Easings;
@@ -166,6 +167,7 @@ public class ChamsConfig {
             .name(Text.of("Scale"))
             .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 2f).step(0.05f).formatValue(CrystalChams.MULTIPLIER_FORMATTER))
             .stateManager(StateManager.createSimple(1F, () -> CONFIG.instance().baseScale, newVal -> CONFIG.instance().baseScale = newVal))
+            .group(OptionGroups.SCALE)
             .build();
     public static EvilOption<Integer> o_baseRotation = EvilOption.<Integer>createBuilder()
             .name(Text.of("Rotation"))
@@ -268,6 +270,7 @@ public class ChamsConfig {
             .name(Text.of("Scale"))
             .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 2.5f).step(0.05f).formatValue(val -> Text.of(String.format("%.2f", val) + "x")))
             .stateManager(StateManager.createSimple(1F, () -> CONFIG.instance().coreScale, newVal -> CONFIG.instance().coreScale = newVal))
+            .group(OptionGroups.SCALE)
             .build();
     public static EvilOption<Color> o_coreColor = EvilOption.<Color>createBuilder()
             .name(Text.of("Color"))

@@ -149,6 +149,21 @@ public class CrystalChams implements ModInitializer {
     public static EvilOption<Easings> createEasingOption(String name, String description, StateManager<Easings> stateManager, OptionGroups group) {
         return EvilOption.<Easings>createBuilder().name(Text.of(name)).description(OptionDescription.of(Text.of(description))).stateManager(stateManager).controller(easingsOption -> EnumControllerBuilder.create(easingsOption).enumClass(Easings.class)).group(group).build();
     }
+    public static EvilOption<Boolean> createBooleanOption(String name, String description, StateManager<Boolean> stateManager) {
+        return EvilOption.<Boolean>createBuilder().name(Text.of(name)).stateManager(stateManager).description(OptionDescription.of(Text.of(description))).controller(CustomTickBoxControllerBuilder::new).build();
+    }
+
+    public static EvilOption<Float> createFloatOptionSeconds(String name, String description, StateManager<Float> stateManager) {
+        return EvilOption.<Float>createBuilder().name(Text.of(name)).description(OptionDescription.of(Text.of(description))).stateManager(stateManager).controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(-2.5f, 2.5f).step(0.1f).formatValue(SECONDS_FORMATTER)).build();
+    }
+
+    public static EvilOption<Float> createFloatOptionPercent(String name, String description, StateManager<Float> stateManager) {
+        return EvilOption.<Float>createBuilder().name(Text.of(name)).description(OptionDescription.of(Text.of(description))).stateManager(stateManager).controller(PERCENT).build();
+    }
+
+    public static EvilOption<Easings> createEasingOption(String name, String description, StateManager<Easings> stateManager) {
+        return EvilOption.<Easings>createBuilder().name(Text.of(name)).description(OptionDescription.of(Text.of(description))).stateManager(stateManager).controller(easingsOption -> EnumControllerBuilder.create(easingsOption).enumClass(Easings.class)).build();
+    }
 
     @Override
     public void onInitialize() {

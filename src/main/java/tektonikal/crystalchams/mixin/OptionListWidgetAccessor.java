@@ -58,10 +58,21 @@ public interface OptionListWidgetAccessor {
                     syncLinkedOptions(((EvilOption<?>) option).group());
                     button.active = false;
                 });
-                this.applyAllButton.active = ((EvilOption<?>) option).linkedOptionsSynced() && option.available();
+                this.applyAllButton.active = optionsSynced((EvilOption<?>) option) && option.available();
             }
         }
 
+        @Unique
+        private boolean optionsSynced(EvilOption<?> option) {
+            for(EvilOption<?> o : CrystalChams.optionGroups.get(option.group())){
+                if(!option.pendingValue().equals(o.pendingValue())){
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        @Unique
         private void syncLinkedOptions(OptionGroups group) {
             CrystalChams.optionGroups.get(group).forEach(evilOption -> evilOption.stateManager().set(option.pendingValue()));
         }
@@ -71,7 +82,7 @@ public interface OptionListWidgetAccessor {
             if (applyAllButton != null) {
                 applyAllButton.setY(y);
                 //not the greatest of ways to do it, but whatever
-                applyAllButton.active = ((EvilOption<?>) option).linkedOptionsSynced() && option.available();
+                applyAllButton.active = optionsSynced((EvilOption<?>) option) && option.available();
                 applyAllButton.setTooltip(applyAllButton.active ? Tooltip.of(Text.of("Apply To All")) : null);
                 applyAllButton.render(graphics, mouseX, mouseY, tickDelta);
             }
@@ -80,7 +91,7 @@ public interface OptionListWidgetAccessor {
 
         @Inject(method = "selectableChildren", at = @At("HEAD"), cancellable = true)
         private void onSelectableChildren(CallbackInfoReturnable<List<? extends Selectable>> cir) {
-            if (option instanceof EvilOption<?> && !((EvilOption<?>) option).getLinkedOptions().isEmpty()) {
+            if (option instanceof EvilOption<?> && ((EvilOption<?>) option).group() != null) {
                 cir.cancel();
                 cir.setReturnValue(ImmutableList.of(widget, applyAllButton, resetButton));
             }
@@ -88,7 +99,7 @@ public interface OptionListWidgetAccessor {
 
         @Inject(method = "children", at = @At("HEAD"), cancellable = true)
         private void onChildren(CallbackInfoReturnable<List<? extends Selectable>> cir) {
-            if (option instanceof EvilOption<?> && !((EvilOption<?>) option).getLinkedOptions().isEmpty()) {
+            if (option instanceof EvilOption<?> && ((EvilOption<?>) option).group() != null) {
                 cir.cancel();
                 cir.setReturnValue(ImmutableList.of(widget, applyAllButton, resetButton));
             }
