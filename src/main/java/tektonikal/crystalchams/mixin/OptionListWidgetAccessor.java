@@ -51,10 +51,9 @@ public interface OptionListWidgetAccessor {
 
         @Inject(method = "<init>", at = @At("TAIL"), remap = false)
         private void onInit(OptionListWidget this$0, Option<?> option, ConfigCategory category, OptionGroup group, OptionListWidget.GroupSeparatorEntry groupSeparatorEntry, AbstractWidget widget, CallbackInfo ci) {
-            if (option instanceof EvilOption<?> && !CrystalChams.optionGroups.get(((EvilOption<?>) option).group()).isEmpty()) {
+            if (option instanceof EvilOption<?> && CrystalChams.optionGroups.get(((EvilOption<?>) option).group()) != null) {
                 this.widget.setDimension(this.widget.getDimension().expanded(-20, 0));
                 this.applyAllButton = new TextScaledButtonWidget(((OptionListWidgetAccessor) this$0).getYaclScreen(), widget.getDimension().xLimit(), -50, 20, 20, 2f, Text.literal("⇛"), button -> {
-//                    ((EvilOption<?>) option).syncLinkedOptions();
                     syncLinkedOptions(((EvilOption<?>) option).group());
                     button.active = false;
                 });
@@ -82,7 +81,7 @@ public interface OptionListWidgetAccessor {
             if (applyAllButton != null) {
                 applyAllButton.setY(y);
                 //not the greatest of ways to do it, but whatever
-                applyAllButton.active = optionsSynced((EvilOption<?>) option) && option.available();
+                applyAllButton.active = !optionsSynced((EvilOption<?>) option) && option.available();
                 applyAllButton.setTooltip(applyAllButton.active ? Tooltip.of(Text.of("Apply To All")) : null);
                 applyAllButton.render(graphics, mouseX, mouseY, tickDelta);
             }
