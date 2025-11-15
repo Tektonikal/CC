@@ -12,6 +12,7 @@ import dev.isxander.yacl3.gui.controllers.PopupControllerScreen;
 import dev.isxander.yacl3.gui.controllers.slider.FloatSliderController;
 import dev.isxander.yacl3.gui.controllers.slider.IntegerSliderController;
 import dev.isxander.yacl3.impl.ListOptionEntryImpl;
+import dev.isxander.yacl3.impl.controller.ColorControllerBuilderImpl;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.CoreShaderRegistrationCallback;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
@@ -23,9 +24,11 @@ import net.minecraft.client.gui.navigation.NavigationAxis;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.block.entity.EndPortalBlockEntityRenderer;
+import net.minecraft.client.render.entity.EnderDragonEntityRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.text.Text;
+import net.minecraft.util.Colors;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.ColorHelper;
@@ -167,6 +170,9 @@ public class CrystalChams implements ModInitializer {
     public static EvilOption<RenderMode> createRenderModeOption(String name, String description, StateManager<RenderMode> stateManager, OptionGroups group) {
         return EvilOption.<RenderMode>createBuilder().name(Text.of(name)).description(OptionDescription.of(Text.of(description))).stateManager(stateManager).controller(easingsOption -> EnumControllerBuilder.create(easingsOption).enumClass(RenderMode.class)).group(group).build();
     }
+    public static EvilOption<Color> createColorOption(String name, String description, StateManager<Color> stateManager, OptionGroups group) {
+        return EvilOption.<Color>createBuilder().name(Text.of(name)).description(OptionDescription.of(Text.of(description))).stateManager(stateManager).controller(ColorControllerBuilderImpl::new).group(group).build();
+    }
 
     @Override
     public void onInitialize() {
@@ -222,7 +228,7 @@ public class CrystalChams implements ModInitializer {
                         double scaleFactorY = (double) mc.getWindow().getHeight() / mc.getWindow().getScaledHeight();
                         Vec3d vec = CrystalChams.screenSpaceToWorldSpace(MathHelper.lerp(CrystalChams.beamProgress, centerX * scaleFactorX, mc.mouse.getX()), MathHelper.lerp(CrystalChams.beamProgress, centerY * scaleFactorY, mc.mouse.getY()), 0, drawContext.getMatrices().peek().getPositionMatrix()).multiply(1 / CrystalChams.mc.getWindow().getScaleFactor());
                         drawContext.getMatrices().translate(vec.x, vec.y, vec.z);
-                        CrystalChams.renderCustomBeam((float) (-vec.x + ((rightPaneDim.getCenter(NavigationAxis.HORIZONTAL) / scaleFac))), (float) -vec.y + (rightPaneDim.getCenter(NavigationAxis.VERTICAL) / scaleFac) - CrystalChams.getYOffset(CrystalChams.previewCrystalEntity.endCrystalAge + ((RenderTickCounter.Dynamic) CrystalChams.mc.getRenderTickCounter()).tickDelta, ChamsConfig.o_coreOffset.pendingValue(), ChamsConfig.o_coreBounceSpeed.pendingValue(), ChamsConfig.o_coreBounceHeight.pendingValue(), ChamsConfig.o_coreDelay.pendingValue()) - 2, 2.5F, ((RenderTickCounter.Dynamic) CrystalChams.mc.getRenderTickCounter()).tickDelta, CrystalChams.previewCrystalEntity.endCrystalAge, drawContext.getMatrices(), CrystalChams.mc.getBufferBuilders().getEntityVertexConsumers(), 255, true);
+                        CrystalChams.renderCustomBeam((float) (-vec.x + ((rightPaneDim.getCenter(NavigationAxis.HORIZONTAL) / scaleFac))), (float) -vec.y + (rightPaneDim.getCenter(NavigationAxis.VERTICAL) / scaleFac) - CrystalChams.getYOffset(CrystalChams.previewCrystalEntity.endCrystalAge + ((RenderTickCounter.Dynamic) CrystalChams.mc.getRenderTickCounter()).tickDelta, ChamsConfig.o_coreOffset.pendingValue(), ChamsConfig.o_coreBounceSpeed.pendingValue(), ChamsConfig.o_coreBounceHeight.pendingValue(), ChamsConfig.o_coreDelay.pendingValue()) - 2, 2.5F, ((RenderTickCounter.Dynamic) CrystalChams.mc.getRenderTickCounter()).tickDelta, CrystalChams.previewCrystalEntity.endCrystalAge, drawContext.getMatrices(), CrystalChams.mc.getBufferBuilders().getEntityVertexConsumers(), 255, 1);
                         drawContext.getMatrices().pop();
                     }
                     drawContext.draw();
@@ -383,12 +389,21 @@ public class CrystalChams implements ModInitializer {
         return new Vec3d(target.x, target.y, target.z);
     }
 
-    public static void renderCustomBeam(float dx, float dy, float dz, float tickDelta, int age, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, boolean preview) {
+    public static void renderCustomBeam(float dx, float dy, float dz, float tickDelta, int age, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int mode) {
+        /*
+        0 - non-preview
+        1 - preview
+        2 - funnier option
+         */
+        if(mode == 2){
+            renderVanillaCrystalBeam(dx, dy, dz,  tickDelta, age, matrices, vertexConsumers, light);
+            return;
+        }
         float f = MathHelper.sqrt(dx * dx + dz * dz);
         float v = dx * dx + dy * dy + dz * dz;
         float g = MathHelper.sqrt(v);
         matrices.push();
-        if (!preview) {
+        if (mode == 0) {
             matrices.translate(0.0F, 2.0F, 0.0F);
         }
         matrices.multiply(RotationAxis.POSITIVE_Y.rotation((float) (-Math.atan2(dz, dx)) - (float) (Math.PI / 2)));
@@ -407,8 +422,8 @@ public class CrystalChams implements ModInitializer {
             float q = (float) n / ChamsConfig.o_beamSides.pendingValue();
             Color rainbowCol1 = new Color(CrystalChams.getRainbow(ChamsConfig.o_beam1RainbowDelay.pendingValue(), ChamsConfig.o_beam1RainbowSpeed.pendingValue(), ChamsConfig.o_beam1RainbowSaturation.pendingValue(), ChamsConfig.o_beam1RainbowBrightness.pendingValue()));
             Color rainbowCol2 = new Color(CrystalChams.getRainbow(ChamsConfig.o_beam2RainbowDelay.pendingValue(), ChamsConfig.o_beam2RainbowSpeed.pendingValue(), ChamsConfig.o_beam2RainbowSaturation.pendingValue(), ChamsConfig.o_beam2RainbowBrightness.pendingValue()));
-            int startCol = ChamsConfig.o_beam1Rainbow.pendingValue() ? ColorHelper.Argb.getArgb((int) (ChamsConfig.o_beam1Alpha.pendingValue() * (preview ? CrystalChams.beamProgress : 1) * 255F), rainbowCol1.getRed(), rainbowCol1.getGreen(), rainbowCol1.getBlue()) : ColorHelper.Argb.getArgb((int) (ChamsConfig.o_beam1Alpha.pendingValue() * (preview ? CrystalChams.beamProgress : 1) * 255F), ChamsConfig.o_beam1Color.pendingValue().getRed(), ChamsConfig.o_beam1Color.pendingValue().getGreen(), ChamsConfig.o_beam1Color.pendingValue().getBlue());
-            int endCol = ChamsConfig.o_beam2Rainbow.pendingValue() ? ColorHelper.Argb.getArgb((int) (ChamsConfig.o_beam2Alpha.pendingValue() * (preview ? CrystalChams.beamProgress : 1) * 255F), rainbowCol2.getRed(), rainbowCol2.getGreen(), rainbowCol2.getBlue()) : ColorHelper.Argb.getArgb((int) (ChamsConfig.o_beam2Alpha.pendingValue() * (preview ? CrystalChams.beamProgress : 1) * 255F), ChamsConfig.o_beam2Color.pendingValue().getRed(), ChamsConfig.o_beam2Color.pendingValue().getGreen(), ChamsConfig.o_beam2Color.pendingValue().getBlue());
+            int startCol = ChamsConfig.o_beam1Rainbow.pendingValue() ? ColorHelper.Argb.getArgb((int) (ChamsConfig.o_beam1Alpha.pendingValue() * (mode == 1 ? CrystalChams.beamProgress : 1) * 255F), rainbowCol1.getRed(), rainbowCol1.getGreen(), rainbowCol1.getBlue()) : ColorHelper.Argb.getArgb((int) (ChamsConfig.o_beam1Alpha.pendingValue() * (mode == 1 ? CrystalChams.beamProgress : 1) * 255F), ChamsConfig.o_beam1Color.pendingValue().getRed(), ChamsConfig.o_beam1Color.pendingValue().getGreen(), ChamsConfig.o_beam1Color.pendingValue().getBlue());
+            int endCol = ChamsConfig.o_beam2Rainbow.pendingValue() ? ColorHelper.Argb.getArgb((int) (ChamsConfig.o_beam2Alpha.pendingValue() * (mode == 1 ? CrystalChams.beamProgress : 1) * 255F), rainbowCol2.getRed(), rainbowCol2.getGreen(), rainbowCol2.getBlue()) : ColorHelper.Argb.getArgb((int) (ChamsConfig.o_beam2Alpha.pendingValue() * (mode == 1 ? CrystalChams.beamProgress : 1) * 255F), ChamsConfig.o_beam2Color.pendingValue().getRed(), ChamsConfig.o_beam2Color.pendingValue().getGreen(), ChamsConfig.o_beam2Color.pendingValue().getBlue());
             vertexConsumer.vertex(entry, k * ChamsConfig.o_beam2Radius.pendingValue(), l * ChamsConfig.o_beam2Radius.pendingValue(), 0.0F).color(endCol).texture(m, h).overlay(OverlayTexture.DEFAULT_UV).light(ChamsConfig.o_beam2LightLevel.pendingValue() != -1 ? ChamsConfig.o_beam2LightLevel.pendingValue() : light).normal(entry, 0.0F, -1.0F, 0.0F);
             vertexConsumer.vertex(entry, k * ChamsConfig.o_beam1Radius.pendingValue(), l * ChamsConfig.o_beam1Radius.pendingValue(), g).color(startCol).texture(m, i).overlay(OverlayTexture.DEFAULT_UV).light(ChamsConfig.o_beam1LightLevel.pendingValue() != -1 ? ChamsConfig.o_beam1LightLevel.pendingValue() : light).normal(entry, 0.0F, -1.0F, 0.0F);
             vertexConsumer.vertex(entry, o * ChamsConfig.o_beam1Radius.pendingValue(), p * ChamsConfig.o_beam1Radius.pendingValue(), g).color(startCol).texture(q, i).overlay(OverlayTexture.DEFAULT_UV).light(ChamsConfig.o_beam1LightLevel.pendingValue() != -1 ? ChamsConfig.o_beam1LightLevel.pendingValue() : light).normal(entry, 0.0F, -1.0F, 0.0F);
@@ -417,6 +432,49 @@ public class CrystalChams implements ModInitializer {
             l = p;
             m = q;
         }
+        matrices.pop();
+    }
+
+    private static void renderVanillaCrystalBeam(float dx, float dy, float dz, float tickDelta, int age, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
+        float f = MathHelper.sqrt(dx * dx + dz * dz);
+        float value = dx * dx + dy * dy + dz * dz;
+        float g = MathHelper.sqrt(value);
+        matrices.push();
+        matrices.translate(0.0F, 2.0F, 0.0F);
+        matrices.multiply(RotationAxis.POSITIVE_Y.rotation((float)(-Math.atan2(dz, dx)) - (float) (Math.PI / 2)));
+        matrices.multiply(RotationAxis.POSITIVE_X.rotation((float)(-Math.atan2(f, dy)) - (float) (Math.PI / 2)));
+        VertexConsumer vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getEntitySmoothCutout(CRYSTAL_BEAM_TEXTURE));
+        float h = 0.0F - (age + tickDelta) * 0.01F;
+        float i = MathHelper.sqrt(value) / 32.0F - (age + tickDelta) * 0.01F;
+        int j = 8;
+        float k = 0.0F;
+        float l = 0.75F;
+        float m = 0.0F;
+        MatrixStack.Entry entry = matrices.peek();
+
+        for (int n = 1; n <= 8; n++) {
+            float o = MathHelper.sin(n * (float) (Math.PI * 2) / 8.0F) * 0.75F;
+            float p = MathHelper.cos(n * (float) (Math.PI * 2) / 8.0F) * 0.75F;
+            float q = n / 8.0F;
+            vertexConsumer.vertex(entry, k * 0.2F, l * 0.2F, 0.0F)
+                    .color(Colors.BLACK)
+                    .texture(m, h)
+                    .overlay(OverlayTexture.DEFAULT_UV)
+                    .light(light)
+                    .normal(entry, 0.0F, -1.0F, 0.0F);
+            vertexConsumer.vertex(entry, k, l, g).color(Colors.WHITE).texture(m, i).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, -1.0F, 0.0F);
+            vertexConsumer.vertex(entry, o, p, g).color(Colors.WHITE).texture(q, i).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, -1.0F, 0.0F);
+            vertexConsumer.vertex(entry, o * 0.2F, p * 0.2F, 0.0F)
+                    .color(Colors.BLACK)
+                    .texture(q, h)
+                    .overlay(OverlayTexture.DEFAULT_UV)
+                    .light(light)
+                    .normal(entry, 0.0F, -1.0F, 0.0F);
+            k = o;
+            l = p;
+            m = q;
+        }
+
         matrices.pop();
     }
 }

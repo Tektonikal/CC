@@ -7,6 +7,7 @@ public enum OptionGroups {
     ROTATION_SPEED,
     BOUNCE_HEIGHT,
     BOUNCE_SPEED,
+    DELAY,
     SCALE,
     LIGHT_LEVEL,
     RENDER_MODE,

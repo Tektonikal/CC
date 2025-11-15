@@ -21,6 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import tektonikal.crystalchams.CrystalChams;
 import tektonikal.crystalchams.OptionGroups;
+import tektonikal.crystalchams.config.ChamsConfig;
 import tektonikal.crystalchams.config.EvilOption;
 
 import java.util.List;
@@ -63,8 +64,11 @@ public interface OptionListWidgetAccessor {
 
         @Unique
         private boolean optionsSynced(EvilOption<?> option) {
-            for(EvilOption<?> o : CrystalChams.optionGroups.get(option.group())){
-                if(!option.pendingValue().equals(o.pendingValue())){
+            for (EvilOption<?> o : CrystalChams.optionGroups.get(option.group())) {
+                if (o.equals(ChamsConfig.o_baseRenderMode)) {
+                    boolean val = o.stateManager().get() != ChamsConfig.BaseRenderMode.NEVER;
+                    return !option.pendingValue().equals(val);
+                } else if (!option.pendingValue().equals(o.pendingValue())) {
                     return false;
                 }
             }
@@ -73,7 +77,15 @@ public interface OptionListWidgetAccessor {
 
         @Unique
         private void syncLinkedOptions(OptionGroups group) {
-            CrystalChams.optionGroups.get(group).forEach(evilOption -> evilOption.stateManager().set(option.pendingValue()));
+            if (group.equals(OptionGroups.RENDER) && option.equals(ChamsConfig.o_baseRenderMode)) {
+                for (EvilOption evilOption : CrystalChams.optionGroups.get(group)) {
+                    evilOption.stateManager().set(option.pendingValue() != ChamsConfig.BaseRenderMode.NEVER);
+                }
+            } else {
+                for (EvilOption evilOption : CrystalChams.optionGroups.get(group)) {
+                    evilOption.stateManager().set(option.pendingValue());
+                }
+            }
         }
 
         @Inject(method = "render", at = @At("TAIL"))

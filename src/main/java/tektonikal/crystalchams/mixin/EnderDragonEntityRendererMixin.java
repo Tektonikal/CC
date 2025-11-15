@@ -43,7 +43,7 @@ public abstract class EnderDragonEntityRendererMixin extends EntityRenderer<Ende
             ci.cancel();
             return;
         }
-        renderCustomBeam(dx, dy, dz, tickDelta, age, matrices, vertexConsumers, light, false);
+        renderCustomBeam(dx, dy, dz, tickDelta, age, matrices, vertexConsumers, light, 0);
         ci.cancel();
     }
 }

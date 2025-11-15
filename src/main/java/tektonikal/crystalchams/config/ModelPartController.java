@@ -37,6 +37,7 @@ public class ModelPartController implements Controller<ModelPartOptions> {
     public EvilOption<RenderMode> o_renderLayer;
     public EvilOption<Boolean> o_culling;
     public EvilOption<Boolean> o_funnyOption;
+    public EvilOption<Boolean> o_funnierOption;
     public EvilOption<Boolean> o_rainbow;
     public EvilOption<Float> o_rainbowSpeed;
     public EvilOption<Integer> o_rainbowDelay;
@@ -69,6 +70,7 @@ public class ModelPartController implements Controller<ModelPartOptions> {
                 OptionGroups.RENDER_MODE);
         o_culling = CrystalChams.createBooleanOption("Culled", "", StateManager.createSimple(false, () -> option.binding().getValue().culling, newVal -> option.binding().getValue().culling = newVal));
         o_funnyOption = CrystalChams.createBooleanOption("Funny Option", "", StateManager.createSimple(false, () -> option.binding().getValue().funnyOption, newVal -> option.binding().getValue().funnyOption = newVal));
+        o_funnierOption = CrystalChams.createBooleanOption("Funnier Option", "", StateManager.createSimple(false, () -> option.binding().getValue().funnierOption, newVal -> option.binding().getValue().funnierOption = newVal));
         o_rainbow = CrystalChams.createBooleanOption("Rainbow", "", StateManager.createSimple(false, () -> option.binding().getValue().rainbow, newVal -> option.binding().getValue().rainbow = newVal));
         o_rainbowSpeed = EvilOption.<Float>createBuilder().name(Text.of("Rainbow Speed")).controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 10f).step(0.1f).formatValue(value -> Text.of(String.format("%.1f", value) + "x"))).stateManager(StateManager.createSimple(2F, () -> option.binding().getValue().rainbowSpeed, newVal -> option.binding().getValue().rainbowSpeed = newVal)).build();
         o_rainbowDelay = EvilOption.<Integer>createBuilder().name(Text.of("Rainbow Delay")).controller(integerOption -> CustomIntegerSliderControllerBuilder.create(integerOption).step(1).range(-500, 500).formatValue(integer -> Text.of(integer + "ms"))).stateManager(StateManager.createSimple(0, () -> option.binding().getValue().rainbowDelay, newVal -> option.binding().getValue().rainbowDelay = newVal)).build();
@@ -94,8 +96,7 @@ public class ModelPartController implements Controller<ModelPartOptions> {
     public AbstractWidget provideWidget(YACLScreen screen, Dimension<Integer> widgetDimension) {
         //            System.out.println(ChamsConfig.o_frameList.isPendingValueDefault());
         //            ((ListOptionImplAccessor) ChamsConfig.o_frameList).triggerListener(OptionEventListener.Event.STATE_CHANGE, false);
-        subScreen = YetAnotherConfigLib.createBuilder().title(Text.of("Custom End Crystals")).category(ConfigCategory.createBuilder().name(Text.of("Edit Frame")).option(o_render).group(OptionGroup.createBuilder().name(Text.of("Movement")).option(o_offset).option(o_rotationSpeed).option(o_bounceHeight).option(o_bounceSpeed).option(o_tickDelay).build()).group(OptionGroup.createBuilder().name(Text.of("Rendering")).option(o_scale).option(o_color).option(o_alpha).option(o_lightLevel).option(o_renderLayer).option(o_culling).option(o_funnyOption).build()).group(OptionGroup.createBuilder().name(Text.of("Rainbow")).option(o_rainbow).option(o_rainbowSpeed).option(o_rainbowDelay).option(o_rainbowSaturation).option(o_rainbowBrightness).build()).build()).save(ChamsConfig.CONFIG::save).build();
-        System.out.println("QHAR?");
+        subScreen = YetAnotherConfigLib.createBuilder().title(Text.of("Custom End Crystals")).category(ConfigCategory.createBuilder().name(Text.of("Edit Frame")).option(o_render).group(OptionGroup.createBuilder().name(Text.of("Movement")).option(o_offset).option(o_rotationSpeed).option(o_bounceHeight).option(o_bounceSpeed).option(o_tickDelay).build()).group(OptionGroup.createBuilder().name(Text.of("Rendering")).option(o_scale).option(o_color).option(o_alpha).option(o_lightLevel).option(o_renderLayer).option(o_culling).option(o_funnyOption).option(o_funnierOption).build()).group(OptionGroup.createBuilder().name(Text.of("Rainbow")).option(o_rainbow).option(o_rainbowSpeed).option(o_rainbowDelay).option(o_rainbowSaturation).option(o_rainbowBrightness).build()).build()).save(ChamsConfig.CONFIG::save).build();
         return new ModelPartOptionElement(this, screen, widgetDimension);
     }
 
