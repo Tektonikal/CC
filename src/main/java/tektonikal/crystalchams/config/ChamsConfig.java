@@ -314,19 +314,9 @@ public class ChamsConfig {
             .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 2f).step(0.1f).formatValue(val -> Text.of(String.format("%.1f", val) + "s")))
             .stateManager(StateManager.createSimple(1F, () -> CONFIG.instance().coreAlphaAnimDuration, newVal -> CONFIG.instance().coreAlphaAnimDuration = newVal))
             .build();
-    public static EvilOption<Easings> o_coreAlphaEasing = EvilOption.<Easings>createBuilder()
-            .name(Text.of(SEPARATOR + "Easing"))
-            .group(OptionGroups.ALPHA_EASING)
-            .controller(easingsOption -> EnumControllerBuilder.create(easingsOption).enumClass(Easings.class))
-            .stateManager(StateManager.createSimple(Easings.OFF, () -> CONFIG.instance().coreAlphaEasing, newVal -> CONFIG.instance().coreAlphaEasing = newVal))
-            .build();
+    public static EvilOption<Easings> o_coreAlphaEasing = CrystalChams.createEasingOption( "", StateManager.createSimple(Easings.OFF, () -> CONFIG.instance().coreAlphaEasing, newVal -> CONFIG.instance().coreAlphaEasing = newVal), OptionGroups.ALPHA_EASING);
     @Updatable
-    public static EvilOption<Boolean> o_coreScaleAnimation = EvilOption.<Boolean>createBuilder()
-            .name(Text.of("Animate Scale"))
-            .group(OptionGroups.ANIMATE_SCALE)
-            .controller(CustomTickBoxControllerBuilder::new)
-            .stateManager(StateManager.createSimple(false, () -> CONFIG.instance().coreScaleAnimation, newVal -> CONFIG.instance().coreScaleAnimation = newVal))
-            .build();
+    public static EvilOption<Boolean> o_coreScaleAnimation = CrystalChams.createBooleanOption("Animate Scale", "", StateManager.createSimple(false, () -> CONFIG.instance().coreScaleAnimation, newVal -> CONFIG.instance().coreScaleAnimation = newVal), OptionGroups.ANIMATE_SCALE);
     public static EvilOption<Float> o_coreStartScale = EvilOption.<Float>createBuilder()
             .name(Text.of(SEPARATOR + "Starting Scale"))
             .group(OptionGroups.STARTING_SCALE)
@@ -345,25 +335,15 @@ public class ChamsConfig {
             .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 2f).step(0.1f).formatValue(val -> Text.of(String.format("%.1f", val) + "s")))
             .stateManager(StateManager.createSimple(1F, () -> CONFIG.instance().coreScaleAnimDuration, newVal -> CONFIG.instance().coreScaleAnimDuration = newVal))
             .build();
-    public static EvilOption<Easings> o_coreScaleEasing = EvilOption.<Easings>createBuilder()
-            .name(Text.of(SEPARATOR + "Easing"))
-            .group(OptionGroups.SCALE_EASING)
-            .controller(easingsOption -> EnumControllerBuilder.create(easingsOption).enumClass(Easings.class))
-            .stateManager(StateManager.createSimple(Easings.OFF, () -> CONFIG.instance().coreScaleEasing, newVal -> CONFIG.instance().coreScaleEasing = newVal))
-            .build();
+    public static EvilOption<Easings> o_coreScaleEasing = CrystalChams.createEasingOption("", StateManager.createSimple(Easings.OFF, () -> CONFIG.instance().coreScaleEasing, newVal -> CONFIG.instance().coreScaleEasing = newVal), OptionGroups.SCALE_EASING);
     //TODO: look into drop-down widget
     @Updatable
-    public static EvilOption<Boolean> o_renderFrames = EvilOption.<Boolean>createBuilder()
-            .name(Text.of("Render Frames"))
-            .controller(CustomTickBoxControllerBuilder::new)
-            .stateManager(StateManager.createSimple(true, () -> CONFIG.instance().renderFrames, newVal -> CONFIG.instance().renderFrames = newVal))
-            .build();
+    public static EvilOption<Boolean> o_renderFrames = CrystalChams.createBooleanOption("Render Frames", "",
+            StateManager.createSimple(true, () -> CONFIG.instance().renderFrames, newVal -> CONFIG.instance().renderFrames = newVal), OptionGroups.RENDER);
     @Updatable
-    public static EvilOption<Boolean> o_renderBeam = EvilOption.<Boolean>createBuilder()
-            .name(Text.of("Render Beam"))
-            .controller(CustomTickBoxControllerBuilder::new)
-            .stateManager(StateManager.createSimple(true, () -> CONFIG.instance().renderBeam, newVal -> CONFIG.instance().renderBeam = newVal))
-            .build();
+    public static EvilOption<Boolean> o_renderBeam = CrystalChams.createBooleanOption("Render Beam", "",
+            StateManager.createSimple(true, () -> CONFIG.instance().renderBeam, newVal -> CONFIG.instance().renderBeam = newVal),
+            OptionGroups.RENDER);
     public static EvilOption<Color> o_beam1Color = CrystalChams.createColorOption("Color", "", StateManager.createSimple(Color.WHITE, () -> CONFIG.instance().beam1Color, newVal -> CONFIG.instance().beam1Color = newVal), OptionGroups.COLOR);
     public static EvilOption<Float> o_beam1Alpha = CrystalChams.createFloatOptionPercent("Opacity", "", StateManager.createSimple(1F, () -> CONFIG.instance().beam1Alpha, newVal -> CONFIG.instance().beam1Alpha = newVal));
     public static EvilOption<Integer> o_beam1LightLevel = EvilOption.<Integer>createBuilder()
@@ -373,11 +353,9 @@ public class ChamsConfig {
             .stateManager(StateManager.createSimple(-1, () -> CONFIG.instance().beam1LightLevel, newVal -> CONFIG.instance().beam1LightLevel = newVal))
             .build();
     @Updatable
-    public static EvilOption<Boolean> o_beam1Rainbow = EvilOption.<Boolean>createBuilder()
-            .name(Text.of("Rainbow"))
-            .controller(CustomTickBoxControllerBuilder::new)
-            .stateManager(StateManager.createSimple(false, () -> CONFIG.instance().beam1Rainbow, newVal -> CONFIG.instance().beam1Rainbow = newVal))
-            .build();
+    public static EvilOption<Boolean> o_beam1Rainbow = CrystalChams.createBooleanOption("Rainbow", "",
+            StateManager.createSimple(false, () -> CONFIG.instance().beam1Rainbow, newVal -> CONFIG.instance().beam1Rainbow = newVal),
+            OptionGroups.RAINBOW);
     public static EvilOption<Float> o_beam1RainbowSpeed = EvilOption.<Float>createBuilder()
             .name(Text.of("Rainbow Speed"))
             .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 10f).step(0.1f).formatValue(CrystalChams.MULTIPLIER_FORMATTER_ONE_PLACE))
@@ -402,11 +380,9 @@ public class ChamsConfig {
             .stateManager(StateManager.createSimple(-1, () -> CONFIG.instance().beam2LightLevel, newVal -> CONFIG.instance().beam2LightLevel = newVal))
             .build();
     @Updatable
-    public static EvilOption<Boolean> o_beam2Rainbow = EvilOption.<Boolean>createBuilder()
-            .name(Text.of("Rainbow"))
-            .controller(CustomTickBoxControllerBuilder::new)
-            .stateManager(StateManager.createSimple(false, () -> CONFIG.instance().beam2Rainbow, newVal -> CONFIG.instance().beam2Rainbow = newVal))
-            .build();
+    public static EvilOption<Boolean> o_beam2Rainbow = CrystalChams.createBooleanOption("Rainbow", "",
+            StateManager.createSimple(false, () -> CONFIG.instance().beam2Rainbow, newVal -> CONFIG.instance().beam2Rainbow = newVal),
+            OptionGroups.RAINBOW);
     public static EvilOption<Float> o_beam2RainbowSpeed = EvilOption.<Float>createBuilder()
             .name(Text.of("Rainbow Speed"))
             .controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 10f).step(0.1f).formatValue(CrystalChams.MULTIPLIER_FORMATTER_ONE_PLACE))
@@ -444,7 +420,7 @@ public class ChamsConfig {
     public static EvilOption<RenderMode> o_beamRenderLayer = CrystalChams.createRenderModeOption("Render Mode", "",
             StateManager.createSimple(RenderMode.DEFAULT, () -> CONFIG.instance().beamRenderMode, newVal -> CONFIG.instance().beamRenderMode = newVal),
             OptionGroups.RENDER_MODE);
-    public static EvilOption<Boolean> o_beamCulling = CrystalChams.createBooleanOption("Culled",
+    public static EvilOption<Boolean> o_beamCulling = CrystalChams.createBooleanOption(SEPARATOR+"Culling",
             "",
             StateManager.createSimple(false, () -> CONFIG.instance().beamCulling, newVal -> CONFIG.instance().beamCulling = newVal),
             OptionGroups.CULLED);
@@ -506,6 +482,7 @@ public class ChamsConfig {
             o_beamSides.setAvailable(available);
             o_beamScrollSpeed.setAvailable(available);
             o_beamRenderLayer.setAvailable(available);
+            o_beamCulling.setAvailable(available);
         } else if (booleanOption.equals(o_beam1Rainbow)) {
             boolean available = o_beam1Rainbow.available() && aBoolean;
             o_beam1RainbowDelay.setAvailable(available);
@@ -727,6 +704,7 @@ public class ChamsConfig {
                                         .option(o_beamSides)
                                         .option(o_beamScrollSpeed)
                                         .option(o_beamRenderLayer)
+                                        .option(o_beamCulling)
                                         .build())
                                 .build())
                 ))

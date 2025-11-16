@@ -149,9 +149,6 @@ public class CrystalChams implements ModInitializer {
         return EvilOption.<Float>createBuilder().name(Text.of(name)).description(OptionDescription.of(Text.of(description))).stateManager(stateManager).controller(PERCENT).group(group).build();
     }
 
-    public static EvilOption<Easings> createEasingOption(String name, String description, StateManager<Easings> stateManager, OptionGroups group) {
-        return EvilOption.<Easings>createBuilder().name(Text.of(name)).description(OptionDescription.of(Text.of(description))).stateManager(stateManager).controller(easingsOption -> EnumControllerBuilder.create(easingsOption).enumClass(Easings.class)).group(group).build();
-    }
     public static EvilOption<Boolean> createBooleanOption(String name, String description, StateManager<Boolean> stateManager) {
         return EvilOption.<Boolean>createBuilder().name(Text.of(name)).stateManager(stateManager).description(OptionDescription.of(Text.of(description))).controller(CustomTickBoxControllerBuilder::new).build();
     }
@@ -164,8 +161,8 @@ public class CrystalChams implements ModInitializer {
         return EvilOption.<Float>createBuilder().name(Text.of(name)).description(OptionDescription.of(Text.of(description))).stateManager(stateManager).controller(PERCENT).build();
     }
 
-    public static EvilOption<Easings> createEasingOption(String name, String description, StateManager<Easings> stateManager) {
-        return EvilOption.<Easings>createBuilder().name(Text.of(name)).description(OptionDescription.of(Text.of(description))).stateManager(stateManager).controller(easingsOption -> EnumControllerBuilder.create(easingsOption).enumClass(Easings.class)).build();
+    public static EvilOption<Easings> createEasingOption(String description, StateManager<Easings> stateManager, OptionGroups group) {
+        return EvilOption.<Easings>createBuilder().name(Text.of(ChamsConfig.SEPARATOR + "Easing")).description(OptionDescription.of(Text.of(description))).stateManager(stateManager).controller(easingsOption -> EnumControllerBuilder.create(easingsOption).enumClass(Easings.class)).group(group).build();
     }
     public static EvilOption<RenderMode> createRenderModeOption(String name, String description, StateManager<RenderMode> stateManager, OptionGroups group) {
         return EvilOption.<RenderMode>createBuilder().name(Text.of(name)).description(OptionDescription.of(Text.of(description))).stateManager(stateManager).controller(easingsOption -> EnumControllerBuilder.create(easingsOption).enumClass(RenderMode.class)).group(group).build();
