@@ -66,7 +66,7 @@ public interface OptionListWidgetAccessor {
         private boolean optionsSynced(EvilOption<?> option) {
             for (EvilOption<?> o : CrystalChams.optionGroups.get(option.group())) {
                 if (o.equals(ChamsConfig.o_baseRenderMode)) {
-                    boolean val = o.stateManager().get() != ChamsConfig.BaseRenderMode.NEVER;
+                    boolean val = o.stateManager().get() != CrystalChams.BaseRenderMode.NEVER;
                     return !option.pendingValue().equals(val);
                 } else if (!option.pendingValue().equals(o.pendingValue())) {
                     return false;
@@ -79,7 +79,7 @@ public interface OptionListWidgetAccessor {
         private void syncLinkedOptions(OptionGroups group) {
             if (group.equals(OptionGroups.RENDER) && option.equals(ChamsConfig.o_baseRenderMode)) {
                 for (EvilOption evilOption : CrystalChams.optionGroups.get(group)) {
-                    evilOption.stateManager().set(option.pendingValue() != ChamsConfig.BaseRenderMode.NEVER);
+                    evilOption.stateManager().set(option.pendingValue() != CrystalChams.BaseRenderMode.NEVER);
                 }
             } else {
                 for (EvilOption evilOption : CrystalChams.optionGroups.get(group)) {

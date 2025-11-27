@@ -1,12 +1,17 @@
 package tektonikal.crystalchams;
 
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.mojang.blaze3d.systems.RenderSystem;
+import dev.isxander.yacl3.api.NameableEnum;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
 import dev.isxander.yacl3.api.StateManager;
 import dev.isxander.yacl3.api.controller.ControllerBuilder;
 import dev.isxander.yacl3.api.controller.EnumControllerBuilder;
 import dev.isxander.yacl3.api.controller.ValueFormatter;
+import dev.isxander.yacl3.config.v2.impl.serializer.GsonConfigSerializer;
 import dev.isxander.yacl3.gui.YACLScreen;
 import dev.isxander.yacl3.gui.controllers.PopupControllerScreen;
 import dev.isxander.yacl3.gui.controllers.slider.FloatSliderController;
@@ -24,7 +29,6 @@ import net.minecraft.client.gui.navigation.NavigationAxis;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.block.entity.EndPortalBlockEntityRenderer;
-import net.minecraft.client.render.entity.EnderDragonEntityRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.text.Text;
@@ -37,17 +41,19 @@ import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 import org.joml.*;
 import org.lwjgl.opengl.GL11;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tektonikal.crystalchams.annotation.Updatable;
 import tektonikal.crystalchams.config.*;
 import tektonikal.crystalchams.mixin.CategoryTabAccessor;
 import tektonikal.crystalchams.mixin.PopupControllerScreenAccessor;
 import tektonikal.crystalchams.stupidfuckingboilerplate.CustomFloatSliderController;
 import tektonikal.crystalchams.stupidfuckingboilerplate.CustomFloatSliderControllerBuilder;
+import tektonikal.crystalchams.stupidfuckingboilerplate.CustomIntegerSliderController;
 import tektonikal.crystalchams.stupidfuckingboilerplate.CustomTickBoxControllerBuilder;
 import tektonikal.crystalchams.util.Easings;
 
 import java.awt.*;
-import java.awt.List;
 import java.lang.Math;
 import java.util.*;
 import java.util.Random;
@@ -60,6 +66,7 @@ import static net.minecraft.client.render.entity.EnderDragonEntityRenderer.CRYST
 public class CrystalChams implements ModInitializer {
     public static final MinecraftClient mc = MinecraftClient.getInstance();
     public static final Function<Double, RenderLayer.MultiPhase> CUSTOM_DEBUG_LINE_STRIP = Util.memoize((lineWidth) -> RenderLayer.of("custom_debug_line_strip", VertexFormats.POSITION_COLOR_LIGHT, VertexFormat.DrawMode.DEBUG_LINE_STRIP, 1536, RenderLayer.MultiPhaseParameters.builder().program(POSITION_COLOR_LIGHTMAP_PROGRAM).lineWidth(new RenderPhase.LineWidth(OptionalDouble.of(lineWidth))).transparency(TRANSLUCENT_TRANSPARENCY).cull(DISABLE_CULLING).lightmap(ENABLE_LIGHTMAP).build(false)));
+    public static final String SEPARATOR = " - ";
     public static ShaderProgram ENTITY_TRANSLUCENT_NOTEX;
     public static ShaderProgram END_PORTAL_TEX;
     public static ShaderProgram CUSTOM_IMAGE;
@@ -87,6 +94,14 @@ public class CrystalChams implements ModInitializer {
     public static EndCrystalEntity previewCrystalEntity = new EndCrystalEntity(mc.world, 0.5, 0, 0);
     public static float previewScaleSmoothed = ChamsConfig.CONFIG.instance().previewScale;
     public static float beamProgress;
+    public static Gson gson = new GsonBuilder()
+            .setFieldNamingPolicy(FieldNamingPolicy.IDENTITY)
+            .serializeNulls()
+            .registerTypeHierarchyAdapter(Color.class, new GsonConfigSerializer.ColorTypeAdapter())
+            .setPrettyPrinting()
+            .create();
+    public static final String CC_MOD_ID = "crystalchams";
+    public static final Logger LOGGER = LoggerFactory.getLogger(CC_MOD_ID);
 
     public static float getYOffset(float age, float offset, float bounceSpeed, float bounceHeight, float tickDelay) {
         //?????
@@ -162,7 +177,7 @@ public class CrystalChams implements ModInitializer {
     }
 
     public static EvilOption<Easings> createEasingOption(String description, StateManager<Easings> stateManager, OptionGroups group) {
-        return EvilOption.<Easings>createBuilder().name(Text.of(ChamsConfig.SEPARATOR + "Easing")).description(OptionDescription.of(Text.of(description))).stateManager(stateManager).controller(easingsOption -> EnumControllerBuilder.create(easingsOption).enumClass(Easings.class)).group(group).build();
+        return EvilOption.<Easings>createBuilder().name(Text.of(SEPARATOR + "Easing")).description(OptionDescription.of(Text.of(description))).stateManager(stateManager).controller(easingsOption -> EnumControllerBuilder.create(easingsOption).enumClass(Easings.class)).group(group).build();
     }
     public static EvilOption<RenderMode> createRenderModeOption(String name, String description, StateManager<RenderMode> stateManager, OptionGroups group) {
         return EvilOption.<RenderMode>createBuilder().name(Text.of(name)).description(OptionDescription.of(Text.of(description))).stateManager(stateManager).controller(easingsOption -> EnumControllerBuilder.create(easingsOption).enumClass(RenderMode.class)).group(group).build();
@@ -254,8 +269,7 @@ public class CrystalChams implements ModInitializer {
             try {
                 ((Option<Boolean>) field.get(null)).addListener(ChamsConfig::update);
             } catch (Exception x) {
-                System.out.println("what the fuck");
-                throw new RuntimeException(x);
+                LOGGER.error("Error adding listeners: {}", field.getName());
             }
         });
     }
@@ -268,9 +282,10 @@ public class CrystalChams implements ModInitializer {
                 if (value instanceof EvilOption && ((EvilOption<?>) value).group() != null) {
                     optionGroups.get(((EvilOption<?>) value).group()).add((EvilOption) value);
                 }
+                //refresh the option. sigh
                 ((Option) value).requestSet(((Option<?>) value).binding().getValue());
             } catch (IllegalAccessException e) {
-                System.out.println("what the hell");
+                LOGGER.error("Error refreshing or linking option: {}", field.getName());
             }
         });
     }
@@ -278,15 +293,14 @@ public class CrystalChams implements ModInitializer {
     public static void randomizeOptions() {
         Arrays.stream(ChamsConfig.class.getDeclaredFields()).filter(field -> field.getName().startsWith("o_")).forEach(field -> {
             if (field.getName().equals("o_frameList")) {
+                //TODO: i still think it would be really funny to have it generate a random number of frames
                 ChamsConfig.o_frameList.options().forEach(listOptionEntry -> {
                     ModelPartController controller = (ModelPartController) ((ListOptionEntryImpl.EntryController) (listOptionEntry.controller())).controller();
                     Arrays.stream(ModelPartController.class.getDeclaredFields()).filter(field1 -> field1.getName().startsWith("o_")).forEach(field1 -> {
                         try {
                             randomizeOption(field1.get(controller));
-                        } catch (IllegalAccessException e) {
-                            System.out.println("QHAR???");
-                        } catch (NullPointerException e) {
-                            System.out.println("you dumbass. you forgot about " + field1.getName());
+                        } catch (IllegalAccessException | NullPointerException ignored) {
+                            LOGGER.error("Error during randomization of options");
                         }
                     });
                 });
@@ -295,7 +309,7 @@ public class CrystalChams implements ModInitializer {
             try {
                 randomizeOption(field.get(null));
             } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
+                LOGGER.error("This shouldn't happen. this sucks");
             }
         });
     }
@@ -307,7 +321,7 @@ public class CrystalChams implements ModInitializer {
                 return;
             }
             if (value.equals(ChamsConfig.o_baseRenderMode)) {
-                //TODO
+                //TODO: expand the list of options. i don't want to randomize the preview scale anymore
                 return;
             }
             if (value.equals(ChamsConfig.o_coreAlphaEasing)) {
@@ -333,15 +347,17 @@ public class CrystalChams implements ModInitializer {
                 case "dev.isxander.yacl3.gui.controllers.slider.IntegerSliderController":
                     ((Option<Integer>) value).requestSet(safeRandom((int) ((IntegerSliderController) ((Option<Integer>) value).controller()).min(), (int) ((IntegerSliderController) ((Option<Integer>) value).controller()).max()));
                     break;
+                case "tektonikal.crystalchams.stupidfuckingboilerplate.CustomIntegerSliderController":
+                    ((Option<Integer>) value).requestSet(safeRandom((int) ((CustomIntegerSliderController) ((Option<Integer>) value).controller()).min(), (int) ((CustomIntegerSliderController) ((Option<Integer>) value).controller()).max()));
                 case "dev.isxander.yacl3.gui.controllers.cycling.EnumController":
-                    ((Option<RenderMode>) value).requestSet(RenderMode.values()[safeRandom(0, RenderMode.values().length - 1)]);
+                    //TODO: multiple enum types
+//                    ((Option<RenderMode>) value).requestSet(RenderMode.values()[safeRandom(0, RenderMode.values().length - 1)]);
                     break;
                 default:
-                    System.out.println(((Option<?>) value).controller().getClass().getCanonicalName());
+                    LOGGER.warn("Skipping unrandomizable option: {}", ((Option<?>) value).controller().option().name());
             }
         } catch (UnsupportedOperationException e) {
-            System.out.println("SOMETHING HAS GONE TERRIBLY WRONG!!!");
-            e.printStackTrace();
+            LOGGER.error("Error during randomization of option (SINGULAR)");
         }
     }
 
@@ -473,5 +489,21 @@ public class CrystalChams implements ModInitializer {
         }
 
         matrices.pop();
+    }
+
+    public enum BaseRenderMode implements NameableEnum {
+        ALWAYS,
+        DEFAULT,
+        NEVER;
+
+
+        @Override
+        public Text getDisplayName() {
+            return switch (this) {
+                case ALWAYS -> Text.of("Always");
+                case DEFAULT -> Text.of("Default");
+                case NEVER -> Text.of("Never");
+            };
+        }
     }
 }
