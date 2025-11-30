@@ -497,8 +497,8 @@ public class ChamsConfig {
         specialUpdate(o_baseRenderMode, o_baseRenderMode.pendingValue());
     }
 
-    private static void specialUpdate(Option<CrystalChams.BaseRenderMode> baseRenderModeOption, CrystalChams.BaseRenderMode baseRenderMode) {
-        boolean available = baseRenderModeOption.available() && baseRenderMode != CrystalChams.BaseRenderMode.NEVER;
+    private static void specialUpdate(Option<CrystalChams.BaseRenderMode> baseRenderModeOption, Object baseRenderMode) {
+        boolean available = baseRenderModeOption.available() && (baseRenderMode != CrystalChams.BaseRenderMode.NEVER);
         o_baseOffset.setAvailable(available);
         o_baseScale.setAvailable(available);
         o_baseColor.setAvailable(available);

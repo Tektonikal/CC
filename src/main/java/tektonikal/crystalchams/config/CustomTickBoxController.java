@@ -34,6 +34,7 @@ public class CustomTickBoxController extends TickBoxController {
 
         @Override
         protected void drawHoveredControl(DrawContext graphics, int mouseX, int mouseY, float delta) {
+            //TODO: animation only happens when control is onscreen
                 int outlineSize = 10;
                 int outlineX1 = getDimension().xLimit() - getXPadding() - outlineSize;
                 int outlineY1 = getDimension().centerY() - outlineSize / 2;

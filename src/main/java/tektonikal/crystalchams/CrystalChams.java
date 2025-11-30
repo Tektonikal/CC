@@ -71,7 +71,6 @@ public class CrystalChams implements ModInitializer {
     public static ShaderProgram END_PORTAL_TEX;
     public static ShaderProgram CUSTOM_IMAGE;
     public static final float PREVIEW_EASING_SPEED = 12.5F;
-    public static final EnumMap<OptionGroups, HashSet<EvilOption<?>>> optionGroups = new EnumMap<>(OptionGroups.class);
     public static final ValueFormatter<Integer> LIGHT_FORMATTER = value -> Text.of(value == -1 ? "Use World Light" : value + "");
     public static final ValueFormatter<Float> PERCENT_FORMATTER = value -> Text.of((int) (value * 100) + "%");
     public static final ValueFormatter<Float> MULTIPLIER_FORMATTER = val -> Text.of(String.format("%.2f", val) + "x");
@@ -188,9 +187,6 @@ public class CrystalChams implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        for(OptionGroups g : OptionGroups.values()) {
-            optionGroups.put(g, new HashSet<>());
-        }
         ChamsConfig.CONFIG.load();
         ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
             if (isThisMyScreen(screen)) {
@@ -279,9 +275,6 @@ public class CrystalChams implements ModInitializer {
         Arrays.stream(ChamsConfig.class.getDeclaredFields()).filter(field -> field.getName().startsWith("o_")).forEach(field -> {
             try {
                 Object value = field.get(null);
-                if (value instanceof EvilOption && ((EvilOption<?>) value).group() != null) {
-                    optionGroups.get(((EvilOption<?>) value).group()).add((EvilOption) value);
-                }
                 //refresh the option. sigh
                 ((Option) value).requestSet(((Option<?>) value).binding().getValue());
             } catch (IllegalAccessException e) {

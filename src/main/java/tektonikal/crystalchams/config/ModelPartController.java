@@ -100,7 +100,8 @@ public class ModelPartController implements Controller<ModelPartOptions> {
         subScreen = YetAnotherConfigLib.createBuilder()
                 .title(Text.of("Custom End Crystals"))
                 .category(ConfigCategory.createBuilder()
-                        .name(Text.of("Frame " + (index + 1)))
+                        //TODO include index?
+                        .name(Text.of("Edit Frame"))
                         .option(o_render)
                         .group(OptionGroup.createBuilder()
                                 .name(Text.of("Transform"))
@@ -136,17 +137,6 @@ public class ModelPartController implements Controller<ModelPartOptions> {
     public static class ModelPartOptionElement extends ControllerWidget<ModelPartController> {
         public ModelPartOptionElement(ModelPartController control, YACLScreen screen, Dimension<Integer> dim) {
             super(control, screen, dim);
-            //TODO: this really fuckin sucks, it keeps old option elements in it, but it doesn't crash!
-            Arrays.stream(ModelPartController.class.getDeclaredFields()).filter(field -> field.getName().startsWith("o_")).forEach(field -> {
-                try {
-                    Object value = field.get(control);
-                    if (value instanceof EvilOption && ((EvilOption<?>) value).group() != null) {
-                        CrystalChams.optionGroups.get(((EvilOption<?>) value).group()).add((EvilOption) value);
-                    }
-                } catch (IllegalAccessException e) {
-                    CrystalChams.LOGGER.error("Error during linking of new frame options");
-                }
-            });
         }
 
         @Override
@@ -157,6 +147,7 @@ public class ModelPartController implements Controller<ModelPartOptions> {
         @Override
         public void render(DrawContext graphics, int mouseX, int mouseY, float delta) {
             hovered = isMouseOver(mouseX, mouseY);
+            int index = -1;
             for (ListOptionEntry<ModelPartOptions> modelPartOptionsListOptionEntry : ChamsConfig.o_frameList.options()) {
                 ModelPartController controller = (ModelPartController) ((ListOptionEntryImpl.EntryController) (modelPartOptionsListOptionEntry.controller())).controller();
                 if (controller.equals(this.control)) {

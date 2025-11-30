@@ -40,6 +40,7 @@ public class CustomFloatSliderControllerElement extends ControllerWidget<ICustom
 
     @Override
     public void render(DrawContext graphics, int mouseX, int mouseY, float delta) {
+        //TODO: make animation toggleable
         super.render(graphics, mouseX, mouseY, delta);
         interpolatedValue = CrystalChams.ease(interpolatedValue, control.pendingValue(), 20);
         //this is so fucking stupid
