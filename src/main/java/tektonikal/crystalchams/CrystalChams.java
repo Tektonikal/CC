@@ -47,10 +47,7 @@ import tektonikal.crystalchams.annotation.Updatable;
 import tektonikal.crystalchams.config.*;
 import tektonikal.crystalchams.mixin.CategoryTabAccessor;
 import tektonikal.crystalchams.mixin.PopupControllerScreenAccessor;
-import tektonikal.crystalchams.stupidfuckingboilerplate.CustomFloatSliderController;
-import tektonikal.crystalchams.stupidfuckingboilerplate.CustomFloatSliderControllerBuilder;
-import tektonikal.crystalchams.stupidfuckingboilerplate.CustomIntegerSliderController;
-import tektonikal.crystalchams.stupidfuckingboilerplate.CustomTickBoxControllerBuilder;
+import tektonikal.crystalchams.stupidfuckingboilerplate.*;
 import tektonikal.crystalchams.util.Easings;
 
 import java.awt.*;
@@ -79,6 +76,7 @@ public class CrystalChams implements ModInitializer {
     public static final ValueFormatter<Float> BLOCKS_FORMATTER_TWO_PLACES = val -> Text.of(String.format("%.2f", val).replace(".0", "") + (Math.abs(val) == 1 ? " block" : " blocks"));
     public static final ValueFormatter<Float> SECONDS_FORMATTER = val -> Text.of(String.format("%.1f", val).replace(".0", "") + (Math.abs(val) == 1 ? " second" : " seconds"));
     public static final Function<Option<Float>, ControllerBuilder<Float>> PERCENT = floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(PERCENT_FORMATTER);
+    public static final Function<Option<Integer>, ControllerBuilder<Integer>> LIGHT = intOption -> CustomIntegerSliderControllerBuilder.create(intOption).range(-1, 255).step(1).formatValue(LIGHT_FORMATTER);
     public static final BiFunction<Identifier, Boolean, RenderLayer> CUSTOM_ENTITY_NOTEX = Util.memoize((texture, shouldCull) -> {
         RenderLayer.MultiPhaseParameters multiPhaseParameters = RenderLayer.MultiPhaseParameters.builder().program(new RenderPhase.ShaderProgram(() -> ENTITY_TRANSLUCENT_NOTEX)).texture(new RenderPhase.Texture(texture, false, false)).transparency(TRANSLUCENT_TRANSPARENCY).cull(shouldCull ? ENABLE_CULLING : DISABLE_CULLING).lightmap(ENABLE_LIGHTMAP).overlay(ENABLE_OVERLAY_COLOR).build(true);
         return RenderLayer.MultiPhase.of("custom_entity_translucent", VertexFormats.POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL, VertexFormat.DrawMode.QUADS, 1536, true, true, multiPhaseParameters);
