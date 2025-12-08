@@ -23,6 +23,7 @@ public enum OptionGroups {
     BEAM_RADIUS,
 
     THE_FUNNY_OPTION,
+    THE_FUNNIER_OPTION,
 
     ANIMATION,
 

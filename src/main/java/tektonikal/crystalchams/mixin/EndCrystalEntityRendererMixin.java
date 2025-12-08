@@ -93,10 +93,10 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
         matrixStack.push();
 
         matrixStack.multiply(RotationAxis.POSITIVE_Y.rotation((float) Math.toRadians(ChamsConfig.o_baseRotation.pendingValue())));
-        //translate before scaling because fuck you
-        matrixStack.translate(0.0F, ChamsConfig.o_baseOffset.pendingValue() - 1, 0.0F);
         float scale = baseScale * 2;
+        matrixStack.translate(0.0F, ChamsConfig.o_baseOffset.pendingValue(), 0.0F);
         matrixStack.scale(scale, scale, scale);
+        matrixStack.translate(0.0F, -0.5F, 0.0F);
         if ((endCrystalEntity.shouldShowBottom() && ChamsConfig.o_baseRenderMode.pendingValue() == BaseRenderMode.DEFAULT) || ChamsConfig.o_baseRenderMode.pendingValue() == BaseRenderMode.ALWAYS) {
             int col = getColor(ChamsConfig.o_baseColor.pendingValue(), ChamsConfig.o_baseAlpha.pendingValue(), ChamsConfig.o_baseRainbow.pendingValue(), ChamsConfig.o_baseRainbowDelay.pendingValue(), ChamsConfig.o_baseRainbowSpeed.pendingValue(), ChamsConfig.o_baseRainbowSaturation.pendingValue(), ChamsConfig.o_baseRainbowBrightness.pendingValue());
             bottom.renderWithoutChildren(matrixStack, getLayer(vertexConsumerProvider, ChamsConfig.o_baseRenderLayer.pendingValue(), ChamsConfig.o_baseCulling.pendingValue(), TEXTURE), getLight(light, ChamsConfig.o_baseLightLevel.pendingValue()), overlay, col);
@@ -137,7 +137,8 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
                         float guhhh = controller.o_scale.pendingValue() * 4;
                         matrixStack.scale(guhhh, guhhh, guhhh);
                     }
-                    int col = getColor(controller.o_color.pendingValue(), controller.o_alpha.pendingValue() * controller.alphaMultiplier, controller.o_rainbow.pendingValue(), controller.o_rainbowDelay.pendingValue(), controller.o_rainbowSpeed.pendingValue(), controller.o_rainbowSaturation.pendingValue(), controller.o_rainbowBrightness.pendingValue());
+                    float alpha = controller.o_alpha.pendingValue() * (endCrystalEntity.equals(previewCrystalEntity) ? controller.alphaMultiplier : 1);
+                    int col = getColor(controller.o_color.pendingValue(), alpha, controller.o_rainbow.pendingValue(), controller.o_rainbowDelay.pendingValue(), controller.o_rainbowSpeed.pendingValue(), controller.o_rainbowSaturation.pendingValue(), controller.o_rainbowBrightness.pendingValue());
                     if (controller.o_funnierOption.pendingValue()) {
 //                        renderFunny(endCrystalEntity, yaw, tickDelta, matrixStack, getLayer(vertexConsumerProvider, controller.o_renderLayer.pendingValue(), controller.o_culling.pendingValue(), TEXTURE), getLight(light, controller.o_lightLevel.pendingValue()), col, vertexConsumerProvider, pos);
                         if (blockPos != null) {

@@ -8,9 +8,11 @@ import dev.isxander.yacl3.api.utils.OptionUtils;
 import dev.isxander.yacl3.gui.YACLScreen;
 import dev.isxander.yacl3.gui.utils.GuiUtils;
 import dev.isxander.yacl3.impl.utils.YACLConstants;
+import dev.isxander.yacl3.platform.YACLConfig;
 import dev.isxander.yacl3.platform.YACLPlatform;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.world.CreateWorldScreen;
@@ -25,12 +27,15 @@ import tektonikal.crystalchams.mixin.CategoryTabAccessor;
 import java.util.HashSet;
 import java.util.Set;
 
-public class SecondaryYACLScreen extends YACLScreen {
+import static tektonikal.crystalchams.CrystalChams.drawPreviewCrystal;
+
+//TODO
+public class EvilYACLScreen extends YACLScreen {
     public static float prog = 0;
     public static boolean closing = false;
     Screen parent;
 
-    public SecondaryYACLScreen(YetAnotherConfigLib config, Screen parent) {
+    public EvilYACLScreen(YetAnotherConfigLib config, Screen parent) {
         super(config, parent);
         this.parent = parent;
     }
@@ -38,22 +43,24 @@ public class SecondaryYACLScreen extends YACLScreen {
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         Window w = MinecraftClient.getInstance().getWindow();
-        context.getMatrices().push();
+        context.enableScissor((int) (w.getScaledWidth() * prog), 0, w.getScaledWidth(), w.getScaledHeight());
         parent.render(context, closing ? mouseX : -1, closing ? mouseY : -1, delta);
-        context.getMatrices().pop();
-        prog = (float) CrystalChams.ease(prog, closing ? 0 : 1, 1F);
+        context.disableScissor();
+        prog = (float) CrystalChams.ease(prog, closing ? 0 : 1, 15F);
         if (prog <= 0.0025 && closing) {
             close();
             return;
         }
         context.getMatrices().push();
-        context.getMatrices().translate(0, w.getScaledHeight() - (w.getScaledHeight() * prog), 0);
+        context.getMatrices().translate(-w.getScaledWidth() + (w.getScaledWidth() * prog), 0, 0);
+        context.enableScissor(0, 0, MathHelper.ceil(w.getScaledWidth() * prog), w.getScaledHeight());
         super.render(context, mouseX, mouseY, delta);
-        CrystalChams.drawPreviewCrystal(context, ((CategoryTabAccessor) this.tabManager.getCurrentTab()).rightPaneDim(), this);
+        drawPreviewCrystal(context, ((CategoryTabAccessor) this.tabManager.getCurrentTab()).rightPaneDim(), this);
+        context.disableScissor();
         context.getMatrices().pop();
-//        RenderSystem.enableScissor();
         //TODO: sync up with mouse Y?
     }
+
     private static final Identifier DARKER_BG = YACLPlatform.mcRl("textures/gui/menu_list_background.png");
 
     @Override
@@ -64,7 +71,7 @@ public class SecondaryYACLScreen extends YACLScreen {
         }
 
         this.applyBlur(delta);
-        this.renderDarkening(context);
+//        this.renderDarkening(context);
         RenderSystem.enableBlend();
         GuiUtils.blitGuiTex(context, DARKER_BG, rightPaneDim.getLeft(), rightPaneDim.getTop(), rightPaneDim.getRight() + 2, rightPaneDim.getBottom() + 2, rightPaneDim.width() + 2, rightPaneDim.height() + 2, 32, 32);
         context.getMatrices().push();
@@ -74,17 +81,6 @@ public class SecondaryYACLScreen extends YACLScreen {
         context.getMatrices().pop();
         RenderSystem.disableBlend();
     }
-
-    @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == GLFW.GLFW_KEY_ESCAPE && this.shouldCloseOnEsc()) {
-            closing = true;
-            return true;
-        } else {
-            return super.keyPressed(keyCode, scanCode, modifiers);
-        }
-    }
-
 
     @Override
     public void finishOrSave() {
@@ -104,11 +100,28 @@ public class SecondaryYACLScreen extends YACLScreen {
             OptionUtils.forEachOptions(config, Option::requestSetDefault);
         }
     }
-
+    //TODO: write proper credits for mod
     @Override
     public void close() {
         prog = 0;
         closing = false;
         client.setScreen(parent);
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (keyCode == GLFW.GLFW_KEY_ESCAPE && this.shouldCloseOnEsc() && !closing) {
+            closing = true;
+            return true;
+        } else {
+            if (closing) {
+                if(keyCode == GLFW.GLFW_KEY_ESCAPE && this.shouldCloseOnEsc()){
+                    close();
+                }
+                return parent.keyPressed(keyCode, scanCode, modifiers);
+            } else {
+                return super.keyPressed(keyCode, scanCode, modifiers);
+            }
+        }
     }
 }

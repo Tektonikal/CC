@@ -29,6 +29,10 @@ import net.minecraft.client.gui.navigation.NavigationAxis;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.block.entity.EndPortalBlockEntityRenderer;
+import net.minecraft.client.texture.AbstractTexture;
+import net.minecraft.client.texture.NativeImage;
+import net.minecraft.client.texture.NativeImageBackedTexture;
+import net.minecraft.client.texture.TextureManager;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.text.Text;
@@ -39,6 +43,7 @@ import net.minecraft.util.math.ColorHelper;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
+import org.jetbrains.annotations.NotNull;
 import org.joml.*;
 import org.lwjgl.opengl.GL11;
 import org.slf4j.Logger;
@@ -48,11 +53,22 @@ import tektonikal.crystalchams.config.*;
 import tektonikal.crystalchams.mixin.CategoryTabAccessor;
 import tektonikal.crystalchams.mixin.PopupControllerScreenAccessor;
 import tektonikal.crystalchams.stupidfuckingboilerplate.*;
+import tektonikal.crystalchams.util.AnimatedGIFDecoder;
 import tektonikal.crystalchams.util.Easings;
 
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.lang.Math;
+import java.nio.file.Files;
 import java.util.*;
+import java.util.List;
 import java.util.Random;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -62,10 +78,11 @@ import static net.minecraft.client.render.entity.EnderDragonEntityRenderer.CRYST
 
 public class CrystalChams implements ModInitializer {
     public static final MinecraftClient mc = MinecraftClient.getInstance();
-    public static final Function<Double, RenderLayer.MultiPhase> CUSTOM_DEBUG_LINE_STRIP = Util.memoize((lineWidth) -> RenderLayer.of("custom_debug_line_strip", VertexFormats.POSITION_COLOR_LIGHT, VertexFormat.DrawMode.DEBUG_LINE_STRIP, 1536, RenderLayer.MultiPhaseParameters.builder().program(POSITION_COLOR_LIGHTMAP_PROGRAM).lineWidth(new RenderPhase.LineWidth(OptionalDouble.of(lineWidth))).transparency(TRANSLUCENT_TRANSPARENCY).cull(DISABLE_CULLING).lightmap(ENABLE_LIGHTMAP).build(false)));
+    public static final Function<Double, RenderLayer.MultiPhase> CUSTOM_DEBUG_LINE_STRIP = Util.memoize((lineWidth) -> RenderLayer.of("custom_debug_line_strip", VertexFormats.POSITION_COLOR_LIGHT, VertexFormat.DrawMode.DEBUG_LINE_STRIP, 1536, RenderLayer.MultiPhaseParameters.builder().program(POSITION_COLOR_LIGHTMAP_PROGRAM).lineWidth(new LineWidth(OptionalDouble.of(lineWidth))).transparency(TRANSLUCENT_TRANSPARENCY).cull(DISABLE_CULLING).lightmap(ENABLE_LIGHTMAP).build(false)));
     public static final String SEPARATOR = " - ";
     public static ShaderProgram ENTITY_TRANSLUCENT_NOTEX;
     public static ShaderProgram END_PORTAL_TEX;
+    public static int imageIndex = 0;
     public static ShaderProgram CUSTOM_IMAGE;
     public static final float PREVIEW_EASING_SPEED = 12.5F;
     public static final ValueFormatter<Integer> LIGHT_FORMATTER = value -> Text.of(value == -1 ? "Use World Light" : value + "");
@@ -78,11 +95,11 @@ public class CrystalChams implements ModInitializer {
     public static final Function<Option<Float>, ControllerBuilder<Float>> PERCENT = floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(PERCENT_FORMATTER);
     public static final Function<Option<Integer>, ControllerBuilder<Integer>> LIGHT = intOption -> CustomIntegerSliderControllerBuilder.create(intOption).range(-1, 255).step(1).formatValue(LIGHT_FORMATTER);
     public static final BiFunction<Identifier, Boolean, RenderLayer> CUSTOM_ENTITY_NOTEX = Util.memoize((texture, shouldCull) -> {
-        RenderLayer.MultiPhaseParameters multiPhaseParameters = RenderLayer.MultiPhaseParameters.builder().program(new RenderPhase.ShaderProgram(() -> ENTITY_TRANSLUCENT_NOTEX)).texture(new RenderPhase.Texture(texture, false, false)).transparency(TRANSLUCENT_TRANSPARENCY).cull(shouldCull ? ENABLE_CULLING : DISABLE_CULLING).lightmap(ENABLE_LIGHTMAP).overlay(ENABLE_OVERLAY_COLOR).build(true);
+        RenderLayer.MultiPhaseParameters multiPhaseParameters = RenderLayer.MultiPhaseParameters.builder().program(new RenderPhase.ShaderProgram(() -> ENTITY_TRANSLUCENT_NOTEX)).texture(new Texture(texture, false, false)).transparency(TRANSLUCENT_TRANSPARENCY).cull(shouldCull ? ENABLE_CULLING : DISABLE_CULLING).lightmap(ENABLE_LIGHTMAP).overlay(ENABLE_OVERLAY_COLOR).build(true);
         return RenderLayer.MultiPhase.of("custom_entity_translucent", VertexFormats.POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL, VertexFormat.DrawMode.QUADS, 1536, true, true, multiPhaseParameters);
     });
     public static final BiFunction<Identifier, Boolean, RenderLayer> CUSTOM_END_GATEWAY = Util.memoize((texture, shouldCull) -> RenderLayer.of("custom_end_gateway", VertexFormats.POSITION_TEXTURE_COLOR, VertexFormat.DrawMode.QUADS, 1536, false, true, RenderLayer.MultiPhaseParameters.builder().program(new RenderPhase.ShaderProgram(() -> END_PORTAL_TEX)).texture(Textures.create().add(EndPortalBlockEntityRenderer.SKY_TEXTURE, false, false).add(EndPortalBlockEntityRenderer.PORTAL_TEXTURE, false, false).add(texture, false, false).build()).transparency(TRANSLUCENT_TRANSPARENCY).cull(shouldCull ? ENABLE_CULLING : DISABLE_CULLING).build(true)));
-    public static final BiFunction<Identifier, Boolean, RenderLayer> CUSTOM_IMAGE_FUNC = Util.memoize((texture, shouldCull) -> RenderLayer.of("custom_end_gateway", VertexFormats.POSITION_TEXTURE_COLOR_LIGHT, VertexFormat.DrawMode.QUADS, 1536, false, true, RenderLayer.MultiPhaseParameters.builder().program(new RenderPhase.ShaderProgram(() -> CUSTOM_IMAGE)).texture(Textures.create().add(Identifier.of("crystalchams:custom/image.png"), false, false).add(texture, false, false).build()).transparency(TRANSLUCENT_TRANSPARENCY).cull(shouldCull ? ENABLE_CULLING : DISABLE_CULLING).build(true)));
+    public static final BiFunction<Identifier, Boolean, RenderLayer> CUSTOM_IMAGE_FUNC = Util.memoize((texture, shouldCull) -> RenderLayer.of("custom_end_gateway", VertexFormats.POSITION_TEXTURE_COLOR_LIGHT, VertexFormat.DrawMode.QUADS, 1536, false, true, RenderLayer.MultiPhaseParameters.builder().program(new RenderPhase.ShaderProgram(() -> CUSTOM_IMAGE)).texture(Textures.create().add(Identifier.of("crystalchams:what"), false, false).add(texture, false, false).build()).transparency(TRANSLUCENT_TRANSPARENCY).cull(shouldCull ? ENABLE_CULLING : DISABLE_CULLING).build(true)));
     public static final BiFunction<Identifier, Boolean, RenderLayer> CUSTOM_NORMAL = Util.memoize((texture, shouldCull) -> {
         RenderLayer.MultiPhaseParameters multiPhaseParameters = RenderLayer.MultiPhaseParameters.builder().program(ENTITY_TRANSLUCENT_PROGRAM).texture(new Texture(texture, false, false)).transparency(TRANSLUCENT_TRANSPARENCY).cull(shouldCull ? ENABLE_CULLING : DISABLE_CULLING).lightmap(ENABLE_LIGHTMAP).overlay(ENABLE_OVERLAY_COLOR).build(true);
         return RenderLayer.of("custom_entity_translucent", VertexFormats.POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL, VertexFormat.DrawMode.QUADS, 1536, true, true, multiPhaseParameters);
@@ -99,6 +116,8 @@ public class CrystalChams implements ModInitializer {
             .create();
     public static final String CC_MOD_ID = "crystalchams";
     public static final Logger LOGGER = LoggerFactory.getLogger(CC_MOD_ID);
+    public static List<BufferedImage> frames = List.of();
+    public static String filePath = "";
 
     public static float getYOffset(float age, float offset, float bounceSpeed, float bounceHeight, float tickDelay) {
         //?????
@@ -176,9 +195,11 @@ public class CrystalChams implements ModInitializer {
     public static EvilOption<Easings> createEasingOption(String description, StateManager<Easings> stateManager, OptionGroups group) {
         return EvilOption.<Easings>createBuilder().name(Text.of(SEPARATOR + "Easing")).description(OptionDescription.of(Text.of(description))).stateManager(stateManager).controller(easingsOption -> EnumControllerBuilder.create(easingsOption).enumClass(Easings.class)).group(group).build();
     }
+
     public static EvilOption<RenderMode> createRenderModeOption(String name, String description, StateManager<RenderMode> stateManager, OptionGroups group) {
         return EvilOption.<RenderMode>createBuilder().name(Text.of(name)).description(OptionDescription.of(Text.of(description))).stateManager(stateManager).controller(easingsOption -> EnumControllerBuilder.create(easingsOption).enumClass(RenderMode.class)).group(group).build();
     }
+
     public static EvilOption<Color> createColorOption(String name, String description, StateManager<Color> stateManager, OptionGroups group) {
         return EvilOption.<Color>createBuilder().name(Text.of(name)).description(OptionDescription.of(Text.of(description))).stateManager(stateManager).controller(ColorControllerBuilderImpl::new).group(group).build();
     }
@@ -202,44 +223,7 @@ public class CrystalChams implements ModInitializer {
                         rightPaneDim = ((CategoryTabAccessor) ((YACLScreen) screen).tabManager.getCurrentTab()).rightPaneDim();
                         yaclScreen = (YACLScreen) screen;
                     }
-                    RenderSystem.enableBlend();
-                    DiffuseLighting.method_34742();
-                    float centerX = rightPaneDim.getCenter(NavigationAxis.HORIZONTAL);
-                    float centerY = rightPaneDim.getCenter(NavigationAxis.VERTICAL);
-                    //TODO: fuck around with these numbers a bit more later
-                    double scaledMouseX = mc.mouse.getX() * mc.getWindow().getScaledWidth() / mc.getWindow().getWidth();
-                    double scaledMouseY = mc.mouse.getY() * mc.getWindow().getScaledHeight() / mc.getWindow().getHeight();
-                    CrystalChams.crystalRotX = (float) CrystalChams.ease(CrystalChams.crystalRotX, Math.atan((centerX - scaledMouseX) / 40F), 15F);
-                    CrystalChams.crystalRotY = (float) CrystalChams.ease(CrystalChams.crystalRotY, Math.atan((centerY - scaledMouseY) / 40F), 15F);
-                    CrystalChams.previewScaleSmoothed = (float) CrystalChams.ease(CrystalChams.previewScaleSmoothed, ChamsConfig.o_previewScale.pendingValue(), 10F);
-                    if (Float.isNaN(CrystalChams.crystalRotX) || Float.isNaN(CrystalChams.crystalRotY)) {
-                        CrystalChams.crystalRotX = 0;
-                        CrystalChams.crystalRotY = 0;
-                    }
-                    CrystalChams.beamProgress = (float) CrystalChams.ease(CrystalChams.beamProgress, yaclScreen.tabManager.getCurrentTab().getTitle().equals(Text.of("Beam")) ? 1 : 0, 5);
-                    drawContext.getMatrices().push();
-                    drawContext.getMatrices().translate(centerX, centerY, 500.0);
-                    float scaleFac = Math.min(CrystalChams.mc.getWindow().getScaledWidth(), CrystalChams.mc.getWindow().getScaledHeight()) / 7.5F * previewScaleSmoothed;
-                    drawContext.getMatrices().scale(scaleFac, scaleFac, -(scaleFac));
-                    drawContext.getMatrices().multiply(RotationAxis.POSITIVE_Z.rotation((float) Math.PI));
-                    //TODO these numbers too
-                    drawContext.getMatrices().multiply(RotationAxis.POSITIVE_X.rotation(CrystalChams.crystalRotY * 25.0F * (float) (Math.PI / 180.0)));
-                    drawContext.getMatrices().multiply(RotationAxis.NEGATIVE_Y.rotation(CrystalChams.crystalRotX * 35.0F * (float) (Math.PI / 180.0)));
-                    CrystalChams.mc.getEntityRenderDispatcher().getRenderer(CrystalChams.previewCrystalEntity).render(CrystalChams.previewCrystalEntity, 0, ((RenderTickCounter.Dynamic) CrystalChams.mc.getRenderTickCounter()).tickDelta, drawContext.getMatrices(), CrystalChams.mc.getBufferBuilders().getEntityVertexConsumers(), 255);
-                    drawContext.getMatrices().pop();
-                    if (ChamsConfig.o_renderBeam.pendingValue()) {
-                        drawContext.getMatrices().push();
-                        drawContext.getMatrices().scale(scaleFac, scaleFac, -scaleFac);
-                        double scaleFactorX = (double) mc.getWindow().getWidth() / mc.getWindow().getScaledWidth();
-                        double scaleFactorY = (double) mc.getWindow().getHeight() / mc.getWindow().getScaledHeight();
-                        Vec3d vec = CrystalChams.screenSpaceToWorldSpace(MathHelper.lerp(CrystalChams.beamProgress, centerX * scaleFactorX, mc.mouse.getX()), MathHelper.lerp(CrystalChams.beamProgress, centerY * scaleFactorY, mc.mouse.getY()), 0, drawContext.getMatrices().peek().getPositionMatrix()).multiply(1 / CrystalChams.mc.getWindow().getScaleFactor());
-                        drawContext.getMatrices().translate(vec.x, vec.y, vec.z);
-                        CrystalChams.renderCustomBeam((float) (-vec.x + ((rightPaneDim.getCenter(NavigationAxis.HORIZONTAL) / scaleFac))), (float) -vec.y + (rightPaneDim.getCenter(NavigationAxis.VERTICAL) / scaleFac) - CrystalChams.getYOffset(CrystalChams.previewCrystalEntity.endCrystalAge + ((RenderTickCounter.Dynamic) CrystalChams.mc.getRenderTickCounter()).tickDelta, ChamsConfig.o_coreOffset.pendingValue(), ChamsConfig.o_coreBounceSpeed.pendingValue(), ChamsConfig.o_coreBounceHeight.pendingValue(), ChamsConfig.o_coreDelay.pendingValue()) - 2, 2.5F, ((RenderTickCounter.Dynamic) CrystalChams.mc.getRenderTickCounter()).tickDelta, CrystalChams.previewCrystalEntity.endCrystalAge, drawContext.getMatrices(), CrystalChams.mc.getBufferBuilders().getEntityVertexConsumers(), 255, 1);
-                        drawContext.getMatrices().pop();
-                    }
-                    drawContext.draw();
-                    RenderSystem.disableBlend();
-                    DiffuseLighting.enableGuiDepthLighting();
+//                    drawPreviewCrystal(drawContext, rightPaneDim, yaclScreen);
                 });
             }
         });
@@ -250,6 +234,72 @@ public class CrystalChams implements ModInitializer {
         armSecuritySystem();
         //I wish I knew why this is necessary.
         unleashHell();
+        Timer t = new Timer();
+        t.schedule(new  TimerTask() {
+            @Override
+            public void run() {
+//            mc.getTextureManager().destroyTexture(id("what"));
+            final ByteArrayOutputStream output = new ByteArrayOutputStream();
+            try {
+                ImageIO.write(frames.get(imageIndex % frames.size()), "png", output);
+                imageIndex++;
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            new ByteArrayInputStream(output.toByteArray(), 0, output.size());
+            NativeImage image;
+            try {
+                image = NativeImage.read(new ByteArrayInputStream(output.toByteArray(), 0, output.size()));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            MinecraftClient.getInstance().execute(() -> {
+                NativeImageBackedTexture texture = new NativeImageBackedTexture(image);
+                mc.getTextureManager().registerTexture(id("what"), texture);
+            });
+            }
+        }, 0, 42);
+    }
+
+    public static void drawPreviewCrystal(DrawContext drawContext, ScreenRect rightPaneDim, YACLScreen yaclScreen) {
+        RenderSystem.enableBlend();
+        DiffuseLighting.method_34742();
+        float centerX = rightPaneDim.getCenter(NavigationAxis.HORIZONTAL);
+        float centerY = rightPaneDim.getCenter(NavigationAxis.VERTICAL);
+        //TODO: fuck around with these numbers a bit more later
+        double scaledMouseX = mc.mouse.getX() * mc.getWindow().getScaledWidth() / mc.getWindow().getWidth();
+        double scaledMouseY = mc.mouse.getY() * mc.getWindow().getScaledHeight() / mc.getWindow().getHeight();
+        CrystalChams.crystalRotX = (float) CrystalChams.ease(CrystalChams.crystalRotX, Math.atan((centerX - scaledMouseX) / 40F), 15F);
+        CrystalChams.crystalRotY = (float) CrystalChams.ease(CrystalChams.crystalRotY, Math.atan((centerY - scaledMouseY) / 40F), 15F);
+        CrystalChams.previewScaleSmoothed = (float) CrystalChams.ease(CrystalChams.previewScaleSmoothed, ChamsConfig.o_previewScale.pendingValue(), 10F);
+        if (Float.isNaN(CrystalChams.crystalRotX) || Float.isNaN(CrystalChams.crystalRotY)) {
+            CrystalChams.crystalRotX = 0;
+            CrystalChams.crystalRotY = 0;
+        }
+        CrystalChams.beamProgress = (float) CrystalChams.ease(CrystalChams.beamProgress, yaclScreen.tabManager.getCurrentTab().getTitle().equals(Text.of("Beam")) ? 1 : 0, 5);
+        drawContext.getMatrices().push();
+        drawContext.getMatrices().translate(centerX, centerY, 500.0);
+        float scaleFac = Math.min(CrystalChams.mc.getWindow().getScaledWidth(), CrystalChams.mc.getWindow().getScaledHeight()) / 7.5F * previewScaleSmoothed;
+        drawContext.getMatrices().scale(scaleFac, scaleFac, -(scaleFac));
+        drawContext.getMatrices().multiply(RotationAxis.POSITIVE_Z.rotation((float) Math.PI));
+        //TODO these numbers too
+        drawContext.getMatrices().multiply(RotationAxis.POSITIVE_X.rotation(CrystalChams.crystalRotY * 25.0F * (float) (Math.PI / 180.0)));
+        drawContext.getMatrices().multiply(RotationAxis.NEGATIVE_Y.rotation(CrystalChams.crystalRotX * 35.0F * (float) (Math.PI / 180.0)));
+        CrystalChams.mc.getEntityRenderDispatcher().getRenderer(CrystalChams.previewCrystalEntity).render(CrystalChams.previewCrystalEntity, 0, ((RenderTickCounter.Dynamic) CrystalChams.mc.getRenderTickCounter()).tickDelta, drawContext.getMatrices(), CrystalChams.mc.getBufferBuilders().getEntityVertexConsumers(), 255);
+        drawContext.getMatrices().pop();
+        if (ChamsConfig.o_renderBeam.pendingValue()) {
+            drawContext.getMatrices().push();
+            drawContext.getMatrices().scale(scaleFac, scaleFac, -scaleFac);
+            double scaleFactorX = (double) mc.getWindow().getWidth() / mc.getWindow().getScaledWidth();
+            double scaleFactorY = (double) mc.getWindow().getHeight() / mc.getWindow().getScaledHeight();
+            Vec3d vec = CrystalChams.screenSpaceToWorldSpace(MathHelper.lerp(CrystalChams.beamProgress, centerX * scaleFactorX, mc.mouse.getX()), MathHelper.lerp(CrystalChams.beamProgress, centerY * scaleFactorY, mc.mouse.getY()), 0, drawContext.getMatrices().peek().getPositionMatrix()).multiply(1 / CrystalChams.mc.getWindow().getScaleFactor());
+            drawContext.getMatrices().translate(vec.x, vec.y, vec.z);
+            CrystalChams.renderCustomBeam((float) (-vec.x + ((rightPaneDim.getCenter(NavigationAxis.HORIZONTAL) / scaleFac))), (float) -vec.y + (rightPaneDim.getCenter(NavigationAxis.VERTICAL) / scaleFac) - CrystalChams.getYOffset(CrystalChams.previewCrystalEntity.endCrystalAge + ((RenderTickCounter.Dynamic) CrystalChams.mc.getRenderTickCounter()).tickDelta, ChamsConfig.o_coreOffset.pendingValue(), ChamsConfig.o_coreBounceSpeed.pendingValue(), ChamsConfig.o_coreBounceHeight.pendingValue(), ChamsConfig.o_coreDelay.pendingValue()) - 2, 2.5F, ((RenderTickCounter.Dynamic) CrystalChams.mc.getRenderTickCounter()).tickDelta, CrystalChams.previewCrystalEntity.endCrystalAge, drawContext.getMatrices(), CrystalChams.mc.getBufferBuilders().getEntityVertexConsumers(), 255, 1);
+            drawContext.getMatrices().pop();
+        }
+        drawContext.draw();
+        RenderSystem.disableBlend();
+        DiffuseLighting.enableGuiDepthLighting();
     }
 
 
@@ -399,8 +449,8 @@ public class CrystalChams implements ModInitializer {
         1 - preview
         2 - funnier option
          */
-        if(mode == 2){
-            renderVanillaCrystalBeam(dx, dy, dz,  tickDelta, age, matrices, vertexConsumers, light);
+        if (mode == 2) {
+            renderVanillaCrystalBeam(dx, dy, dz, tickDelta, age, matrices, vertexConsumers, light);
             return;
         }
         float f = MathHelper.sqrt(dx * dx + dz * dz);
@@ -445,8 +495,8 @@ public class CrystalChams implements ModInitializer {
         float g = MathHelper.sqrt(value);
         matrices.push();
         matrices.translate(0.0F, 2.0F, 0.0F);
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotation((float)(-Math.atan2(dz, dx)) - (float) (Math.PI / 2)));
-        matrices.multiply(RotationAxis.POSITIVE_X.rotation((float)(-Math.atan2(f, dy)) - (float) (Math.PI / 2)));
+        matrices.multiply(RotationAxis.POSITIVE_Y.rotation((float) (-Math.atan2(dz, dx)) - (float) (Math.PI / 2)));
+        matrices.multiply(RotationAxis.POSITIVE_X.rotation((float) (-Math.atan2(f, dy)) - (float) (Math.PI / 2)));
         VertexConsumer vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getEntitySmoothCutout(CRYSTAL_BEAM_TEXTURE));
         float h = 0.0F - (age + tickDelta) * 0.01F;
         float i = MathHelper.sqrt(value) / 32.0F - (age + tickDelta) * 0.01F;

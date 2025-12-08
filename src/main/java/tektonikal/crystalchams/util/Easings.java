@@ -12,7 +12,7 @@ import static java.lang.Math.*;
 // https://gist.github.com/dev-hydrogen/21a66f83f0386123e0c0acf107254843
 public enum Easings implements NameableEnum {
     OFF(x -> x),
-    //TODO: figure out how to slide exponential smoothing in here
+    //TODO: figure out how to slide exponential smoothing in here?
     easeInSine(x -> 1 - cos((x * PI) / 2)),
     easeOutSine(x -> sin((x * PI) / 2)),
     easeInOutSine(x -> -(cos(PI * x) - 1) / 2),

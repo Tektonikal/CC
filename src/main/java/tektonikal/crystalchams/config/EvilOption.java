@@ -109,9 +109,10 @@ public class EvilOption<T> implements Option<T> {
         this.available = available;
 
         if (changed) {
-            if (!available) {
-                this.stateManager.sync();
-            }
+            //yeah
+//            if (!available) {
+//                this.stateManager.sync();
+//            }
             this.triggerListener(OptionEventListener.Event.AVAILABILITY_CHANGE, !available);
         }
     }
@@ -299,6 +300,7 @@ public class EvilOption<T> implements Option<T> {
             this.flags.addAll(flags);
             return this;
         }
+
         public EvilOptionBuilder<T> group(OptionGroups group) {
             this.group = group;
             return this;

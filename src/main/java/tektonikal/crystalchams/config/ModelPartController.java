@@ -1,7 +1,6 @@
 package tektonikal.crystalchams.config;
 
 import dev.isxander.yacl3.api.*;
-import dev.isxander.yacl3.api.controller.IntegerSliderControllerBuilder;
 import dev.isxander.yacl3.api.utils.Dimension;
 import dev.isxander.yacl3.gui.AbstractWidget;
 import dev.isxander.yacl3.gui.YACLScreen;
@@ -17,9 +16,9 @@ import tektonikal.crystalchams.stupidfuckingboilerplate.CustomFloatSliderControl
 import tektonikal.crystalchams.stupidfuckingboilerplate.CustomIntegerSliderControllerBuilder;
 
 import java.awt.*;
-import java.util.Arrays;
 
 public class ModelPartController implements Controller<ModelPartOptions> {
+    //TODO: breaks
     public float alphaMultiplier = 1;
     public boolean hovered;
     private final Option<ModelPartOptions> option;
@@ -65,17 +64,17 @@ public class ModelPartController implements Controller<ModelPartOptions> {
         o_scale = EvilOption.<Float>createBuilder().name(Text.of("Scale")).controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 2f).step(0.05f).formatValue(val -> Text.of(String.format("%.2f", val) + "x"))).stateManager(StateManager.createSimple(1F, () -> option.binding().getValue().scale, newVal -> option.binding().getValue().scale = newVal)).group(OptionGroups.SCALE).build();
         o_color = EvilOption.<Color>createBuilder().name(Text.of("Color")).controller(ColorControllerBuilderImpl::new).stateManager(StateManager.createSimple(new Color(255, 255, 255), () -> option.binding().getValue().color, newVal -> option.binding().getValue().color = newVal)).group(OptionGroups.COLOR).build();
         o_alpha = EvilOption.<Float>createBuilder().name(Text.of("Opacity")).controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(val -> Text.of(String.format("%.0f", val * 100) + "%"))).stateManager(StateManager.createSimple(1F, () -> option.binding().getValue().alpha, newVal -> option.binding().getValue().alpha = newVal)).group(OptionGroups.OPACITY).build();
-        //TODO: create light level option
-        o_lightLevel = EvilOption.<Integer>createBuilder().name(Text.of("Light Level")).description(OptionDescription.createBuilder().text(Text.of("How brightly lit the object is. -1 uses the world's lighting, while 0-255 is mapped respectively.")).build()).stateManager(StateManager.createSimple(-1, () -> option.binding().getValue().lightLevel, newVal -> option.binding().getValue().lightLevel = newVal)).controller(CrystalChams.LIGHT).build();
+        //TODO: create light level option builder
+        o_lightLevel = EvilOption.<Integer>createBuilder().name(Text.of("Light Level")).description(OptionDescription.createBuilder().text(Text.of("How brightly lit the object is. -1 uses the world's lighting, while 0-255 is mapped respectively.")).build()).stateManager(StateManager.createSimple(-1, () -> option.binding().getValue().lightLevel, newVal -> option.binding().getValue().lightLevel = newVal)).controller(CrystalChams.LIGHT).group(OptionGroups.LIGHT_LEVEL).build();
         o_renderLayer = CrystalChams.createRenderModeOption("Render Mode", "",
                 StateManager.createSimple(RenderMode.DEFAULT, () -> option.binding().getValue().renderLayer, newVal -> option.binding().getValue().renderLayer = newVal),
                 OptionGroups.RENDER_MODE);
-        o_culling = CrystalChams.createBooleanOption("Culled", "", StateManager.createSimple(false, () -> option.binding().getValue().culling, newVal -> option.binding().getValue().culling = newVal));
-        o_funnyOption = CrystalChams.createBooleanOption("Funny Option", "", StateManager.createSimple(false, () -> option.binding().getValue().funnyOption, newVal -> option.binding().getValue().funnyOption = newVal));
-        o_funnierOption = CrystalChams.createBooleanOption("Funnier Option", "", StateManager.createSimple(false, () -> option.binding().getValue().funnierOption, newVal -> option.binding().getValue().funnierOption = newVal));
-        o_rainbow = CrystalChams.createBooleanOption("Rainbow", "", StateManager.createSimple(false, () -> option.binding().getValue().rainbow, newVal -> option.binding().getValue().rainbow = newVal));
-        o_rainbowSpeed = EvilOption.<Float>createBuilder().name(Text.of("Rainbow Speed")).controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 10f).step(0.1f).formatValue(value -> Text.of(String.format("%.1f", value) + "x"))).stateManager(StateManager.createSimple(2F, () -> option.binding().getValue().rainbowSpeed, newVal -> option.binding().getValue().rainbowSpeed = newVal)).build();
-        o_rainbowDelay = EvilOption.<Integer>createBuilder().name(Text.of("Rainbow Delay")).controller(integerOption -> CustomIntegerSliderControllerBuilder.create(integerOption).step(1).range(-500, 500).formatValue(integer -> Text.of(integer + "ms"))).stateManager(StateManager.createSimple(0, () -> option.binding().getValue().rainbowDelay, newVal -> option.binding().getValue().rainbowDelay = newVal)).build();
+        o_culling = CrystalChams.createBooleanOption("Culled", "", StateManager.createSimple(false, () -> option.binding().getValue().culling, newVal -> option.binding().getValue().culling = newVal), OptionGroups.CULLED);
+        o_funnyOption = CrystalChams.createBooleanOption("Funny Option", "", StateManager.createSimple(false, () -> option.binding().getValue().funnyOption, newVal -> option.binding().getValue().funnyOption = newVal), OptionGroups.THE_FUNNY_OPTION);
+        o_funnierOption = CrystalChams.createBooleanOption("Funnier Option", "", StateManager.createSimple(false, () -> option.binding().getValue().funnierOption, newVal -> option.binding().getValue().funnierOption = newVal), OptionGroups.THE_FUNNIER_OPTION);
+        o_rainbow = CrystalChams.createBooleanOption("Rainbow", "", StateManager.createSimple(false, () -> option.binding().getValue().rainbow, newVal -> option.binding().getValue().rainbow = newVal), OptionGroups.RAINBOW);
+        o_rainbowSpeed = EvilOption.<Float>createBuilder().name(Text.of("Rainbow Speed")).controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 10f).step(0.1f).formatValue(value -> Text.of(String.format("%.1f", value) + "x"))).stateManager(StateManager.createSimple(2F, () -> option.binding().getValue().rainbowSpeed, newVal -> option.binding().getValue().rainbowSpeed = newVal)).group(OptionGroups.RAINBOW_SPEED).build();
+        o_rainbowDelay = EvilOption.<Integer>createBuilder().name(Text.of("Rainbow Delay")).controller(integerOption -> CustomIntegerSliderControllerBuilder.create(integerOption).step(1).range(-500, 500).formatValue(integer -> Text.of(integer + "ms"))).stateManager(StateManager.createSimple(0, () -> option.binding().getValue().rainbowDelay, newVal -> option.binding().getValue().rainbowDelay = newVal)).group(OptionGroups.RAINBOW_DELAY).build();
         o_rainbowSaturation = CrystalChams.createFloatOptionPercent(CrystalChams.SEPARATOR+"Saturation", "", StateManager.createSimple(1f, () -> option.binding().getValue().rainbowSaturation, newVal -> option.binding().getValue().rainbowSaturation = newVal), OptionGroups.RAINBOW_SATURATION);
         o_rainbowBrightness = CrystalChams.createFloatOptionPercent(CrystalChams.SEPARATOR+"Brightness", "", StateManager.createSimple(1F, () -> option.binding().getValue().rainbowBrightness, newVal -> option.binding().getValue().rainbowBrightness = newVal), OptionGroups.RAINBOW_BRIGHTNESS);
         o_animation = CrystalChams.createBooleanOption("Animations", "",
@@ -140,6 +139,7 @@ public class ModelPartController implements Controller<ModelPartOptions> {
             super(control, screen, dim);
         }
 
+
         @Override
         protected int getHoveredControlWidth() {
             return 0;
@@ -176,7 +176,7 @@ public class ModelPartController implements Controller<ModelPartOptions> {
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
             if (!isMouseOver(mouseX, mouseY) || !isAvailable()) return false;
             playDownSound();
-            client.setScreen(new SecondaryYACLScreen(control, control.subScreen, screen));
+            client.setScreen(new SecondaryYACLScreen(control.subScreen, screen));
             return true;
         }
     }

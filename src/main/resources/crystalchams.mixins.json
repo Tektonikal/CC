@@ -4,6 +4,7 @@
   "package": "tektonikal.crystalchams.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "AbstractWidgetMixin",
     "ControllerWidgetMixin",
     "EndCrystalEntityMixin",
     "ListOptionImplMixin",
