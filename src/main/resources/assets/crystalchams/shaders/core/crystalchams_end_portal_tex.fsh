@@ -1,6 +1,12 @@
 #version 150
 
 #moj_import <matrix.glsl>
+#moj_import <fog.glsl>
+
+uniform vec4 ColorModulator;
+uniform float FogStart;
+uniform float FogEnd;
+uniform vec4 FogColor;
 
 uniform sampler2D Sampler0;
 uniform sampler2D Sampler1;
@@ -9,6 +15,7 @@ uniform sampler2D Sampler2;
 uniform float GameTime;
 uniform int EndPortalLayers;
 
+in float vertexDistance;
 in vec4 texProj0;
 in vec2 texCoord0;
 in vec4 overlayColor;
@@ -61,8 +68,10 @@ void main() {
     vec3 color = textureProj(Sampler0, texProj0).rgb * vec3(0.022087, 0.098399, 0.110818);
     for (int i = 0; i < EndPortalLayers; i++) {
         vec3 shiftedCol = rgb2hsv(overlayColor.rgb);
-        shiftedCol.r += (15 - i) * 0.0104166667 * (i % 2 == 0 ? -1 : 1);
+        shiftedCol.r += (15 - i) * 0.0078125 * (i % 2 == 0 ? -1 : 1);
         color += textureProj(Sampler1, texProj0 * end_portal_layer(float(i + 1))).rgb * (vec3(i * 0.0625) * hsv2rgb(shiftedCol));
     }
-    fragColor = vec4(color, overlayColor.a);
+    color *= ColorModulator.rgb;
+    fragColor = linear_fog(vec4(color, overlayColor.a), vertexDistance, FogStart, FogEnd, FogColor);
+
 }

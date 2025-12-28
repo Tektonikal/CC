@@ -43,14 +43,9 @@ public class EvilYACLScreen extends YACLScreen {
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         Window w = MinecraftClient.getInstance().getWindow();
-        context.enableScissor((int) (w.getScaledWidth() * prog), 0, w.getScaledWidth(), w.getScaledHeight());
+        context.enableScissor(MathHelper.ceil(w.getScaledWidth() * prog), 0, w.getScaledWidth(), w.getScaledHeight());
         parent.render(context, closing ? mouseX : -1, closing ? mouseY : -1, delta);
         context.disableScissor();
-        prog = (float) CrystalChams.ease(prog, closing ? 0 : 1, 15F);
-        if (prog <= 0.0025 && closing) {
-            close();
-            return;
-        }
         context.getMatrices().push();
         context.getMatrices().translate(-w.getScaledWidth() + (w.getScaledWidth() * prog), 0, 0);
         context.enableScissor(0, 0, MathHelper.ceil(w.getScaledWidth() * prog), w.getScaledHeight());
@@ -58,6 +53,10 @@ public class EvilYACLScreen extends YACLScreen {
         drawPreviewCrystal(context, ((CategoryTabAccessor) this.tabManager.getCurrentTab()).rightPaneDim(), this);
         context.disableScissor();
         context.getMatrices().pop();
+        prog = (float) CrystalChams.ease(prog, closing ? 0 : 1, 15F);
+        if (prog <= 0.0025 && closing) {
+            close();
+        }
         //TODO: sync up with mouse Y?
     }
 
@@ -72,14 +71,14 @@ public class EvilYACLScreen extends YACLScreen {
 
         this.applyBlur(delta);
 //        this.renderDarkening(context);
-        RenderSystem.enableBlend();
-        GuiUtils.blitGuiTex(context, DARKER_BG, rightPaneDim.getLeft(), rightPaneDim.getTop(), rightPaneDim.getRight() + 2, rightPaneDim.getBottom() + 2, rightPaneDim.width() + 2, rightPaneDim.height() + 2, 32, 32);
-        context.getMatrices().push();
-        context.getMatrices().translate(rightPaneDim.getLeft(), rightPaneDim.getTop(), 0);
-        context.getMatrices().multiply(RotationAxis.POSITIVE_Z.rotationDegrees(90), 0, 0, 1);
-        GuiUtils.blitGuiTex(context, CreateWorldScreen.FOOTER_SEPARATOR_TEXTURE, 0, 0, 0f, 0f, rightPaneDim.height() + 1, 2, 32, 2);
-        context.getMatrices().pop();
-        RenderSystem.disableBlend();
+//        RenderSystem.enableBlend();
+//        GuiUtils.blitGuiTex(context, DARKER_BG, rightPaneDim.getLeft(), rightPaneDim.getTop(), rightPaneDim.getRight() + 2, rightPaneDim.getBottom() + 2, rightPaneDim.width() + 2, rightPaneDim.height() + 2, 32, 32);
+//        context.getMatrices().push();
+//        context.getMatrices().translate(rightPaneDim.getLeft(), rightPaneDim.getTop(), 0);
+//        context.getMatrices().multiply(RotationAxis.POSITIVE_Z.rotationDegrees(90), 0, 0, 1);
+//        GuiUtils.blitGuiTex(context, CreateWorldScreen.FOOTER_SEPARATOR_TEXTURE, 0, 0, 0f, 0f, rightPaneDim.height() + 1, 2, 32, 2);
+//        context.getMatrices().pop();
+//        RenderSystem.disableBlend();
     }
 
     @Override
@@ -89,6 +88,13 @@ public class EvilYACLScreen extends YACLScreen {
         } else {
             closing = true;
         }
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        CrystalChams.previewCrystalEntity.age++;
+        CrystalChams.previewCrystalEntity.endCrystalAge++;
     }
 
     @Override

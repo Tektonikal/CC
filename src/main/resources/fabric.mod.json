@@ -5,7 +5,7 @@
   "name": "Custom End Crystals",
   "description": "Customize how your end crystals look!",
   "authors": ["Tektonikal"],
-  "contributors": ["Kwag - Rubber Duck"],
+  "contributors": [],
   "license": "LGPL-3.0",
   "icon": "icon.png",
   "environment": "client",
@@ -36,9 +36,6 @@
       "links": {
         "Discord": "https://discord.gg/HyUVJYeKS5"
       }
-    },
-    "loom:injected_interfaces": {
-      "net/minecraft/class_630": ["tektonikal/crystalchams/interfaces/ModelPartInterface"]
     }
   },
   "accessWidener": "crystalchams.accesswidener"

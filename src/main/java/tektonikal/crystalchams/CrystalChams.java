@@ -4,13 +4,11 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.blaze3d.systems.RenderSystem;
-import dev.isxander.yacl3.api.NameableEnum;
-import dev.isxander.yacl3.api.Option;
-import dev.isxander.yacl3.api.OptionDescription;
-import dev.isxander.yacl3.api.StateManager;
+import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.ControllerBuilder;
 import dev.isxander.yacl3.api.controller.EnumControllerBuilder;
 import dev.isxander.yacl3.api.controller.ValueFormatter;
+import dev.isxander.yacl3.api.utils.OptionUtils;
 import dev.isxander.yacl3.config.v2.impl.serializer.GsonConfigSerializer;
 import dev.isxander.yacl3.gui.YACLScreen;
 import dev.isxander.yacl3.gui.controllers.PopupControllerScreen;
@@ -164,44 +162,38 @@ public class CrystalChams implements ModInitializer {
         return screen instanceof YACLScreen && (((YACLScreen) screen).config.title().equals(Text.of("Custom End Crystals")));
     }
 
+    //TODO: replace with instanceof check with custom YACL screen class
     public static boolean isThisMyScreen() {
         return isThisMyScreen(CrystalChams.mc.currentScreen);
     }
 
-    public static EvilOption<Boolean> createBooleanOption(String name, String description, StateManager<Boolean> stateManager, OptionGroups group) {
-        return EvilOption.<Boolean>createBuilder().name(Text.of(name)).stateManager(stateManager).description(OptionDescription.of(Text.of(description))).controller(CustomTickBoxControllerBuilder::new).group(group).build();
+
+    public static EvilOption<Boolean> createBooleanOption(String name, StateManager<Boolean> stateManager, OptionGroups group) {
+        return EvilOption.<Boolean>createBuilder().name(Text.translatable(name)).stateManager(stateManager).description(getDescription(name)).controller(CustomTickBoxControllerBuilder::new).group(group).build();
     }
 
-    public static EvilOption<Float> createFloatOptionSeconds(String name, String description, StateManager<Float> stateManager, OptionGroups group) {
-        return EvilOption.<Float>createBuilder().name(Text.of(name)).description(OptionDescription.of(Text.of(description))).stateManager(stateManager).controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(-2.5f, 2.5f).step(0.1f).formatValue(SECONDS_FORMATTER)).group(group).build();
+    private static OptionDescription getDescription(String name) {
+        return OptionDescription.of(Text.translatable(name + ".description"));
     }
 
-    public static EvilOption<Float> createFloatOptionPercent(String name, String description, StateManager<Float> stateManager, OptionGroups group) {
-        return EvilOption.<Float>createBuilder().name(Text.of(name)).description(OptionDescription.of(Text.of(description))).stateManager(stateManager).controller(PERCENT).group(group).build();
+    public static EvilOption<Float> createFloatOptionSeconds(String name, StateManager<Float> stateManager, OptionGroups group) {
+        return EvilOption.<Float>createBuilder().name(Text.translatable(name)).stateManager(stateManager).description(getDescription(name)).controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(-2.5f, 2.5f).step(0.1f).formatValue(SECONDS_FORMATTER)).group(group).build();
     }
 
-    public static EvilOption<Boolean> createBooleanOption(String name, String description, StateManager<Boolean> stateManager) {
-        return EvilOption.<Boolean>createBuilder().name(Text.of(name)).stateManager(stateManager).description(OptionDescription.of(Text.of(description))).controller(CustomTickBoxControllerBuilder::new).build();
+    public static EvilOption<Float> createFloatOptionPercent(String name, StateManager<Float> stateManager, OptionGroups group) {
+        return EvilOption.<Float>createBuilder().name(Text.translatable(name)).stateManager(stateManager).description(getDescription(name)).controller(PERCENT).group(group).build();
     }
 
-    public static EvilOption<Float> createFloatOptionSeconds(String name, String description, StateManager<Float> stateManager) {
-        return EvilOption.<Float>createBuilder().name(Text.of(name)).description(OptionDescription.of(Text.of(description))).stateManager(stateManager).controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(-2.5f, 2.5f).step(0.1f).formatValue(SECONDS_FORMATTER)).build();
+    public static EvilOption<Easings> createEasingOption(StateManager<Easings> stateManager, OptionGroups group) {
+        return EvilOption.<Easings>createBuilder().name(Text.of(SEPARATOR + Text.translatable("yeah"))).stateManager(stateManager).description(getDescription("yeah")).controller(easingsOption -> EnumControllerBuilder.create(easingsOption).enumClass(Easings.class)).group(group).build();
     }
 
-    public static EvilOption<Float> createFloatOptionPercent(String name, String description, StateManager<Float> stateManager) {
-        return EvilOption.<Float>createBuilder().name(Text.of(name)).description(OptionDescription.of(Text.of(description))).stateManager(stateManager).controller(PERCENT).build();
+    public static EvilOption<RenderMode> createRenderModeOption(String name, StateManager<RenderMode> stateManager, OptionGroups group) {
+        return EvilOption.<RenderMode>createBuilder().name(Text.translatable(name)).stateManager(stateManager).description(getDescription(name)).controller(easingsOption -> EnumControllerBuilder.create(easingsOption).enumClass(RenderMode.class)).group(group).build();
     }
 
-    public static EvilOption<Easings> createEasingOption(String description, StateManager<Easings> stateManager, OptionGroups group) {
-        return EvilOption.<Easings>createBuilder().name(Text.of(SEPARATOR + "Easing")).description(OptionDescription.of(Text.of(description))).stateManager(stateManager).controller(easingsOption -> EnumControllerBuilder.create(easingsOption).enumClass(Easings.class)).group(group).build();
-    }
-
-    public static EvilOption<RenderMode> createRenderModeOption(String name, String description, StateManager<RenderMode> stateManager, OptionGroups group) {
-        return EvilOption.<RenderMode>createBuilder().name(Text.of(name)).description(OptionDescription.of(Text.of(description))).stateManager(stateManager).controller(easingsOption -> EnumControllerBuilder.create(easingsOption).enumClass(RenderMode.class)).group(group).build();
-    }
-
-    public static EvilOption<Color> createColorOption(String name, String description, StateManager<Color> stateManager, OptionGroups group) {
-        return EvilOption.<Color>createBuilder().name(Text.of(name)).description(OptionDescription.of(Text.of(description))).stateManager(stateManager).controller(ColorControllerBuilderImpl::new).group(group).build();
+    public static EvilOption<Color> createColorOption(String name, StateManager<Color> stateManager, OptionGroups group) {
+        return EvilOption.<Color>createBuilder().name(Text.translatable(name)).stateManager(stateManager).description(getDescription(name)).controller(ColorControllerBuilderImpl::new).group(group).build();
     }
 
     @Override
@@ -235,28 +227,27 @@ public class CrystalChams implements ModInitializer {
         //I wish I knew why this is necessary.
         unleashHell();
         Timer t = new Timer();
-        t.schedule(new  TimerTask() {
+        t.schedule(new TimerTask() {
             @Override
             public void run() {
-//            mc.getTextureManager().destroyTexture(id("what"));
-            final ByteArrayOutputStream output = new ByteArrayOutputStream();
-            try {
-                ImageIO.write(frames.get(imageIndex % frames.size()), "png", output);
-                imageIndex++;
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            new ByteArrayInputStream(output.toByteArray(), 0, output.size());
-            NativeImage image;
-            try {
-                image = NativeImage.read(new ByteArrayInputStream(output.toByteArray(), 0, output.size()));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            MinecraftClient.getInstance().execute(() -> {
-                NativeImageBackedTexture texture = new NativeImageBackedTexture(image);
-                mc.getTextureManager().registerTexture(id("what"), texture);
-            });
+                final ByteArrayOutputStream output = new ByteArrayOutputStream();
+                try {
+                    ImageIO.write(frames.get(imageIndex % frames.size()), "png", output);
+                    imageIndex++;
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                new ByteArrayInputStream(output.toByteArray(), 0, output.size());
+                NativeImage image;
+                try {
+                    image = NativeImage.read(new ByteArrayInputStream(output.toByteArray(), 0, output.size()));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                MinecraftClient.getInstance().execute(() -> {
+                    NativeImageBackedTexture texture = new NativeImageBackedTexture(image);
+                    mc.getTextureManager().registerTexture(id("what"), texture);
+                });
             }
         }, 0, 42);
     }
@@ -276,6 +267,7 @@ public class CrystalChams implements ModInitializer {
             CrystalChams.crystalRotX = 0;
             CrystalChams.crystalRotY = 0;
         }
+
         CrystalChams.beamProgress = (float) CrystalChams.ease(CrystalChams.beamProgress, yaclScreen.tabManager.getCurrentTab().getTitle().equals(Text.of("Beam")) ? 1 : 0, 5);
         drawContext.getMatrices().push();
         drawContext.getMatrices().translate(centerX, centerY, 500.0);
@@ -283,8 +275,11 @@ public class CrystalChams implements ModInitializer {
         drawContext.getMatrices().scale(scaleFac, scaleFac, -(scaleFac));
         drawContext.getMatrices().multiply(RotationAxis.POSITIVE_Z.rotation((float) Math.PI));
         //TODO these numbers too
-        drawContext.getMatrices().multiply(RotationAxis.POSITIVE_X.rotation(CrystalChams.crystalRotY * 25.0F * (float) (Math.PI / 180.0)));
-        drawContext.getMatrices().multiply(RotationAxis.NEGATIVE_Y.rotation(CrystalChams.crystalRotX * 35.0F * (float) (Math.PI / 180.0)));
+//        drawContext.getMatrices().multiply(RotationAxis.POSITIVE_X.rotation(CrystalChams.crystalRotY * 25.0F * (float) (Math.PI / 180.0)));
+//        drawContext.getMatrices().multiply(RotationAxis.NEGATIVE_Y.rotation(CrystalChams.crystalRotX * 35.0F * (float) (Math.PI / 180.0)));
+        //TODO: remove trailer code
+        drawContext.getMatrices().multiply(RotationAxis.POSITIVE_X.rotation(-22.5F * (float) (Math.PI / 180.0)));
+        drawContext.getMatrices().multiply(RotationAxis.NEGATIVE_Y.rotation(45.0F * (float) (Math.PI / 180.0)));
         CrystalChams.mc.getEntityRenderDispatcher().getRenderer(CrystalChams.previewCrystalEntity).render(CrystalChams.previewCrystalEntity, 0, ((RenderTickCounter.Dynamic) CrystalChams.mc.getRenderTickCounter()).tickDelta, drawContext.getMatrices(), CrystalChams.mc.getBufferBuilders().getEntityVertexConsumers(), 255);
         drawContext.getMatrices().pop();
         if (ChamsConfig.o_renderBeam.pendingValue()) {
@@ -320,13 +315,9 @@ public class CrystalChams implements ModInitializer {
 
     @SuppressWarnings("rawtypes")
     public static void unleashHell() {
-        Arrays.stream(ChamsConfig.class.getDeclaredFields()).filter(field -> field.getName().startsWith("o_")).forEach(field -> {
-            try {
-                Object value = field.get(null);
-                //refresh the option. sigh
-                ((Option) value).requestSet(((Option<?>) value).binding().getValue());
-            } catch (IllegalAccessException e) {
-                LOGGER.error("Error refreshing or linking option: {}", field.getName());
+        OptionUtils.forEachOptions(((YACLScreen) ChamsConfig.getConfigScreen(null)).config, option -> {
+            if (!(option instanceof ButtonOption)) {
+                ((Option<Object>) option).stateManager().set(option.pendingValue());
             }
         });
     }

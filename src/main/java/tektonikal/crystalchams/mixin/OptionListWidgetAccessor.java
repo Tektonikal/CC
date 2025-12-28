@@ -29,6 +29,7 @@ import tektonikal.crystalchams.config.ModelPartController;
 import tektonikal.crystalchams.config.ModelPartOptions;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
@@ -69,17 +70,38 @@ public interface OptionListWidgetAccessor {
             }
         }
 
-        //Sigh.
         @Unique
         private boolean optionsSynced() {
-            //TODO
             List<EvilOption> list = getLinkedOptions(((EvilOption<?>) option).group()).stream().filter(evilOption -> !evilOption.equals(option)).toList();
-            for (EvilOption evilOption : list) {
-                if (!evilOption.stateManager().get().equals(option.stateManager().get())) {
-                    return false;
+            //this is horrible. i regret ever making baseRenderMode a thing. the horrors of overengineering have finally caught up to me
+            if (((EvilOption) option).group() == OptionGroups.RENDER) {
+                if (option.equals(ChamsConfig.o_baseRenderMode)) {
+                    for (EvilOption evilOption : list) {
+                        if (!evilOption.stateManager().get().equals(option.stateManager().get() != CrystalChams.BaseRenderMode.NEVER)) {
+                            return false;
+                        }
+                    }
+                    return true;
                 }
+                else{
+                    for (EvilOption evilOption : list) {
+                        if(evilOption.equals(ChamsConfig.o_baseRenderMode)) {
+                            return evilOption.stateManager().get() != CrystalChams.BaseRenderMode.NEVER == (boolean) option.stateManager().get();
+                        }
+                        if (!evilOption.stateManager().get().equals(option.stateManager().get())) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+            } else {
+                for (EvilOption evilOption : list) {
+                    if (!evilOption.stateManager().get().equals(option.stateManager().get())) {
+                        return false;
+                    }
+                }
+                return true;
             }
-            return true;
         }
 
         @Unique
@@ -105,7 +127,7 @@ public interface OptionListWidgetAccessor {
         @Unique
         private static List<EvilOption> getLinkedOptions(OptionGroups group) {
             //THIS IS EVEN WORSE KILLING MYSELF
-            List<EvilOption> options = new java.util.ArrayList<>(List.of());
+            List<EvilOption> options = new ArrayList<>(List.of());
             Arrays.stream(ChamsConfig.class.getDeclaredFields()).filter(field -> field.getName().startsWith("o_") && !field.getName().equals("o_frameList")).forEach(input -> {
                 try {
                     options.add((EvilOption) input.get(null));

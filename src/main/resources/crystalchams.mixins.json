@@ -19,7 +19,6 @@
     "EndCrystalEntityRendererMixin",
     "EnderDragonEntityRendererMixin",
     "MinecraftClientMixin",
-    "ModelPartMixin",
     "OptionListWidgetAccessor",
     "OptionListWidgetAccessor$OptionListWidgetEntryMixin",
     "PopupControllerScreenAccessor",

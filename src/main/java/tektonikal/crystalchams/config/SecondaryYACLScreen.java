@@ -25,6 +25,8 @@ import tektonikal.crystalchams.mixin.CategoryTabAccessor;
 import java.util.HashSet;
 import java.util.Set;
 
+import static tektonikal.crystalchams.CrystalChams.drawPreviewCrystal;
+
 public class SecondaryYACLScreen extends YACLScreen {
     public static float prog = 0;
     public static boolean closing = false;
@@ -38,21 +40,20 @@ public class SecondaryYACLScreen extends YACLScreen {
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         Window w = MinecraftClient.getInstance().getWindow();
-        context.getMatrices().push();
+//        context.enableScissor(0, MathHelper.ceil(w.getScaledHeight() * prog), w.getScaledWidth(), w.getScaledHeight());
         parent.render(context, closing ? mouseX : -1, closing ? mouseY : -1, delta);
+//        context.disableScissor();
+        context.getMatrices().push();
+        context.getMatrices().translate(0, w.getScaledHeight() - (w.getScaledHeight() * prog), 0);
+//        context.enableScissor(0, 0, w.getScaledWidth(), MathHelper.ceil(w.getScaledHeight() * prog));
+        super.render(context, mouseX, mouseY, delta);
+        drawPreviewCrystal(context, ((CategoryTabAccessor) this.tabManager.getCurrentTab()).rightPaneDim(), this);
+//        context.disableScissor();
         context.getMatrices().pop();
         prog = (float) CrystalChams.ease(prog, closing ? 0 : 1, 1F);
         if (prog <= 0.0025 && closing) {
             close();
-            return;
         }
-        context.getMatrices().push();
-        context.getMatrices().translate(0, w.getScaledHeight() - (w.getScaledHeight() * prog), 0);
-        super.render(context, mouseX, mouseY, delta);
-        CrystalChams.drawPreviewCrystal(context, ((CategoryTabAccessor) this.tabManager.getCurrentTab()).rightPaneDim(), this);
-        context.getMatrices().pop();
-//        RenderSystem.enableScissor();
-        //TODO: sync up with mouse Y?
     }
     private static final Identifier DARKER_BG = YACLPlatform.mcRl("textures/gui/menu_list_background.png");
 
@@ -65,14 +66,14 @@ public class SecondaryYACLScreen extends YACLScreen {
 
         this.applyBlur(delta);
         this.renderDarkening(context);
-        RenderSystem.enableBlend();
-        GuiUtils.blitGuiTex(context, DARKER_BG, rightPaneDim.getLeft(), rightPaneDim.getTop(), rightPaneDim.getRight() + 2, rightPaneDim.getBottom() + 2, rightPaneDim.width() + 2, rightPaneDim.height() + 2, 32, 32);
-        context.getMatrices().push();
-        context.getMatrices().translate(rightPaneDim.getLeft(), rightPaneDim.getTop(), 0);
-        context.getMatrices().multiply(RotationAxis.POSITIVE_Z.rotationDegrees(90), 0, 0, 1);
-        GuiUtils.blitGuiTex(context, CreateWorldScreen.FOOTER_SEPARATOR_TEXTURE, 0, 0, 0f, 0f, rightPaneDim.height() + 1, 2, 32, 2);
-        context.getMatrices().pop();
-        RenderSystem.disableBlend();
+//        RenderSystem.enableBlend();
+//        GuiUtils.blitGuiTex(context, DARKER_BG, rightPaneDim.getLeft(), rightPaneDim.getTop(), rightPaneDim.getRight() + 2, rightPaneDim.getBottom() + 2, rightPaneDim.width() + 2, rightPaneDim.height() + 2, 32, 32);32
+//        context.getMatrices().push();
+//        context.getMatrices().translate(rightPaneDim.getLeft(), rightPaneDim.getTop(), 0);
+//        context.getMatrices().multiply(RotationAxis.POSITIVE_Z.rotationDegrees(90), 0, 0, 1);
+//        GuiUtils.blitGuiTex(context, CreateWorldScreen.FOOTER_SEPARATOR_TEXTURE, 0, 0, 0f, 0f, rightPaneDim.height() + 1, 2, 32, 2);
+//        context.getMatrices().pop();
+//        RenderSystem.disableBlend();
     }
 
     @Override
@@ -85,6 +86,13 @@ public class SecondaryYACLScreen extends YACLScreen {
         }
     }
 
+    @Override
+    public void tick() {
+        //TODO: deduplicate this
+        super.tick();
+        CrystalChams.previewCrystalEntity.age++;
+        CrystalChams.previewCrystalEntity.endCrystalAge++;
+    }
 
     @Override
     public void finishOrSave() {

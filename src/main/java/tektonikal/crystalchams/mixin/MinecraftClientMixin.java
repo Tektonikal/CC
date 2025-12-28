@@ -1,5 +1,7 @@
 package tektonikal.crystalchams.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import dev.isxander.yacl3.gui.YACLScreen;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Overlay;
 import net.minecraft.client.gui.screen.Screen;
@@ -13,20 +15,23 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import tektonikal.crystalchams.CrystalChams;
+import tektonikal.crystalchams.config.EvilYACLScreen;
+import tektonikal.crystalchams.config.SecondaryYACLScreen;
 
 @Mixin(MinecraftClient.class)
 public class MinecraftClientMixin {
-    @Shadow @Nullable public ClientWorld world;
 
-    @Shadow @Nullable public Screen currentScreen;
+    @Shadow
+    @Nullable
+    public Screen currentScreen;
 
-    @Shadow private @Nullable Overlay overlay;
 
-    @Shadow @Final private Window window;
+    @Shadow
+    @Final
+    private Window window;
 
-    @Inject(method = "getFramerateLimit", at = @At("HEAD"), cancellable = true)
-    private void CC$getFramerateLimit(CallbackInfoReturnable<Integer> cir) {
-        //TODO: modifyargs/modify return value
-        cir.setReturnValue(this.world != null || (this.currentScreen == null && this.overlay == null) || CrystalChams.isThisMyScreen(currentScreen) ? this.window.getFramerateLimit() : 60);
+    @ModifyReturnValue(method = "getFramerateLimit", at = @At("RETURN"))
+    private int CC$fixFPSLimit(int original) {
+        return currentScreen instanceof EvilYACLScreen || currentScreen instanceof SecondaryYACLScreen ? this.window.getFramerateLimit() : original;
     }
 }
