@@ -12,6 +12,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import tektonikal.crystalchams.CrystalChams;
 import tektonikal.crystalchams.config.ChamsConfig;
+import tektonikal.crystalchams.config.EvilYACLScreen;
+import tektonikal.crystalchams.config.SecondaryYACLScreen;
 
 import java.awt.*;
 
@@ -33,7 +35,7 @@ public abstract class ButtonWidgetMixin{
     float hoverProgress;
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/ClickableWidget;renderWidget(Lnet/minecraft/client/gui/DrawContext;IIF)V", shift = At.Shift.AFTER))
     private void CC$OUGHHHH(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci){
-        if(CrystalChams.isThisMyScreen() && ((ClickableWidget)(Object)this) instanceof ButtonWidget && !(((ClickableWidget)(Object)this) instanceof LowProfileButtonWidget) && ChamsConfig.o_showAnimations.pendingValue()){
+        if((CrystalChams.mc.currentScreen instanceof EvilYACLScreen || CrystalChams.mc.currentScreen instanceof SecondaryYACLScreen) && ((ClickableWidget)(Object)this) instanceof ButtonWidget && !(((ClickableWidget)(Object)this) instanceof LowProfileButtonWidget) && ChamsConfig.o_showAnimations.pendingValue()){
                 hoverProgress = (float) CrystalChams.ease(hoverProgress, (hovered || focused && CrystalChams.mc.getNavigationType().isKeyboard()) && active ? 1 : 0, 10F);
             context.drawBorder(x, y, width, height, new Color(hoverProgress, hoverProgress, hoverProgress).getRGB());
         }

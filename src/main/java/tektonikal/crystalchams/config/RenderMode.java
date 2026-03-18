@@ -43,11 +43,11 @@ public enum RenderMode implements NameableEnum {
     @Override
     public Text getDisplayName() {
         return switch (this) {
-            case DEFAULT -> Text.of("Default");
-            case GATEWAY -> Text.of("Gateway");
-            case WIREFRAME -> Text.of("Wireframe");
-            case NOTEX -> Text.of("No Texture Color");
-            case IMAGE -> Text.of("Image");
+            case DEFAULT -> Text.translatable("config.renderMode.default");
+            case GATEWAY -> Text.translatable("config.renderMode.gateway");
+            case WIREFRAME -> Text.translatable("config.renderMode.wireframe");
+            case NOTEX -> Text.translatable("config.renderMode.noTexture");
+            case IMAGE -> Text.translatable("config.renderMode.image");
         };
     }
 }

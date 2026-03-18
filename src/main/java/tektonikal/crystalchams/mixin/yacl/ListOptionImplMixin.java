@@ -1,4 +1,4 @@
-package tektonikal.crystalchams.mixin;
+package tektonikal.crystalchams.mixin.yacl;
 
 import dev.isxander.yacl3.impl.ListOptionImpl;
 import org.spongepowered.asm.mixin.Mixin;
@@ -11,7 +11,7 @@ import tektonikal.crystalchams.CrystalChams;
 public class ListOptionImplMixin {
     @Inject(method = "isPendingValueDefault", at = @At("HEAD"), remap = false, cancellable = true)
     private static void ough(CallbackInfoReturnable<Boolean> cir){
-//        if(CrystalChams.isThisMyScreen()){
+//        if(CrystalChams.mc.currentScreen instanceof EvilYACLScreen){
 //            cir.setReturnValue(false);
 //        }
     }

@@ -1,4 +1,4 @@
-package tektonikal.crystalchams.mixin;
+package tektonikal.crystalchams.mixin.yacl;
 
 
 import com.google.common.collect.ImmutableList;
@@ -8,6 +8,7 @@ import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionGroup;
 import dev.isxander.yacl3.gui.*;
 import dev.isxander.yacl3.impl.ListOptionEntryImpl;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.gui.tooltip.Tooltip;
@@ -23,10 +24,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import tektonikal.crystalchams.CrystalChams;
 import tektonikal.crystalchams.OptionGroups;
-import tektonikal.crystalchams.config.ChamsConfig;
-import tektonikal.crystalchams.config.EvilOption;
-import tektonikal.crystalchams.config.ModelPartController;
-import tektonikal.crystalchams.config.ModelPartOptions;
+import tektonikal.crystalchams.config.*;
+import tektonikal.crystalchams.util.Easings;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -35,13 +34,14 @@ import java.util.List;
 import java.util.stream.Stream;
 
 @Mixin(value = OptionListWidget.class)
-public interface OptionListWidgetAccessor {
+public class OptionListWidgetAccessor extends YACLSelectionList<OptionListWidget.Entry> {
 
-    @Accessor(remap = false)
-    YACLScreen getYaclScreen();
+    public OptionListWidgetAccessor(MinecraftClient minecraft, int width, int height, int y) {
+        super(minecraft, width, height, y);
+    }
 
     @Mixin(value = OptionListWidget.OptionEntry.class)
-    abstract class OptionListWidgetEntryMixin {
+    abstract static class OptionListWidgetEntryMixin {
         @Shadow(remap = false)
         @Final
         public AbstractWidget widget;
@@ -51,8 +51,13 @@ public interface OptionListWidgetAccessor {
         @Shadow(remap = false)
         @Final
         public Option<?> option;
+        @Shadow
+        @Final
+        OptionListWidget this$0;
         @Unique
         private TextScaledButtonWidget applyAllButton;
+        @Unique
+        private float onScreenProgress = 0;
 
         protected OptionListWidgetEntryMixin(TextScaledButtonWidget applyAllButton) {
             this.applyAllButton = applyAllButton;
@@ -62,7 +67,7 @@ public interface OptionListWidgetAccessor {
         private void onInit(OptionListWidget this$0, Option<?> option, ConfigCategory category, OptionGroup group, OptionListWidget.GroupSeparatorEntry groupSeparatorEntry, AbstractWidget widget, CallbackInfo ci) {
             if (option instanceof EvilOption<?> && ((EvilOption<?>) option).group() != null) {
                 this.widget.setDimension(this.widget.getDimension().expanded(-20, 0));
-                this.applyAllButton = new TextScaledButtonWidget(((OptionListWidgetAccessor) this$0).getYaclScreen(), widget.getDimension().xLimit(), -50, 20, 20, 2f, Text.literal("⇛"), button -> {
+                this.applyAllButton = new TextScaledButtonWidget(((EvilAccessor) this$0).getYaclScreen(), widget.getDimension().xLimit(), -50, 20, 20, 2f, Text.literal("⇛"), button -> {
                     syncLinkedOptions(((EvilOption<?>) option).group());
                     button.active = false;
                 });
@@ -72,6 +77,9 @@ public interface OptionListWidgetAccessor {
 
         @Unique
         private boolean optionsSynced() {
+            if (option == null) {
+                return false;
+            }
             List<EvilOption> list = getLinkedOptions(((EvilOption<?>) option).group()).stream().filter(evilOption -> !evilOption.equals(option)).toList();
             //this is horrible. i regret ever making baseRenderMode a thing. the horrors of overengineering have finally caught up to me
             if (((EvilOption) option).group() == OptionGroups.RENDER) {
@@ -82,10 +90,9 @@ public interface OptionListWidgetAccessor {
                         }
                     }
                     return true;
-                }
-                else{
+                } else {
                     for (EvilOption evilOption : list) {
-                        if(evilOption.equals(ChamsConfig.o_baseRenderMode)) {
+                        if (evilOption.equals(ChamsConfig.o_baseRenderMode)) {
                             return evilOption.stateManager().get() != CrystalChams.BaseRenderMode.NEVER == (boolean) option.stateManager().get();
                         }
                         if (!evilOption.stateManager().get().equals(option.stateManager().get())) {
@@ -145,20 +152,34 @@ public interface OptionListWidgetAccessor {
                     }
                 });
             }
-            return options.stream().filter(evilOption -> evilOption.group() == group).toList();
+            return options.stream().filter(evilOption -> evilOption != null && evilOption.group() == group).toList();
         }
 
-        @Inject(method = "render", at = @At("TAIL"))
-        private void onRender(DrawContext graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta, CallbackInfo ci) {
+        @Inject(method = "renderContent", at = @At("HEAD"))
+        private void CC$YEAH(DrawContext graphics, int mouseX, int mouseY, boolean hovered, float deltaTicks, CallbackInfo ci) {
+            graphics.getMatrices().push();
+            if (ChamsConfig.o_showAnimations.pendingValue() && (CrystalChams.mc.currentScreen instanceof EvilYACLScreen || CrystalChams.mc.currentScreen instanceof SecondaryYACLScreen) && resetButton != null) {
+                graphics.getMatrices().translate(-CrystalChams.mc.getWindow().getScaledWidth() * (1 - onScreenProgress), 0, 0);
+            }
+        }
+
+        @Inject(method = "renderContent", at = @At("TAIL"))
+        private void onRender(DrawContext graphics, int mouseX, int mouseY, boolean hovered, float deltaTicks, CallbackInfo ci) {
+            if (resetButton != null) {
+                var scaledHeight = CrystalChams.mc.getWindow().getScaledHeight();
+                onScreenProgress = (float) CrystalChams.ease(onScreenProgress, resetButton.getY() >= scaledHeight * 0.025
+                        && resetButton.getY() <= scaledHeight * 0.975 ? 1 : 0, 20);
+            }
             if (applyAllButton != null) {
-                applyAllButton.setY(y);
+                applyAllButton.setY(resetButton.getY());
                 //not the greatest of ways to do it, but whatever
                 applyAllButton.active = !optionsSynced() && option.available();
                 applyAllButton.setTooltip(applyAllButton.active ? Tooltip.of(Text.of("Apply To All")) : null);
-                applyAllButton.render(graphics, mouseX, mouseY, tickDelta);
+                applyAllButton.render(graphics, mouseX, mouseY, deltaTicks);
             }
-
+            graphics.getMatrices().pop();
         }
+
 
         @Inject(method = "selectableChildren", at = @At("HEAD"), cancellable = true)
         private void onSelectableChildren(CallbackInfoReturnable<List<? extends Selectable>> cir) {

@@ -1,4 +1,4 @@
-package tektonikal.crystalchams.mixin;
+package tektonikal.crystalchams.mixin.yacl;
 
 import dev.isxander.yacl3.gui.AbstractWidget;
 import net.minecraft.client.gui.DrawContext;

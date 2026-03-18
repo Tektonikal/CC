@@ -13,11 +13,11 @@ import net.minecraft.text.Text;
 import tektonikal.crystalchams.CrystalChams;
 import tektonikal.crystalchams.OptionGroups;
 import tektonikal.crystalchams.stupidfuckingboilerplate.CustomFloatSliderControllerBuilder;
+import tektonikal.crystalchams.util.Easings;
 
 import java.awt.*;
 
 public class ModelPartController implements Controller<ModelPartOptions> {
-    //TODO: breaks
     public float alphaMultiplier = 1;
     public boolean hovered;
     private final Option<ModelPartOptions> option;
@@ -31,7 +31,8 @@ public class ModelPartController implements Controller<ModelPartOptions> {
     public EvilOption<Float> o_scale;
     public EvilOption<Color> o_color;
     public EvilOption<Float> o_alpha;
-    public EvilOption<Integer> o_lightLevel;
+    public EvilOption<Integer> o_blockLightLevel;
+    public EvilOption<Integer> o_skyLightLevel;
     public EvilOption<RenderMode> o_renderLayer;
     public EvilOption<Boolean> o_culling;
     public EvilOption<Boolean> o_funnyOption;
@@ -45,10 +46,10 @@ public class ModelPartController implements Controller<ModelPartOptions> {
     public EvilOption<Boolean> o_animation;
 
     public EvilOption<Boolean> o_animateVerticalOffset;
-//    public EvilOption<Float> o_startingVerticalOffset;
-//    public EvilOption<Float> verticalOffsetAnimationDuration;
-//    public EvilOption<Float> verticalOffsetAnimationDelay;
-//    public EvilOption<Easings> verticalOffsetEasing;
+    public EvilOption<Float> o_startingVerticalOffset;
+    public EvilOption<Float> o_verticalOffsetAnimationDuration;
+    public EvilOption<Float> o_verticalOffsetAnimationDelay;
+    public EvilOption<Easings> o_verticalOffsetEasing;
 
     @SuppressWarnings("deprecation")
     public ModelPartController(Option<ModelPartOptions> option) {
@@ -63,17 +64,18 @@ public class ModelPartController implements Controller<ModelPartOptions> {
         o_scale = EvilOption.<Float>createBuilder().name(Text.of("Scale")).controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 2f).step(0.05f).formatValue(val -> Text.of(String.format("%.2f", val) + "x"))).stateManager(StateManager.createSimple(1F, () -> option.binding().getValue().scale, newVal -> option.binding().getValue().scale = newVal)).group(OptionGroups.SCALE).build();
         o_color = EvilOption.<Color>createBuilder().name(Text.of("Color")).controller(ColorControllerBuilderImpl::new).stateManager(StateManager.createSimple(new Color(255, 255, 255), () -> option.binding().getValue().color, newVal -> option.binding().getValue().color = newVal)).group(OptionGroups.COLOR).build();
         o_alpha = EvilOption.<Float>createBuilder().name(Text.of("Opacity")).controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(val -> Text.of(String.format("%.0f", val * 100) + "%"))).stateManager(StateManager.createSimple(1F, () -> option.binding().getValue().alpha, newVal -> option.binding().getValue().alpha = newVal)).group(OptionGroups.OPACITY).build();
-        //TODO: create light level option builder
-        o_lightLevel = EvilOption.<Integer>createBuilder().name(Text.of("Light Level")).description(OptionDescription.createBuilder().text(Text.of("How brightly lit the object is. -1 uses the world's lighting, while 0-255 is mapped respectively.")).build()).stateManager(StateManager.createSimple(-1, () -> option.binding().getValue().lightLevel, newVal -> option.binding().getValue().lightLevel = newVal)).controller(CrystalChams.LIGHT).group(OptionGroups.LIGHT_LEVEL).build();
+        o_blockLightLevel = CrystalChams.createBlockLightLevelOption(StateManager.createSimple(-1, () -> option.binding().getValue().blockLightLevel, newVal -> option.binding().getValue().blockLightLevel = newVal));
+        o_skyLightLevel = CrystalChams.createSkyLightLevelOption(StateManager.createSimple(-1, () -> option.binding().getValue().skyLightLevel, newVal -> option.binding().getValue().skyLightLevel = newVal));
+
         o_renderLayer = CrystalChams.createRenderModeOption("Render Mode", 
                 StateManager.createSimple(RenderMode.DEFAULT, () -> option.binding().getValue().renderLayer, newVal -> option.binding().getValue().renderLayer = newVal),
                 OptionGroups.RENDER_MODE);
-        o_culling = CrystalChams.createBooleanOption("Culled",  StateManager.createSimple(false, () -> option.binding().getValue().culling, newVal -> option.binding().getValue().culling = newVal), OptionGroups.CULLED);
+        o_culling = CrystalChams.createBooleanOption(CrystalChams.SEPARATOR+"Culled",  StateManager.createSimple(false, () -> option.binding().getValue().culling, newVal -> option.binding().getValue().culling = newVal), OptionGroups.CULLED);
         o_funnyOption = CrystalChams.createBooleanOption("Funny Option",  StateManager.createSimple(false, () -> option.binding().getValue().funnyOption, newVal -> option.binding().getValue().funnyOption = newVal), OptionGroups.THE_FUNNY_OPTION);
         o_funnierOption = CrystalChams.createBooleanOption("Funnier Option",  StateManager.createSimple(false, () -> option.binding().getValue().funnierOption, newVal -> option.binding().getValue().funnierOption = newVal), OptionGroups.THE_FUNNIER_OPTION);
         o_rainbow = CrystalChams.createBooleanOption("Rainbow",  StateManager.createSimple(false, () -> option.binding().getValue().rainbow, newVal -> option.binding().getValue().rainbow = newVal), OptionGroups.RAINBOW);
-        o_rainbowSpeed = EvilOption.<Float>createBuilder().name(Text.of("Rainbow Speed")).controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 10f).step(0.1f).formatValue(value -> Text.of(String.format("%.1f", value) + "x"))).stateManager(StateManager.createSimple(2F, () -> option.binding().getValue().rainbowSpeed, newVal -> option.binding().getValue().rainbowSpeed = newVal)).group(OptionGroups.RAINBOW_SPEED).build();
-        o_rainbowDelay = EvilOption.<Float>createBuilder().name(Text.of("Rainbow Delay")).controller(integerOption -> CustomFloatSliderControllerBuilder.create(integerOption).step(0.1F).range(-2.5F, 2.5F).formatValue(CrystalChams.SECONDS_FORMATTER)).stateManager(StateManager.createSimple(0F, () -> option.binding().getValue().rainbowDelay, newVal -> option.binding().getValue().rainbowDelay = newVal)).group(OptionGroups.RAINBOW_DELAY).build();
+        o_rainbowSpeed = EvilOption.<Float>createBuilder().name(Text.of(CrystalChams.SEPARATOR+"Rainbow Speed")).controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 10f).step(0.1f).formatValue(value -> Text.of(String.format("%.1f", value) + "x"))).stateManager(StateManager.createSimple(2F, () -> option.binding().getValue().rainbowSpeed, newVal -> option.binding().getValue().rainbowSpeed = newVal)).group(OptionGroups.RAINBOW_SPEED).build();
+        o_rainbowDelay = EvilOption.<Float>createBuilder().name(Text.of(CrystalChams.SEPARATOR+"Rainbow Delay")).controller(integerOption -> CustomFloatSliderControllerBuilder.create(integerOption).step(0.1F).range(-2.5F, 2.5F).formatValue(CrystalChams.SECONDS_FORMATTER)).stateManager(StateManager.createSimple(0F, () -> option.binding().getValue().rainbowDelay, newVal -> option.binding().getValue().rainbowDelay = newVal)).group(OptionGroups.RAINBOW_DELAY).build();
         o_rainbowSaturation = CrystalChams.createFloatOptionPercent(CrystalChams.SEPARATOR+"Saturation",  StateManager.createSimple(1f, () -> option.binding().getValue().rainbowSaturation, newVal -> option.binding().getValue().rainbowSaturation = newVal), OptionGroups.RAINBOW_SATURATION);
         o_rainbowBrightness = CrystalChams.createFloatOptionPercent(CrystalChams.SEPARATOR+"Brightness",  StateManager.createSimple(1F, () -> option.binding().getValue().rainbowBrightness, newVal -> option.binding().getValue().rainbowBrightness = newVal), OptionGroups.RAINBOW_BRIGHTNESS);
         o_animation = CrystalChams.createBooleanOption("Animations", 
@@ -81,9 +83,14 @@ public class ModelPartController implements Controller<ModelPartOptions> {
 
         o_animateVerticalOffset = CrystalChams.createBooleanOption("Animate Vertical Offset", 
                 StateManager.createSimple(false, () -> option.binding().getValue().animateVerticalOffset, newVal -> option.binding().getValue().animateVerticalOffset = newVal), OptionGroups.ANIMATE_VERTICAL_OFFSET);
+        o_startingVerticalOffset =  EvilOption.<Float>createBuilder().name(Text.of("Vertical Offset")).controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(-2.5f, 2.5f).step(0.1f).formatValue(CrystalChams.BLOCKS_FORMATTER)).stateManager(StateManager.createSimple(0F, () -> option.binding().getValue().offset, newVal -> option.binding().getValue().offset = newVal)).group(OptionGroups.VERTICAL_OFFSET).build();
+
+
         //too lazy to set up annotations again, whatever man
         o_render.addListener(this::update);
-
+        o_rainbow.addListener(this::update);
+        this.update(o_render, o_render.stateManager().get());
+        this.update(o_rainbow, o_rainbow.stateManager().get());
     }
 
     public void update(Option<Boolean> booleanOption, Boolean aBoolean) {
@@ -97,7 +104,8 @@ public class ModelPartController implements Controller<ModelPartOptions> {
             o_color.setAvailable(aBoolean);
             o_alpha.setAvailable(aBoolean);
             o_rainbow.setAvailable(aBoolean);
-            o_lightLevel.setAvailable(aBoolean);
+            o_blockLightLevel.setAvailable(aBoolean);
+            o_skyLightLevel.setAvailable(aBoolean);
             o_renderLayer.setAvailable(aBoolean);
             o_culling.setAvailable(aBoolean);
             o_animation.setAvailable(aBoolean);
@@ -107,6 +115,10 @@ public class ModelPartController implements Controller<ModelPartOptions> {
         }
         else if(booleanOption.equals(o_rainbow)){
             boolean b = o_rainbow.available() && aBoolean;
+            o_rainbowSpeed.setAvailable(b);
+            o_rainbowDelay.setAvailable(b);
+            o_rainbowSaturation.setAvailable(b);
+            o_rainbowBrightness.setAvailable(b);
         }
     }
     @Override
@@ -149,11 +161,12 @@ public class ModelPartController implements Controller<ModelPartOptions> {
                                 .option(o_rainbowBrightness).build())
                         .group(OptionGroup.createBuilder()
                                 .name(Text.of("Rendering"))
-                                .option(o_lightLevel)
+                                .option(o_blockLightLevel)
+                                .option(o_skyLightLevel)
                                 .option(o_renderLayer)
                                 .option(o_culling)
                                 .option(o_funnyOption)
-                                .option(o_funnierOption)
+//                                .option(o_funnierOption)
                                 .build())
 //                        .group(OptionGroup.createBuilder()
 //                                .name(Text.of("Animation"))
@@ -195,11 +208,6 @@ public class ModelPartController implements Controller<ModelPartOptions> {
             drawValueText(graphics, mouseX, mouseY, delta);
 
             control.hovered = isHovered();
-            if (control.hovered || CrystalChams.hoveredIndex == -1) {
-                this.control.alphaMultiplier = (float) CrystalChams.ease(control.alphaMultiplier, 1, 5);
-            } else {
-                this.control.alphaMultiplier = (float) CrystalChams.ease(control.alphaMultiplier, 0.25, 5);
-            }
         }
 
 

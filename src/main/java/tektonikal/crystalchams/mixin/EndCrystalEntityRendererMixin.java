@@ -3,12 +3,10 @@ package tektonikal.crystalchams.mixin;
 import dev.isxander.yacl3.api.ListOptionEntry;
 import dev.isxander.yacl3.impl.ListOptionEntryImpl;
 import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.*;
 import net.minecraft.client.render.entity.*;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -75,6 +73,8 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
         super(context);
     }
 
+
+
     @Inject(method = "render(Lnet/minecraft/entity/decoration/EndCrystalEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", at = @At("HEAD"), cancellable = true)
     private void CC$renderInject(EndCrystalEntity endCrystalEntity, float yaw, float tickDelta, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int light, CallbackInfo ci) {
         if (!ChamsConfig.o_modEnabled.pendingValue()) {
@@ -100,7 +100,7 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
         matrixStack.translate(0.0F, -0.5F, 0.0F);
         if ((endCrystalEntity.shouldShowBottom() && ChamsConfig.o_baseRenderMode.pendingValue() == BaseRenderMode.DEFAULT) || ChamsConfig.o_baseRenderMode.pendingValue() == BaseRenderMode.ALWAYS) {
             int col = getColor(ChamsConfig.o_baseColor.pendingValue(), ChamsConfig.o_baseAlpha.pendingValue(), ChamsConfig.o_baseRainbow.pendingValue(), ChamsConfig.o_baseRainbowDelay.pendingValue(), ChamsConfig.o_baseRainbowSpeed.pendingValue(), ChamsConfig.o_baseRainbowSaturation.pendingValue(), ChamsConfig.o_baseRainbowBrightness.pendingValue());
-            bottom.render(matrixStack, getLayer(vertexConsumerProvider, ChamsConfig.o_baseRenderLayer.pendingValue(), ChamsConfig.o_baseCulling.pendingValue(), TEXTURE), getLight(light, ChamsConfig.o_baseLightLevel.pendingValue()), overlay, col);
+            bottom.render(matrixStack, getLayer(vertexConsumerProvider, ChamsConfig.o_baseRenderLayer.pendingValue(), ChamsConfig.o_baseCulling.pendingValue(), TEXTURE), packLight(ChamsConfig.o_baseBlockLightLevel.pendingValue(), ChamsConfig.o_baseSkyLightLevel.pendingValue(), light), overlay, col);
         }
         matrixStack.pop();
         //Frames
@@ -138,6 +138,7 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
                         float guhhh = controller.o_scale.pendingValue() * 4;
                         matrixStack.scale(guhhh, guhhh, guhhh);
                     }
+                    updateAlpha(controller);
                     float alpha = controller.o_alpha.pendingValue() * (endCrystalEntity.equals(previewCrystalEntity) ? controller.alphaMultiplier : 1);
                     int col = getColor(controller.o_color.pendingValue(), alpha, controller.o_rainbow.pendingValue(), controller.o_rainbowDelay.pendingValue(), controller.o_rainbowSpeed.pendingValue(), controller.o_rainbowSaturation.pendingValue(), controller.o_rainbowBrightness.pendingValue());
                     if (controller.o_funnierOption.pendingValue()) {
@@ -153,7 +154,7 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
                             EnderDragonEntityRenderer.renderCrystalBeam(-p, -q + CrystalChams.getYOffset(realAge, ChamsConfig.o_coreOffset.pendingValue(), ChamsConfig.o_coreBounceSpeed.pendingValue(), ChamsConfig.o_coreBounceHeight.pendingValue(), ChamsConfig.o_coreDelay.pendingValue()), -r, tickDelta, endCrystalEntity.endCrystalAge, matrixStack, vertexConsumerProvider, light);
                         }
                     } else {
-                        frame.render(matrixStack, getLayer(vertexConsumerProvider, controller.o_renderLayer.pendingValue(), controller.o_culling.pendingValue(), TEXTURE), getLight(light, controller.o_lightLevel.pendingValue()), overlay, col);
+                        frame.render(matrixStack, getLayer(vertexConsumerProvider, controller.o_renderLayer.pendingValue(), controller.o_culling.pendingValue(), TEXTURE), packLight(controller.o_blockLightLevel.pendingValue(), controller.o_skyLightLevel.pendingValue(), light), overlay, col);
                     }
                     matrixStack.pop();
                 }
@@ -174,7 +175,7 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
             int col = getColor(ChamsConfig.o_coreColor.pendingValue(),
                     getAnimatedValue(ChamsConfig.o_coreAlphaAnimation.pendingValue(), ChamsConfig.o_coreAlphaEasing.pendingValue(), endCrystalEntity.age + tickDelta, ChamsConfig.o_coreAlphaDelay.pendingValue(), ChamsConfig.o_coreAlphaAnimDuration.pendingValue(), ChamsConfig.o_coreStartAlpha.pendingValue(), ChamsConfig.o_coreAlpha.pendingValue()),
                     ChamsConfig.o_coreRainbow.pendingValue(), ChamsConfig.o_coreRainbowDelay.pendingValue(), ChamsConfig.o_coreRainbowSpeed.pendingValue(), ChamsConfig.o_coreRainbowSaturation.pendingValue(), ChamsConfig.o_coreRainbowBrightness.pendingValue());
-            core.render(matrixStack, getLayer(vertexConsumerProvider, ChamsConfig.o_coreRenderLayer.pendingValue(), ChamsConfig.o_coreCulling.pendingValue(), TEXTURE), getLight(light, ChamsConfig.o_coreLightLevel.pendingValue()), overlay, col);
+            core.render(matrixStack, getLayer(vertexConsumerProvider, ChamsConfig.o_coreRenderLayer.pendingValue(), ChamsConfig.o_coreCulling.pendingValue(), TEXTURE), packLight(ChamsConfig.o_coreBlockLightLevel.pendingValue(), ChamsConfig.o_coreSkyLightLevel.pendingValue(), light), overlay, col);
             matrixStack.pop();
         }
         matrixStack.pop();
@@ -191,14 +192,22 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
         super.render(endCrystalEntity, yaw, tickDelta, matrixStack, vertexConsumerProvider, light);
         if (ChamsConfig.o_renderHitbox.pendingValue() && !CrystalChams.mc.getEntityRenderDispatcher().shouldRenderHitboxes()) {
             //potentially add custom line renderer layer to here
-            EntityRenderDispatcher.renderHitbox(matrixStack, vertexConsumerProvider.getBuffer(RenderLayer.getLines()), endCrystalEntity, tickDelta, 1, 1, 1);
+            CrystalChams.mc.getEntityRenderDispatcher().renderHitbox(matrixStack, vertexConsumerProvider.getBuffer(RenderLayer.getLines()), endCrystalEntity, tickDelta, 1, 1, 1);
         }
         coreVerticalOffsetAnimator.update();
         ci.cancel();
     }
 
+    @Unique
+    private void updateAlpha(ModelPartController control) {
+        if (control.hovered || CrystalChams.hoveredIndex == -1) {
+            control.alphaMultiplier = (float) CrystalChams.ease(control.alphaMultiplier, 1, 5);
+        } else {
+            control.alphaMultiplier = (float) CrystalChams.ease(control.alphaMultiplier, 0.25, 5);
+        }
+    }
+
     //MAKE SURE THAT IT'S THE age and not endCrystalAge!!!!!!!!!!!!!!!!!!!!!
-    //TODO: make sure light values are processed correctly!
     @Unique
     private static float getAnimatedValue(boolean animate, Easings function, float ageAndDelta, float delay, float duration, float startValue, float targetValue) {
         if (animate) {
@@ -234,6 +243,7 @@ public abstract class EndCrystalEntityRendererMixin extends EntityRenderer<EndCr
             return getColor(new Color(CrystalChams.getRainbow(delay, speed, saturation, brightness)), alpha);
         }
     }
+
     @Unique
     public void renderFunny(EndCrystalEntity endCrystalEntity, float f, float g, MatrixStack matrixStack, VertexConsumer layer, int i, int color, VertexConsumerProvider vertexConsumerProvider, BlockPos pos) {
         matrixStack.push();

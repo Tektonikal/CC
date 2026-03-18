@@ -4,27 +4,30 @@
   "package": "tektonikal.crystalchams.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "AbstractWidgetMixin",
-    "ControllerWidgetMixin",
     "EndCrystalEntityMixin",
-    "ListOptionImplMixin",
-    "OptionDescriptionWidgetMixin"
+    "yacl.AbstractWidgetMixin",
+    "yacl.ControllerWidgetMixin",
+    "yacl.LabelControllerMixin",
+    "yacl.LabelControllerMixin$LabelControllerElementMixin",
+    "yacl.ListOptionImplMixin",
+    "yacl.OptionDescriptionWidgetMixin"
   ],
   "injectors": {
     "defaultRequire": 1
   },
   "client": [
     "ButtonWidgetMixin",
-    "CategoryTabAccessor",
     "EndCrystalEntityRendererMixin",
     "EnderDragonEntityRendererMixin",
     "MinecraftClientMixin",
-    "OptionListWidgetAccessor",
-    "OptionListWidgetAccessor$OptionListWidgetEntryMixin",
-    "PopupControllerScreenAccessor",
-    "PopupControllerScreenMixin",
+    "RenderTickCounterAccessor",
     "TabButtonWidgetMixin",
-    "YACLSCreenMixin",
-    "YACLSCreenMixin$CategoryTabMixin"
+    "yacl.CategoryTabAccessor",
+    "yacl.EvilAccessor",
+    "yacl.OptionListWidgetAccessor",
+    "yacl.OptionListWidgetAccessor$OptionListWidgetEntryMixin",
+    "yacl.XanderIHateYouMixin",
+    "yacl.YACLSCreenMixin",
+    "yacl.YACLSCreenMixin$CategoryTabMixin"
   ]
 }

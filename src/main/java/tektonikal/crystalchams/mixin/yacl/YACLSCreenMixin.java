@@ -1,4 +1,4 @@
-package tektonikal.crystalchams.mixin;
+package tektonikal.crystalchams.mixin.yacl;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import dev.isxander.yacl3.api.ConfigCategory;
@@ -6,11 +6,7 @@ import dev.isxander.yacl3.api.OptionDescription;
 import dev.isxander.yacl3.api.YetAnotherConfigLib;
 import dev.isxander.yacl3.api.utils.Dimension;
 import dev.isxander.yacl3.api.utils.MutableDimension;
-import dev.isxander.yacl3.gui.DescriptionWithName;
-import dev.isxander.yacl3.gui.OptionDescriptionWidget;
-import dev.isxander.yacl3.gui.OptionListWidget;
-import dev.isxander.yacl3.gui.YACLScreen;
-import dev.isxander.yacl3.gui.tab.ListHolderWidget;
+import dev.isxander.yacl3.gui.*;
 import dev.isxander.yacl3.gui.utils.GuiUtils;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.ScreenRect;
@@ -26,6 +22,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import tektonikal.crystalchams.CrystalChams;
+import tektonikal.crystalchams.config.EvilYACLScreen;
+import tektonikal.crystalchams.config.SecondaryYACLScreen;
 
 import java.util.Calendar;
 import java.util.function.Consumer;
@@ -41,7 +39,7 @@ public abstract class YACLSCreenMixin extends Screen {
         super(title);
     }
 
-    @Mixin(YACLScreen.CategoryTab.class)
+    @Mixin(value = YACLScreen.CategoryTab.class, remap = false)
     public abstract static class CategoryTabMixin implements Tab {
         @Mutable
         @Shadow
@@ -62,13 +60,13 @@ public abstract class YACLSCreenMixin extends Screen {
         @Final
         private YACLScreen screen;
         @Shadow(remap = false)
-        private ListHolderWidget<OptionListWidget> optionList;
+        private WidgetAndType<OptionListWidget> optionList;
         @Shadow(remap = false)
         private OptionDescriptionWidget descriptionWidget;
 
         @Inject(method = "<init>", at = @At("TAIL"), remap = false)
         private void cc$OUGHHHHHHH(YACLScreen screen, ConfigCategory category, ScreenRect tabArea, CallbackInfo ci, @Local(ordinal = 1) int padding, @Local(ordinal = 2) int paddedWidth, @Local MutableDimension<Integer> actionDim) {
-            if (CrystalChams.isThisMyScreen(screen)) {
+            if ((CrystalChams.mc.currentScreen instanceof EvilYACLScreen || CrystalChams.mc.currentScreen instanceof SecondaryYACLScreen)) {
                 packsButton = ButtonWidget.builder(Text.literal("Resource Packs"), btn -> {
                     screen.finishOrSave();
                     CrystalChams.mc.setScreen(new PackScreen(CrystalChams.mc.getResourcePackManager(), resourcePackManager -> {
@@ -101,9 +99,9 @@ public abstract class YACLSCreenMixin extends Screen {
 
         @Inject(method = "forEachChild", at = @At(value = "HEAD"), cancellable = true)
         private void CC$oughhh(Consumer<ClickableWidget> consumer, CallbackInfo ci) {
-            if (CrystalChams.isThisMyScreen(screen)) {
+            if ((CrystalChams.mc.currentScreen instanceof EvilYACLScreen || CrystalChams.mc.currentScreen instanceof SecondaryYACLScreen)) {
                 //this is terrible but I don't care anymore
-                consumer.accept(optionList);
+                consumer.accept(optionList.getWidget());
                 //TODO!!!!!!!!!
               consumer.accept(undoButton);
 //              consumer.accept(searchField);

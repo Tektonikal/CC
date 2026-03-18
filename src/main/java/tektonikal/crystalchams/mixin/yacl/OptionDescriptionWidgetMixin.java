@@ -1,4 +1,4 @@
-package tektonikal.crystalchams.mixin;
+package tektonikal.crystalchams.mixin.yacl;
 
 import dev.isxander.yacl3.gui.OptionDescriptionWidget;
 import net.minecraft.client.MinecraftClient;
@@ -15,14 +15,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 import tektonikal.crystalchams.CrystalChams;
 import tektonikal.crystalchams.config.EvilYACLScreen;
+import tektonikal.crystalchams.config.SecondaryYACLScreen;
 
 @Mixin(OptionDescriptionWidget.class)
 public abstract class OptionDescriptionWidgetMixin extends ClickableWidget {
 
-
-    @Shadow
-    @Final
-    private static MinecraftClient minecraft;
 
     public OptionDescriptionWidgetMixin(int x, int y, int width, int height, Text message) {
         super(x, y, width, height, message);
@@ -30,7 +27,8 @@ public abstract class OptionDescriptionWidgetMixin extends ClickableWidget {
 
     @ModifyArgs(method = "renderWidget", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;enableScissor(IIII)V"))
     private void ough(Args args) {
-        if (minecraft.currentScreen instanceof EvilYACLScreen) {
+        //TODO: guh????
+        if ((CrystalChams.mc.currentScreen instanceof EvilYACLScreen || CrystalChams.mc.currentScreen instanceof SecondaryYACLScreen)) {
             args.set(0, 0);
             args.set(1, 0);
             args.set(2, 9999);
@@ -40,6 +38,6 @@ public abstract class OptionDescriptionWidgetMixin extends ClickableWidget {
 
     @Inject(method = "tick()V", at = @At("TAIL"), remap = false)
     private void CC$OUGHHHHHHH(CallbackInfo ci) {
-        //
+        //NOP?
     }
 }

@@ -47,7 +47,7 @@ public abstract class EndCrystalEntityMixin extends Entity implements EndCrystal
 
 //    @Inject(method = "tick", at = @At("TAIL"))
 //    public void tick(CallbackInfo info) {
-//        rotation = (endCrystalAge + ((RenderTickCounter.Dynamic) CrystalChams.mc.getRenderTickCounter()).tickDelta) * 3;
+//        rotation = (endCrystalAge + ((RenderTickCounterAccessor) CrystalChams.mc.getRenderTickCounter()).getTickDelta()) * 3;
 //    }
 //
 //    @Unique

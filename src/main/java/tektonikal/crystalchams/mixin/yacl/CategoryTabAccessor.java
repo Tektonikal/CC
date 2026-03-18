@@ -1,4 +1,4 @@
-package tektonikal.crystalchams.mixin;
+package tektonikal.crystalchams.mixin.yacl;
 
 import dev.isxander.yacl3.gui.YACLScreen;
 import net.minecraft.client.gui.ScreenRect;
