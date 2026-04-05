@@ -11,16 +11,16 @@ import dev.isxander.yacl3.gui.utils.GuiUtils;
 import dev.isxander.yacl3.impl.ListOptionEntryImpl;
 import dev.isxander.yacl3.impl.utils.YACLConstants;
 import dev.isxander.yacl3.platform.YACLPlatform;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.ScreenRect;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.world.CreateWorldScreen;
-import net.minecraft.client.util.Window;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RotationAxis;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
+import com.mojang.blaze3d.platform.Window;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
+import com.mojang.math.Axis;
 import org.lwjgl.glfw.GLFW;
 import tektonikal.crystalchams.CrystalChams;
 import tektonikal.crystalchams.mixin.yacl.CategoryTabAccessor;
@@ -43,7 +43,7 @@ public class SecondaryYACLScreen extends YACLScreen {
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
 //        Window w = MinecraftClient.getInstance().getWindow();
 //        parent.render(context, closing ? mouseX : -1, closing ? mouseY : -1, delta);
 //        context.getMatrices().push();
@@ -78,8 +78,8 @@ public class SecondaryYACLScreen extends YACLScreen {
     @Override
     public void tick() {
         super.tick();
-        CrystalChams.previewCrystalEntity.age++;
-        CrystalChams.previewCrystalEntity.endCrystalAge++;
+        CrystalChams.previewCrystalEntity.tickCount++;
+        CrystalChams.previewCrystalEntity.time++;
     }
 
     @Override
@@ -93,7 +93,7 @@ public class SecondaryYACLScreen extends YACLScreen {
     }
 
     @Override
-    public void close() {
+    public void onClose() {
         //BAD BAD BAD
         for (ListOptionEntry<ModelPartOptions> modelPartOptionsListOptionEntry : ChamsConfig.o_frameList.options()) {
             ModelPartController controller = (ModelPartController) ((ListOptionEntryImpl.EntryController) (modelPartOptionsListOptionEntry.controller())).controller();
@@ -101,11 +101,11 @@ public class SecondaryYACLScreen extends YACLScreen {
         }
         prog = 0;
         closing = false;
-        client.setScreen(parent);
+        minecraft.setScreen(parent);
     }
 
-    public boolean contains(double x, double y, ScreenRect r) {
-        return x >= r.getLeft() && x < r.getRight() && y >= r.getTop() && y < r.getBottom();
+    public boolean contains(double x, double y, ScreenRectangle r) {
+        return x >= r.left() && x < r.right() && y >= r.top() && y < r.bottom();
     }
 
 //    @Override
@@ -122,8 +122,8 @@ public class SecondaryYACLScreen extends YACLScreen {
 //    }
 //
     @Override
-    public boolean mouseClicked(Click mouseButtonEvent, boolean bl) {
-        ScreenRect r = ((CategoryTabAccessor) this.tabManager.getCurrentTab()).rightPaneDim();
+    public boolean mouseClicked(MouseButtonEvent mouseButtonEvent, boolean bl) {
+        ScreenRectangle r = ((CategoryTabAccessor) this.tabManager.getCurrentTab()).rightPaneDim();
         if (contains(mouseButtonEvent.x(), mouseButtonEvent.y(), r)) {
             if (mouseButtonEvent.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
                 draggin = true;
@@ -169,9 +169,9 @@ public class SecondaryYACLScreen extends YACLScreen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        ScreenRect r = ((CategoryTabAccessor) this.tabManager.getCurrentTab()).rightPaneDim();
+        ScreenRectangle r = ((CategoryTabAccessor) this.tabManager.getCurrentTab()).rightPaneDim();
         if (contains(mouseX, mouseY, r)) {
-            ChamsConfig.o_previewScale.stateManager().set(MathHelper.clamp((float) (ChamsConfig.o_previewScale.pendingValue() + verticalAmount * 0.25), 0, 2));
+            ChamsConfig.o_previewScale.stateManager().set(Mth.clamp((float) (ChamsConfig.o_previewScale.pendingValue() + verticalAmount * 0.25), 0, 2));
         }
         if (closing) {
             return parent.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);

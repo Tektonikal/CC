@@ -1,19 +1,19 @@
 package tektonikal.crystalchams.mixin;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.util.Window;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import com.mojang.blaze3d.platform.Window;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(MinecraftClient.class)
-public class MinecraftClientMixin {
+@Mixin(Minecraft.class)
+public class MinecraftMixin {
 
     @Shadow
     @Nullable
-    public Screen currentScreen;
+    public Screen screen;
 
 
     @Shadow

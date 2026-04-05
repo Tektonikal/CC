@@ -1,7 +1,7 @@
 package tektonikal.crystalchams.util;
 
 import dev.isxander.yacl3.api.NameableEnum;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 import tektonikal.crystalchams.CrystalChams;
 
 import java.util.function.Function;
@@ -50,8 +50,8 @@ public enum Easings implements NameableEnum {
     }
 
     @Override
-    public Text getDisplayName() {
+    public Component getDisplayName() {
         //TODO!
-        return Text.of(this.name());
+        return Component.nullToEmpty(this.name());
     }
 }

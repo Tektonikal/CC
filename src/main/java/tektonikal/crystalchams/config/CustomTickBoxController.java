@@ -5,8 +5,8 @@ import dev.isxander.yacl3.api.utils.Dimension;
 import dev.isxander.yacl3.gui.AbstractWidget;
 import dev.isxander.yacl3.gui.YACLScreen;
 import dev.isxander.yacl3.gui.controllers.TickBoxController;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.util.math.ColorHelper;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.util.ARGB;
 import tektonikal.crystalchams.CrystalChams;
 
 public class CustomTickBoxController extends TickBoxController {
@@ -27,13 +27,13 @@ public class CustomTickBoxController extends TickBoxController {
         }
 
         @Override
-        public void render(DrawContext graphics, int mouseX, int mouseY, float delta) {
+        public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
             super.render(graphics, mouseX, mouseY, delta);
             enabledState = (float) CrystalChams.ease(enabledState, control.option().stateManager().get() ? 1 : 0, 10F);
         }
 
         @Override
-        protected void drawHoveredControl(DrawContext graphics, int mouseX, int mouseY, float delta) {
+        protected void drawHoveredControl(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
             //TODO: animation only happens when control is onscreen
                 int outlineSize = 10;
                 int outlineX1 = getDimension().xLimit() - getXPadding() - outlineSize;

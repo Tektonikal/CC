@@ -1,11 +1,11 @@
 package tektonikal.crystalchams.mixin;
 
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ButtonTextures;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.widget.TabButtonWidget;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.TabButton;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -16,8 +16,8 @@ import tektonikal.crystalchams.CrystalChams;
 
 //import static tektonikal.crystalchams.CrystalChams.fillFloat;
 
-@Mixin(TabButtonWidget.class)
-public abstract class TabButtonWidgetMixin extends ClickableWidget {
+@Mixin(TabButton.class)
+public abstract class TabButtonMixin extends AbstractWidget {
 
     @Unique
     float hoverProgress;
@@ -25,19 +25,19 @@ public abstract class TabButtonWidgetMixin extends ClickableWidget {
     float selectedProgress;
 
     @Unique
-    ButtonTextures altTextures = new ButtonTextures(
-            Identifier.ofVanilla("widget/tab_selected"),
-            Identifier.ofVanilla("widget/tab"),
-            Identifier.ofVanilla("widget/tab_selected"),
-            Identifier.ofVanilla("widget/tab")
+    WidgetSprites altTextures = new WidgetSprites(
+            Identifier.withDefaultNamespace("widget/tab_selected"),
+            Identifier.withDefaultNamespace("widget/tab"),
+            Identifier.withDefaultNamespace("widget/tab_selected"),
+            Identifier.withDefaultNamespace("widget/tab")
     );
 
-    public TabButtonWidgetMixin(int x, int y, int width, int height, Text message) {
+    public TabButtonMixin(int x, int y, int width, int height, Component message) {
         super(x, y, width, height, message);
     }
 
     @Shadow
-    public abstract boolean isCurrentTab();
+    public abstract boolean isSelected();
 
 //    @ModifyArgs(method = "renderWidget", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Lnet/minecraft/util/Identifier;IIII)V"))
 //    public void CC$OUGH(Args args) {
@@ -47,9 +47,9 @@ public abstract class TabButtonWidgetMixin extends ClickableWidget {
 //    }
 
     @Inject(method = "renderWidget", at = @At("TAIL"))
-    public void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
-        hoverProgress = (float) CrystalChams.ease(hoverProgress, hovered || (isFocused() && CrystalChams.mc.getNavigationType().isKeyboard()) && this.active ? 1 : 0, 10F);
-        selectedProgress = (float) CrystalChams.ease(selectedProgress, isCurrentTab() && this.active ? 1 : 0, 10F);
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+        hoverProgress = (float) CrystalChams.ease(hoverProgress, isHovered || (isFocused() && CrystalChams.mc.getLastInputType().isKeyboard()) && this.active ? 1 : 0, 10F);
+        selectedProgress = (float) CrystalChams.ease(selectedProgress, isSelected() && this.active ? 1 : 0, 10F);
     }
 
 //    @Inject(method = "drawCurrentTabLine", at = @At("HEAD"), cancellable = true)

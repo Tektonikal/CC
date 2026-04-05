@@ -1,8 +1,8 @@
 package tektonikal.crystalchams.mixin.yacl;
 
 import dev.isxander.yacl3.gui.AbstractWidget;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.util.math.ColorHelper;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.util.ARGB;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;

@@ -1,9 +1,9 @@
 package tektonikal.crystalchams.mixin;
 
 import dev.isxander.yacl3.gui.LowProfileButtonWidget;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.AbstractWidget;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -16,7 +16,7 @@ import tektonikal.crystalchams.config.SecondaryYACLScreen;
 
 import java.awt.*;
 
-@Mixin(ClickableWidget.class)
+@Mixin(AbstractWidget.class)
 public abstract class ButtonWidgetMixin{
     @Shadow private int x;
     @Shadow private int y;
@@ -27,7 +27,7 @@ public abstract class ButtonWidgetMixin{
 
 
     @Shadow private boolean focused;
-    @Shadow protected boolean hovered;
+    @Shadow protected boolean isHovered;
 
 
     @Unique

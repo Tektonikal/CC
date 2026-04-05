@@ -4,13 +4,13 @@ import dev.isxander.yacl3.api.Controller;
 import dev.isxander.yacl3.api.utils.Dimension;
 import dev.isxander.yacl3.gui.AbstractWidget;
 import dev.isxander.yacl3.gui.controllers.LabelController;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(value = LabelController.class, remap = false)
-public abstract class LabelControllerMixin implements Controller<Text> {
+public abstract class LabelControllerMixin implements Controller<Component> {
 
 
     @Mixin(value = LabelController.LabelControllerElement.class, remap = false)

@@ -1,9 +1,9 @@
 package tektonikal.crystalchams.mixin;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.decoration.EndCrystalEntity;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -12,8 +12,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import tektonikal.crystalchams.config.ChamsConfig;
 import tektonikal.crystalchams.interfaces.EndCrystalEntityMixinInterface;
 
-@Mixin(EndCrystalEntity.class)
-public abstract class EndCrystalEntityMixin extends Entity implements EndCrystalEntityMixinInterface {
+@Mixin(EndCrystal.class)
+public abstract class EndCrystalMixin extends Entity implements EndCrystalEntityMixinInterface {
 //    @Shadow
 //    public int endCrystalAge;
 //    @Unique
@@ -32,16 +32,16 @@ public abstract class EndCrystalEntityMixin extends Entity implements EndCrystal
 //    @Unique
 //    public float frame1BounceSpeed = ChamsConfig.CONFIG.instance().frame1BounceSpeed;
 
-    @Shadow public int endCrystalAge;
+    @Shadow public int time;
 
-    public EndCrystalEntityMixin(EntityType<?> type, World world) {
+    public EndCrystalMixin(EntityType<?> type, Level world) {
         super(type, world);
     }
 
-    @Inject(method = "<init>(Lnet/minecraft/entity/EntityType;Lnet/minecraft/world/World;)V", at = @At(value = "TAIL"))
-    private void CC$ough(EntityType<? extends EndCrystalEntity> entityType, World world, CallbackInfo ci){
+    @Inject(method = "<init>(Lnet/minecraft/world/entity/EntityType;Lnet/minecraft/world/level/Level;)V", at = @At(value = "TAIL"))
+    private void CC$ough(EntityType<? extends EndCrystal> entityType, Level world, CallbackInfo ci){
         if(!ChamsConfig.o_randomizeAge.pendingValue()){
-            this.endCrystalAge = 0;
+            this.time = 0;
         }
     }
 

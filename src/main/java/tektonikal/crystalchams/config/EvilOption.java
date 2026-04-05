@@ -5,8 +5,8 @@ import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.ControllerBuilder;
 import dev.isxander.yacl3.impl.ProvidesBindingForDeprecation;
 import dev.isxander.yacl3.impl.utils.YACLConstants;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.NotNull;
@@ -21,7 +21,7 @@ import java.util.function.Supplier;
 
 //I DON'T CARE THAT THIS IS INTERNAL API !!!!!!!!!!!!!
 public class EvilOption<T> implements Option<T> {
-    private final Text name;
+    private final Component name;
     private OptionDescription description;
     private final Controller<T> controller;
     private boolean available;
@@ -34,7 +34,7 @@ public class EvilOption<T> implements Option<T> {
     private final OptionGroups group;
 
     public EvilOption(
-            @NotNull Text name,
+            @NotNull Component name,
             @NotNull Function<T, OptionDescription> descriptionFunction,
             @NotNull Function<Option<T>, Controller<T>> controlGetter,
             @NotNull StateManager<T> stateManager,
@@ -59,7 +59,7 @@ public class EvilOption<T> implements Option<T> {
     }
 
     @Override
-    public @NotNull Text name() {
+    public @NotNull Component name() {
         return name;
     }
 
@@ -70,7 +70,7 @@ public class EvilOption<T> implements Option<T> {
     }
 
     @Override
-    public @NotNull Text tooltip() {
+    public @NotNull Component tooltip() {
         return description.text();
     }
 
@@ -197,7 +197,7 @@ public class EvilOption<T> implements Option<T> {
 
 
     public static class EvilOptionBuilder<T> implements Builder<T> {
-        private Text name = Text.literal("Name not specified!").formatted(Formatting.RED);
+        private Component name = Component.literal("Name not specified!").withStyle(ChatFormatting.RED);
 
         private Function<T, OptionDescription> descriptionFunction = pending -> OptionDescription.EMPTY;
 
@@ -217,7 +217,7 @@ public class EvilOption<T> implements Option<T> {
         private @Nullable StateManager<T> stateManager;
 
         @Override
-        public EvilOptionBuilder<T> name(@NotNull Text name) {
+        public EvilOptionBuilder<T> name(@NotNull Component name) {
             Validate.notNull(name, "`name` cannot be null");
 
             this.name = name;

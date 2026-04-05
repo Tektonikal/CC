@@ -8,15 +8,15 @@ import dev.isxander.yacl3.api.utils.Dimension;
 import dev.isxander.yacl3.api.utils.MutableDimension;
 import dev.isxander.yacl3.gui.*;
 import dev.isxander.yacl3.gui.utils.GuiUtils;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.ScreenRect;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.pack.PackScreen;
-import net.minecraft.client.gui.tab.Tab;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.packs.PackSelectionScreen;
+import net.minecraft.client.gui.components.tabs.Tab;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -34,7 +34,7 @@ public abstract class YACLSCreenMixin extends Screen {
     @Final
     public YetAnotherConfigLib config;
 
-    protected YACLSCreenMixin(Text title) {
+    protected YACLSCreenMixin(Component title) {
         super(title);
     }
 
@@ -43,18 +43,18 @@ public abstract class YACLSCreenMixin extends Screen {
         @Mutable
         @Shadow
         @Final
-        public ButtonWidget undoButton;
+        public Button undoButton;
         @Shadow
         @Final
-        public ButtonWidget cancelResetButton;
+        public Button cancelResetButton;
         @Mutable
         @Shadow
         @Final
-        public ButtonWidget saveFinishedButton;
+        public Button saveFinishedButton;
         @Unique
-        ButtonWidget packsButton;
+        Button packsButton;
         @Unique
-        ButtonWidget resetAnimButton;
+        Button resetAnimButton;
         @Shadow(remap = false)
         @Final
         private YACLScreen screen;
@@ -64,25 +64,25 @@ public abstract class YACLSCreenMixin extends Screen {
         private OptionDescriptionWidget descriptionWidget;
 
         @Inject(method = "<init>", at = @At("TAIL"), remap = false)
-        private void cc$OUGHHHHHHH(YACLScreen screen, ConfigCategory category, ScreenRect tabArea, CallbackInfo ci, @Local(ordinal = 1) int padding, @Local(ordinal = 2) int paddedWidth, @Local MutableDimension<Integer> actionDim) {
+        private void cc$OUGHHHHHHH(YACLScreen screen, ConfigCategory category, ScreenRectangle tabArea, CallbackInfo ci, @Local(ordinal = 1) int padding, @Local(ordinal = 2) int paddedWidth, @Local MutableDimension<Integer> actionDim) {
             //TODO
-            if ((CrystalChams.mc.currentScreen instanceof YACLScreen || CrystalChams.mc.currentScreen instanceof SecondaryYACLScreen)) {
-                packsButton = ButtonWidget.builder(Text.literal("Resource Packs"), btn -> {
+            if ((CrystalChams.mc.screen instanceof YACLScreen || CrystalChams.mc.screen instanceof SecondaryYACLScreen)) {
+                packsButton = Button.builder(Component.literal("Resource Packs"), btn -> {
                     screen.finishOrSave();
-                    CrystalChams.mc.setScreen(new PackScreen(CrystalChams.mc.getResourcePackManager(), resourcePackManager -> {
-                        CrystalChams.mc.options.refreshResourcePacks(resourcePackManager);
+                    CrystalChams.mc.setScreen(new PackSelectionScreen(CrystalChams.mc.getResourcePackRepository(), resourcePackManager -> {
+                        CrystalChams.mc.options.updateResourcePacks(resourcePackManager);
                         CrystalChams.mc.setScreen(screen);
-                    }, CrystalChams.mc.getResourcePackDir(), Text.translatable("resourcePack.title")));
-                }).position(undoButton.getX(), undoButton.getY()).size(actionDim.width(), actionDim.height()).build();
+                    }, CrystalChams.mc.getResourcePackDirectory(), Component.translatable("resourcePack.title")));
+                }).pos(undoButton.getX(), undoButton.getY()).size(actionDim.width(), actionDim.height()).build();
 
-                resetAnimButton = ButtonWidget.builder(Text.literal("Reset Animation"), btn -> CrystalChams.previewCrystalEntity.age = 0).position(undoButton.getX(), undoButton.getY() - 22).size(actionDim.width(), actionDim.height()).build();
+                resetAnimButton = Button.builder(Component.literal("Reset Animation"), btn -> CrystalChams.previewCrystalEntity.tickCount = 0).pos(undoButton.getX(), undoButton.getY() - 22).size(actionDim.width(), actionDim.height()).build();
 
                 this.descriptionWidget = new OptionDescriptionWidget(
-                        () -> new ScreenRect(
+                        () -> new ScreenRectangle(
                                 screen.width / 3 * 2 + padding,
-                                tabArea.getTop() + padding,
+                                tabArea.top() + padding,
                                 paddedWidth,
-                                packsButton.getY() - 1 - tabArea.getTop() - padding * 2
+                                packsButton.getY() - 1 - tabArea.top() - padding * 2
                         ),
                         null
                 );
@@ -97,9 +97,9 @@ public abstract class YACLSCreenMixin extends Screen {
             }
         }
 
-        @Inject(method = "forEachChild", at = @At(value = "HEAD"), cancellable = true)
-        private void CC$oughhh(Consumer<ClickableWidget> consumer, CallbackInfo ci) {
-            if ((CrystalChams.mc.currentScreen instanceof YACLScreen || CrystalChams.mc.currentScreen instanceof SecondaryYACLScreen)) {
+        @Inject(method = "visitChildren", at = @At(value = "HEAD"), cancellable = true)
+        private void CC$oughhh(Consumer<AbstractWidget> consumer, CallbackInfo ci) {
+            if ((CrystalChams.mc.screen instanceof YACLScreen || CrystalChams.mc.screen instanceof SecondaryYACLScreen)) {
                 //this is terrible but I don't care anymore
                 consumer.accept(optionList.getWidget());
                 //TODO!!!!!!!!!
@@ -116,9 +116,9 @@ public abstract class YACLSCreenMixin extends Screen {
 
 
         @Inject(method = "renderBackground", at = @At("TAIL"))
-        private void CC$renderBackground(DrawContext drawContext, CallbackInfo ci) {
+        private void CC$renderBackground(GuiGraphics drawContext, CallbackInfo ci) {
             if (Calendar.getInstance().get(Calendar.MONTH) == Calendar.APRIL && Calendar.getInstance().get(Calendar.DAY_OF_MONTH) == 1) {
-                GuiUtils.blitGuiTex(drawContext, Identifier.of("crystalchams:custom/bg.png"), 0, 0, 1920, 1080, 1920, 1080, CrystalChams.mc.getWindow().getScaledWidth(), CrystalChams.mc.getWindow().getScaledHeight());
+                GuiUtils.blitGuiTex(drawContext, Identifier.parse("crystalchams:custom/bg.png"), 0, 0, 1920, 1080, 1920, 1080, CrystalChams.mc.getWindow().getGuiScaledWidth(), CrystalChams.mc.getWindow().getGuiScaledHeight());
             }
         }
     }

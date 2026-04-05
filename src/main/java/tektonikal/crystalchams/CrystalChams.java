@@ -3,95 +3,82 @@ package tektonikal.crystalchams;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.mojang.blaze3d.opengl.GlProgram;
 import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.systems.RenderSystem;
-import dev.isxander.yacl3.api.*;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
+import dev.isxander.yacl3.api.NameableEnum;
+import dev.isxander.yacl3.api.Option;
+import dev.isxander.yacl3.api.OptionDescription;
+import dev.isxander.yacl3.api.StateManager;
 import dev.isxander.yacl3.api.controller.*;
-import dev.isxander.yacl3.api.utils.OptionUtils;
 import dev.isxander.yacl3.config.v2.impl.serializer.GsonConfigSerializer;
-import dev.isxander.yacl3.gui.YACLScreen;
-import dev.isxander.yacl3.gui.controllers.PopupControllerScreen;
 import dev.isxander.yacl3.gui.controllers.slider.FloatSliderController;
 import dev.isxander.yacl3.gui.controllers.slider.IntegerSliderController;
 import dev.isxander.yacl3.impl.ListOptionEntryImpl;
 import dev.isxander.yacl3.impl.controller.ColorControllerBuilderImpl;
-import dev.isxander.yacl3.impl.controller.FloatSliderControllerBuilderImpl;
 import dev.isxander.yacl3.impl.controller.TickBoxControllerBuilderImpl;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
-import net.minecraft.SharedConstants;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gl.ShaderProgram;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.ScreenRect;
-import net.minecraft.client.gui.hud.debug.DebugHudEntries;
-import net.minecraft.client.gui.navigation.NavigationAxis;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.option.Perspective;
-import net.minecraft.client.render.*;
-import net.minecraft.client.render.block.entity.EndPortalBlockEntityRenderer;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
-import net.minecraft.client.render.debug.EntityHitboxDebugRenderer;
-import net.minecraft.client.texture.NativeImage;
-import net.minecraft.client.texture.NativeImageBackedTexture;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.decoration.EndCrystalEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Colors;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.CameraType;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.debug.DebugScreenEntries;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.debug.EntityHitboxDebugRenderer;
+import net.minecraft.client.renderer.rendertype.RenderSetup;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.ARGB;
+import net.minecraft.util.CommonColors;
+import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
-import net.minecraft.util.math.ColorHelper;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.debug.gizmo.GizmoDrawing;
-import net.minecraft.world.debug.gizmo.TextGizmo;
-import org.joml.*;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tektonikal.crystalchams.annotation.Updatable;
-import tektonikal.crystalchams.config.*;
+import tektonikal.crystalchams.config.ChamsConfig;
+import tektonikal.crystalchams.config.EvilOption;
+import tektonikal.crystalchams.config.ModelPartController;
+import tektonikal.crystalchams.config.RenderMode;
 import tektonikal.crystalchams.mixin.EntityHitboxDebugRendererMixin;
-import tektonikal.crystalchams.mixin.RenderTickCounterAccessor;
-import tektonikal.crystalchams.stupidfuckingboilerplate.*;
 import tektonikal.crystalchams.util.Easings;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.lang.Math;
-import java.util.*;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import static net.minecraft.client.gl.RenderPipelines.ENTITY_SNIPPET;
-import static net.minecraft.client.render.entity.EnderDragonEntityRenderer.CRYSTAL_BEAM_TEXTURE;
+import static net.minecraft.client.renderer.RenderPipelines.ENTITY_SNIPPET;
+import static net.minecraft.client.renderer.entity.EnderDragonRenderer.CRYSTAL_BEAM_LOCATION;
 
 public class CrystalChams implements ModInitializer {
-    public static final MinecraftClient mc = MinecraftClient.getInstance();
+    public static final Minecraft mc = Minecraft.getInstance();
     //    public static final Function<Double, RenderLayer.MultiPhase> CUSTOM_DEBUG_LINE_STRIP = Util.memoize((lineWidth) -> RenderLayer.of("custom_debug_line_strip", VertexFormats.POSITION_COLOR_LIGHT, VertexFormat.DrawMode.DEBUG_LINE_STRIP, 1536, RenderLayer.MultiPhaseParameters.builder().program(POSITION_COLOR_LIGHTMAP_PROGRAM).lineWidth(new LineWidth(OptionalDouble.of(lineWidth))).transparency(TRANSLUCENT_TRANSPARENCY).cull(DISABLE_CULLING).lightmap(ENABLE_LIGHTMAP).build(false)));
     public static final String SEPARATOR = " - ";
-    public static ShaderProgram ENTITY_TRANSLUCENT_NOTEX;
-    public static ShaderProgram END_PORTAL_TEX;
+    public static GlProgram ENTITY_TRANSLUCENT_NOTEX;
+    public static GlProgram END_PORTAL_TEX;
     public static int imageIndex = 0;
-    public static ShaderProgram CUSTOM_IMAGE;
+    public static GlProgram CUSTOM_IMAGE;
     public static final float PREVIEW_EASING_SPEED = 12.5F;
-    public static final ValueFormatter<Integer> LIGHT_FORMATTER = value -> Text.of(value == -1 ? "Use World Light" : value + "");
-    public static final ValueFormatter<Float> PERCENT_FORMATTER = value -> Text.of((int) (value * 100) + "%");
-    public static final ValueFormatter<Float> MULTIPLIER_FORMATTER = val -> Text.of(String.format("%.2f", val) + "x");
-    public static final ValueFormatter<Float> MULTIPLIER_FORMATTER_ONE_PLACE = val -> Text.of(String.format("%.1f", val) + "x");
-    public static final ValueFormatter<Float> BLOCKS_FORMATTER = val -> Text.of(String.format("%.1f", val).replace(".0", "") + (Math.abs(val) == 1 ? " block" : " blocks"));
-    public static final ValueFormatter<Float> BLOCKS_FORMATTER_TWO_PLACES = val -> Text.of(String.format("%.2f", val).replace(".0", "") + (Math.abs(val) == 1 ? " block" : " blocks"));
-    public static final ValueFormatter<Float> SECONDS_FORMATTER = val -> Text.of(String.format("%.1f", val).replace(".0", "") + (Math.abs(val) == 1 ? " second" : " seconds"));
+    public static final ValueFormatter<Integer> LIGHT_FORMATTER = value -> Component.nullToEmpty(value == -1 ? "Use World Light" : value + "");
+    public static final ValueFormatter<Float> PERCENT_FORMATTER = value -> Component.nullToEmpty((int) (value * 100) + "%");
+    public static final ValueFormatter<Float> MULTIPLIER_FORMATTER = val -> Component.nullToEmpty(String.format("%.2f", val) + "x");
+    public static final ValueFormatter<Float> MULTIPLIER_FORMATTER_ONE_PLACE = val -> Component.nullToEmpty(String.format("%.1f", val) + "x");
+    public static final ValueFormatter<Float> BLOCKS_FORMATTER = val -> Component.nullToEmpty(String.format("%.1f", val).replace(".0", "") + (Math.abs(val) == 1 ? " block" : " blocks"));
+    public static final ValueFormatter<Float> BLOCKS_FORMATTER_TWO_PLACES = val -> Component.nullToEmpty(String.format("%.2f", val).replace(".0", "") + (Math.abs(val) == 1 ? " block" : " blocks"));
+    public static final ValueFormatter<Float> SECONDS_FORMATTER = val -> Component.nullToEmpty(String.format("%.1f", val).replace(".0", "") + (Math.abs(val) == 1 ? " second" : " seconds"));
     public static final Function<Option<Float>, ControllerBuilder<Float>> PERCENT = floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(PERCENT_FORMATTER);
     public static final Function<Option<Integer>, ControllerBuilder<Integer>> LIGHT = intOption -> IntegerSliderControllerBuilder.create(intOption).range(-1, 255).step(1).formatValue(LIGHT_FORMATTER);
     //    public static final BiFunction<Identifier, Boolean, RenderLayer> CUSTOM_ENTITY_NOTEX = Util.memoize((texture, shouldCull) -> {
@@ -105,7 +92,7 @@ public class CrystalChams implements ModInitializer {
 //        return RenderLayer.of("custom_entity_translucent", VertexFormats.POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL, VertexFormat.DrawMode.QUADS, 1536, true, true, multiPhaseParameters);
 //    });
     public static int hoveredIndex;
-    public static EndCrystalEntity previewCrystalEntity = new EndCrystalEntity(mc.world, 0.5, 0, 0);
+    public static EndCrystal previewCrystalEntity = new EndCrystal(mc.level, 0.5, 0, 0);
     public static float previewScaleSmoothed = ChamsConfig.CONFIG.instance().previewScale;
     public static float beamProgress;
     public static Gson gson = new GsonBuilder()
@@ -129,23 +116,23 @@ public class CrystalChams implements ModInitializer {
                     .withCull(true)
                     .build()
     );
-    private static final BiFunction<Identifier, Boolean, RenderLayer> ENTITY_TRANSLUCENT_CULLED = Util.memoize(
+    private static final BiFunction<Identifier, Boolean, RenderType> ENTITY_TRANSLUCENT_CULLED = Util.memoize(
             (texture, affectsOutline) -> {
                 RenderSetup renderSetup = RenderSetup.builder(ENTITY_TRANSLUCENT_CULL)
-                        .texture("Sampler0", texture)
+                        .withTexture("Sampler0", texture)
                         .useLightmap()
                         .useOverlay()
-                        .crumbling()
-                        .translucent()
-                        .outlineMode(affectsOutline ? RenderSetup.OutlineMode.AFFECTS_OUTLINE : RenderSetup.OutlineMode.NONE)
-                        .build();
-                return RenderLayer.of("entity_translucent", renderSetup);
+                        .affectsCrumbling()
+                        .sortOnUpload()
+                        .setOutline(affectsOutline ? RenderSetup.OutlineProperty.AFFECTS_OUTLINE : RenderSetup.OutlineProperty.NONE)
+                        .createRenderSetup();
+                return RenderType.create("entity_translucent", renderSetup);
             }
     );
 
     public static float getYOffset(float age, float offset, float bounceSpeed, float bounceHeight, float tickDelay) {
         //?????
-        float g = (MathHelper.sin((age + (tickDelay * 20)) % ((float) (Math.PI * 2F) / (0.2F * bounceSpeed)) * (0.2F * bounceSpeed)) / 2.0F) + 0.5F;
+        float g = (Mth.sin((age + (tickDelay * 20)) % ((float) (Math.PI * 2F) / (0.2F * bounceSpeed)) * (0.2F * bounceSpeed)) / 2.0F) + 0.5F;
         g = (g * g + g) * (0.4F * bounceHeight);
         return g - 1.4F + offset;
     }
@@ -156,12 +143,12 @@ public class CrystalChams implements ModInitializer {
         return Color.getHSBColor((float) (rainbowState / 360.0f), saturation, brightness).getRGB();
     }
 
-    public static RenderLayer getLayer(RenderMode layer, boolean cull, Identifier texture) {
+    public static RenderType getLayer(RenderMode layer, boolean cull, Identifier texture) {
         if(cull){
             return ENTITY_TRANSLUCENT_CULLED.apply(texture, true);
         }
         else{
-            return RenderLayers.entityTranslucent(texture);
+            return RenderTypes.entityTranslucent(texture);
         }
 //        if (layer.getBiFunction() != null) {
 //            return layer.getBiFunction().apply(texture, cull);
@@ -188,7 +175,7 @@ public class CrystalChams implements ModInitializer {
     public static float crystalTargetDraggedRotX;
     public static float crystalTargetDraggedRotY;
 
-    public static EvilOption<Boolean> createBooleanOption(Text name, StateManager<Boolean> stateManager, OptionGroups group) {
+    public static EvilOption<Boolean> createBooleanOption(Component name, StateManager<Boolean> stateManager, OptionGroups group) {
         return EvilOption.<Boolean>createBuilder().name(name).stateManager(stateManager).description(OptionDescription.of()).controller(TickBoxControllerBuilderImpl::new).group(group).build();
     }
     
@@ -197,26 +184,26 @@ public class CrystalChams implements ModInitializer {
 //        return EvilOption.<Float>createBuilder().name(Text.translatable(name)).stateManager(stateManager).description(OptionDescription.of()).controller(floatOption -> new FloatSliderControllerBuilderImpl(floatOption).range(-2.5f, 2.5f).step(0.1f).formatValue(SECONDS_FORMATTER)).group(group).build();
 //    }
 
-    public static EvilOption<Float> createFloatOptionPercent(Text name, StateManager<Float> stateManager, OptionGroups group) {
+    public static EvilOption<Float> createFloatOptionPercent(Component name, StateManager<Float> stateManager, OptionGroups group) {
         return EvilOption.<Float>createBuilder().name(name).stateManager(stateManager).description(OptionDescription.of()).controller(PERCENT).group(group).build();
     }
 
     public static EvilOption<Easings> createEasingOption(StateManager<Easings> stateManager, OptionGroups group) {
-        return EvilOption.<Easings>createBuilder().name(Text.translatable(SEPARATOR).append(Text.translatable("config.option.easing"))).stateManager(stateManager).description(OptionDescription.of()).controller(easingsOption -> EnumControllerBuilder.create(easingsOption).enumClass(Easings.class)).group(group).build();
+        return EvilOption.<Easings>createBuilder().name(Component.translatable(SEPARATOR).append(Component.translatable("config.option.easing"))).stateManager(stateManager).description(OptionDescription.of()).controller(easingsOption -> EnumControllerBuilder.create(easingsOption).enumClass(Easings.class)).group(group).build();
     }
 
-    public static EvilOption<RenderMode> createRenderModeOption(Text name, StateManager<RenderMode> stateManager, OptionGroups group) {
+    public static EvilOption<RenderMode> createRenderModeOption(Component name, StateManager<RenderMode> stateManager, OptionGroups group) {
         return EvilOption.<RenderMode>createBuilder().name(name).stateManager(stateManager).description(OptionDescription.of()).controller(easingsOption -> EnumControllerBuilder.create(easingsOption).enumClass(RenderMode.class)).group(group).build();
     }
 
-    public static EvilOption<Color> createColorOption(Text name, StateManager<Color> stateManager, OptionGroups group) {
+    public static EvilOption<Color> createColorOption(Component name, StateManager<Color> stateManager, OptionGroups group) {
         return EvilOption.<Color>createBuilder().name(name).stateManager(stateManager).description(OptionDescription.of()).controller(ColorControllerBuilderImpl::new).group(group).build();
     }
 
     public static EvilOption<Integer> createSkyLightLevelOption(StateManager<Integer> stateManager) {
         return EvilOption.<Integer>createBuilder()
-                .name(Text.translatable("config.option.skyLightLevel"))
-                .description(OptionDescription.createBuilder().text(Text.of("yeahhhh")).build())
+                .name(Component.translatable("config.option.skyLightLevel"))
+                .description(OptionDescription.createBuilder().text(Component.nullToEmpty("yeahhhh")).build())
                 .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-1, 15).formatValue(CrystalChams.LIGHT_FORMATTER))
                 .stateManager(stateManager)
                 .group(OptionGroups.SKY_LIGHT)
@@ -225,8 +212,8 @@ public class CrystalChams implements ModInitializer {
 
     public static EvilOption<Integer> createBlockLightLevelOption(StateManager<Integer> stateManager) {
         return EvilOption.<Integer>createBuilder()
-                .name(Text.translatable("config.option.blockLightLevel"))
-                .description(OptionDescription.createBuilder().text(Text.of("yeahhhh")).build())
+                .name(Component.translatable("config.option.blockLightLevel"))
+                .description(OptionDescription.createBuilder().text(Component.nullToEmpty("yeahhhh")).build())
                 .controller(integerOption -> IntegerSliderControllerBuilder.create(integerOption).step(1).range(-1, 15).formatValue(CrystalChams.LIGHT_FORMATTER))
                 .stateManager(stateManager)
                 .group(OptionGroups.BLOCK_LIGHT)
@@ -242,15 +229,15 @@ public class CrystalChams implements ModInitializer {
 //        CoreShaderRegistrationCallback.EVENT.register(context -> context.register(id("crystalchams_image"), VertexFormats.POSITION_TEXTURE, shaderProgram -> CUSTOM_IMAGE = shaderProgram));
         armSecuritySystem();
         WorldRenderEvents.BEFORE_DEBUG_RENDER.register(context -> {
-            if (ChamsConfig.o_renderHitbox.pendingValue() && !mc.debugHudEntryList.isEntryVisible(DebugHudEntries.ENTITY_HITBOXES)) {
-                if (mc.world != null) {
-                    for (Entity entity : mc.world.getEntities()) {
+            if (ChamsConfig.o_renderHitbox.pendingValue() && !mc.debugEntries.isCurrentlyEnabled(DebugScreenEntries.ENTITY_HITBOXES)) {
+                if (mc.level != null) {
+                    for (Entity entity : mc.level.entitiesForRendering()) {
                         if (!entity.isInvisible()
-                                && entity instanceof EndCrystalEntity
+                                && entity instanceof EndCrystal
                                 //TODO: i guess bro
 //                                && mc.worldRenderer.getCapturedFrustum().isVisible(entity.getBoundingBox())
-                                && (entity != mc.getCameraEntity() || mc.options.getPerspective() != Perspective.FIRST_PERSON)) {
-                            ((EntityHitboxDebugRendererMixin) yeah).yeah(entity, mc.getRenderTickCounter().getDynamicDeltaTicks(), false);
+                                && (entity != mc.getCameraEntity() || mc.options.getCameraType() != CameraType.FIRST_PERSON)) {
+                            ((EntityHitboxDebugRendererMixin) yeah).yeah(entity, mc.getDeltaTracker().getGameTimeDeltaTicks(), false);
                         }
                     }
                 }
@@ -322,7 +309,7 @@ public class CrystalChams implements ModInitializer {
 //        DiffuseLighting.enableGuiDepthLighting();
 //    }
     public static Identifier id(String path) {
-        return Identifier.of("crystalchams", path);
+        return Identifier.fromNamespaceAndPath("crystalchams", path);
     }
 
     private static void armSecuritySystem() {
@@ -443,7 +430,7 @@ public class CrystalChams implements ModInitializer {
     }
 
     public static double ease(double start, double end, float speed) {
-        return (start + (end - start) * (1 - Math.exp(-((double) mc.getRenderTime() / 1000000000) * speed)));
+        return (start + (end - start) * (1 - Math.exp(-((double) mc.getFrameTimeNs() / 1000000000) * speed)));
     }
 
 //    public static Vec3d screenSpaceToWorldSpace(double x, double y, double d, Matrix4f matrix4f) {
@@ -462,7 +449,7 @@ public class CrystalChams implements ModInitializer {
 //        return new Vec3d(target.x, target.y, target.z);
 //    }
 
-    public static void renderCustomBeam(float dx, float dy, float dz, float tickProgress, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, int mode) {
+    public static void renderCustomBeam(float dx, float dy, float dz, float tickProgress, PoseStack matrices, SubmitNodeCollector queue, int light, int mode) {
         /*
         //TODO
         0 - non-preview
@@ -473,98 +460,98 @@ public class CrystalChams implements ModInitializer {
 //            renderVanillaCrystalBeam(dx, dy, dz, tickDelta, age, matrices, vertexConsumers, light);
 //            return;
 //        }
-        float f = MathHelper.sqrt(dx * dx + dz * dz);
+        float f = Mth.sqrt(dx * dx + dz * dz);
         float v = dx * dx + dy * dy + dz * dz;
-        float g = MathHelper.sqrt(v);
-        matrices.push();
+        float g = Mth.sqrt(v);
+        matrices.pushPose();
         if (mode == 0) {
             matrices.translate(0.0F, 2.0F, 0.0F);
         }
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotation((float) (-Math.atan2(dz, dx)) - (float) (Math.PI / 2)));
-        matrices.multiply(RotationAxis.POSITIVE_X.rotation((float) (-Math.atan2(f, dy)) - (float) (Math.PI / 2)));
+        matrices.mulPose(Axis.YP.rotation((float) (-Math.atan2(dz, dx)) - (float) (Math.PI / 2)));
+        matrices.mulPose(Axis.XP.rotation((float) (-Math.atan2(f, dy)) - (float) (Math.PI / 2)));
 //        VertexConsumer vertexConsumer = getLayer(vertexConsumers, ChamsConfig.o_beamRenderLayer.pendingValue(), ChamsConfig.o_beamCulling.pendingValue(), CRYSTAL_BEAM_TEXTURE);
         float h = -(tickProgress) * (0.01F * ChamsConfig.o_beamScrollSpeed.pendingValue());
-        float i = MathHelper.sqrt(v) / 32.0F - (tickProgress) * (0.01F * ChamsConfig.o_beamScrollSpeed.pendingValue());
-        queue.submitCustom(
+        float i = Mth.sqrt(v) / 32.0F - (tickProgress) * (0.01F * ChamsConfig.o_beamScrollSpeed.pendingValue());
+        queue.submitCustomGeometry(
                 matrices,
                 //TODO: has visual inconsistency with the shader
-                getLayer(RenderMode.DEFAULT, ChamsConfig.o_beamCulling.pendingValue(), CRYSTAL_BEAM_TEXTURE),
+                getLayer(RenderMode.DEFAULT, ChamsConfig.o_beamCulling.pendingValue(), CRYSTAL_BEAM_LOCATION),
                 (matricesEntry, vertexConsumer) -> {
         float k = 0.0F;
         float l = 1F;
         float m = 0.0F;
                     for (int n = 1; n <= ChamsConfig.o_beamSides.pendingValue(); n++) {
-                        float o = MathHelper.sin((float) n * (float) (Math.PI * 2) / ChamsConfig.o_beamSides.pendingValue());
-                        float p = MathHelper.cos((float) n * (float) (Math.PI * 2) / ChamsConfig.o_beamSides.pendingValue());
+                        float o = Mth.sin((float) n * (float) (Math.PI * 2) / ChamsConfig.o_beamSides.pendingValue());
+                        float p = Mth.cos((float) n * (float) (Math.PI * 2) / ChamsConfig.o_beamSides.pendingValue());
                         float q = (float) n / ChamsConfig.o_beamSides.pendingValue();
                         Color rainbowCol1 = new Color(CrystalChams.getRainbow(ChamsConfig.o_beam1RainbowDelay.pendingValue(), ChamsConfig.o_beam1RainbowSpeed.pendingValue(), ChamsConfig.o_beam1RainbowSaturation.pendingValue(), ChamsConfig.o_beam1RainbowBrightness.pendingValue()));
                         Color rainbowCol2 = new Color(CrystalChams.getRainbow(ChamsConfig.o_beam2RainbowDelay.pendingValue(), ChamsConfig.o_beam2RainbowSpeed.pendingValue(), ChamsConfig.o_beam2RainbowSaturation.pendingValue(), ChamsConfig.o_beam2RainbowBrightness.pendingValue()));
-                        int startCol = ChamsConfig.o_beam1Rainbow.pendingValue() ? ColorHelper.getArgb((int) (ChamsConfig.o_beam1Alpha.pendingValue() * (mode == 1 ? CrystalChams.beamProgress : 1) * 255F), rainbowCol1.getRed(), rainbowCol1.getGreen(), rainbowCol1.getBlue()) : ColorHelper.getArgb((int) (ChamsConfig.o_beam1Alpha.pendingValue() * (mode == 1 ? CrystalChams.beamProgress : 1) * 255F), ChamsConfig.o_beam1Color.pendingValue().getRed(), ChamsConfig.o_beam1Color.pendingValue().getGreen(), ChamsConfig.o_beam1Color.pendingValue().getBlue());
-                        int endCol = ChamsConfig.o_beam2Rainbow.pendingValue() ? ColorHelper.getArgb((int) (ChamsConfig.o_beam2Alpha.pendingValue() * (mode == 1 ? CrystalChams.beamProgress : 1) * 255F), rainbowCol2.getRed(), rainbowCol2.getGreen(), rainbowCol2.getBlue()) : ColorHelper.getArgb((int) (ChamsConfig.o_beam2Alpha.pendingValue() * (mode == 1 ? CrystalChams.beamProgress : 1) * 255F), ChamsConfig.o_beam2Color.pendingValue().getRed(), ChamsConfig.o_beam2Color.pendingValue().getGreen(), ChamsConfig.o_beam2Color.pendingValue().getBlue());
-                        vertexConsumer.vertex(matricesEntry, k * ChamsConfig.o_beam2Radius.pendingValue(), l * ChamsConfig.o_beam2Radius.pendingValue(), 0.0F).color(endCol).texture(m, h).overlay(OverlayTexture.DEFAULT_UV).light(packLight(ChamsConfig.o_beam2BlockLightLevel.pendingValue(), ChamsConfig.o_beam2SkyLightLevel.pendingValue(), light)).normal(matricesEntry, 0.0F, -1.0F, 0.0F);
-                        vertexConsumer.vertex(matricesEntry, k * ChamsConfig.o_beam1Radius.pendingValue(), l * ChamsConfig.o_beam1Radius.pendingValue(), g).color(startCol).texture(m, i).overlay(OverlayTexture.DEFAULT_UV).light(packLight(ChamsConfig.o_beam1BlockLightLevel.pendingValue(), ChamsConfig.o_beam1SkyLightLevel.pendingValue(), light)).normal(matricesEntry, 0.0F, -1.0F, 0.0F);
-                        vertexConsumer.vertex(matricesEntry, o * ChamsConfig.o_beam1Radius.pendingValue(), p * ChamsConfig.o_beam1Radius.pendingValue(), g).color(startCol).texture(q, i).overlay(OverlayTexture.DEFAULT_UV).light(packLight(ChamsConfig.o_beam1BlockLightLevel.pendingValue(), ChamsConfig.o_beam1SkyLightLevel.pendingValue(), light)).normal(matricesEntry, 0.0F, -1.0F, 0.0F);
-                        vertexConsumer.vertex(matricesEntry, o * ChamsConfig.o_beam2Radius.pendingValue(), p * ChamsConfig.o_beam2Radius.pendingValue(), 0.0F).color(endCol).texture(q, h).overlay(OverlayTexture.DEFAULT_UV).light(packLight(ChamsConfig.o_beam2BlockLightLevel.pendingValue(), ChamsConfig.o_beam2SkyLightLevel.pendingValue(), light)).normal(matricesEntry, 0.0F, -1.0F, 0.0F);
+                        int startCol = ChamsConfig.o_beam1Rainbow.pendingValue() ? ARGB.color((int) (ChamsConfig.o_beam1Alpha.pendingValue() * (mode == 1 ? CrystalChams.beamProgress : 1) * 255F), rainbowCol1.getRed(), rainbowCol1.getGreen(), rainbowCol1.getBlue()) : ARGB.color((int) (ChamsConfig.o_beam1Alpha.pendingValue() * (mode == 1 ? CrystalChams.beamProgress : 1) * 255F), ChamsConfig.o_beam1Color.pendingValue().getRed(), ChamsConfig.o_beam1Color.pendingValue().getGreen(), ChamsConfig.o_beam1Color.pendingValue().getBlue());
+                        int endCol = ChamsConfig.o_beam2Rainbow.pendingValue() ? ARGB.color((int) (ChamsConfig.o_beam2Alpha.pendingValue() * (mode == 1 ? CrystalChams.beamProgress : 1) * 255F), rainbowCol2.getRed(), rainbowCol2.getGreen(), rainbowCol2.getBlue()) : ARGB.color((int) (ChamsConfig.o_beam2Alpha.pendingValue() * (mode == 1 ? CrystalChams.beamProgress : 1) * 255F), ChamsConfig.o_beam2Color.pendingValue().getRed(), ChamsConfig.o_beam2Color.pendingValue().getGreen(), ChamsConfig.o_beam2Color.pendingValue().getBlue());
+                        vertexConsumer.addVertex(matricesEntry, k * ChamsConfig.o_beam2Radius.pendingValue(), l * ChamsConfig.o_beam2Radius.pendingValue(), 0.0F).setColor(endCol).setUv(m, h).setOverlay(OverlayTexture.NO_OVERLAY).setLight(packLight(ChamsConfig.o_beam2BlockLightLevel.pendingValue(), ChamsConfig.o_beam2SkyLightLevel.pendingValue(), light)).setNormal(matricesEntry, 0.0F, -1.0F, 0.0F);
+                        vertexConsumer.addVertex(matricesEntry, k * ChamsConfig.o_beam1Radius.pendingValue(), l * ChamsConfig.o_beam1Radius.pendingValue(), g).setColor(startCol).setUv(m, i).setOverlay(OverlayTexture.NO_OVERLAY).setLight(packLight(ChamsConfig.o_beam1BlockLightLevel.pendingValue(), ChamsConfig.o_beam1SkyLightLevel.pendingValue(), light)).setNormal(matricesEntry, 0.0F, -1.0F, 0.0F);
+                        vertexConsumer.addVertex(matricesEntry, o * ChamsConfig.o_beam1Radius.pendingValue(), p * ChamsConfig.o_beam1Radius.pendingValue(), g).setColor(startCol).setUv(q, i).setOverlay(OverlayTexture.NO_OVERLAY).setLight(packLight(ChamsConfig.o_beam1BlockLightLevel.pendingValue(), ChamsConfig.o_beam1SkyLightLevel.pendingValue(), light)).setNormal(matricesEntry, 0.0F, -1.0F, 0.0F);
+                        vertexConsumer.addVertex(matricesEntry, o * ChamsConfig.o_beam2Radius.pendingValue(), p * ChamsConfig.o_beam2Radius.pendingValue(), 0.0F).setColor(endCol).setUv(q, h).setOverlay(OverlayTexture.NO_OVERLAY).setLight(packLight(ChamsConfig.o_beam2BlockLightLevel.pendingValue(), ChamsConfig.o_beam2SkyLightLevel.pendingValue(), light)).setNormal(matricesEntry, 0.0F, -1.0F, 0.0F);
                         k = o;
                         l = p;
                         m = q;
                     }
                 }
         );
-        matrices.pop();
+        matrices.popPose();
     }
 
     public static int packLight(int block, int sky, int light) {
         if (block == -1) {
-            block = LightmapTextureManager.getBlockLightCoordinates(light);
+            block = LightTexture.block(light);
         }
         if (sky == -1) {
-            sky = LightmapTextureManager.getSkyLightCoordinates(light);
+            sky = LightTexture.sky(light);
         }
         return block << 4 | sky << 20;
     }
 
-    private static void renderVanillaCrystalBeam(float dx, float dy, float dz, float tickDelta, int age, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
-        float f = MathHelper.sqrt(dx * dx + dz * dz);
+    private static void renderVanillaCrystalBeam(float dx, float dy, float dz, float tickDelta, int age, PoseStack matrices, MultiBufferSource vertexConsumers, int light) {
+        float f = Mth.sqrt(dx * dx + dz * dz);
         float value = dx * dx + dy * dy + dz * dz;
-        float g = MathHelper.sqrt(value);
-        matrices.push();
+        float g = Mth.sqrt(value);
+        matrices.pushPose();
         matrices.translate(0.0F, 2.0F, 0.0F);
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotation((float) (-Math.atan2(dz, dx)) - (float) (Math.PI / 2)));
-        matrices.multiply(RotationAxis.POSITIVE_X.rotation((float) (-Math.atan2(f, dy)) - (float) (Math.PI / 2)));
-        VertexConsumer vertexConsumer = vertexConsumers.getBuffer(RenderLayers.entitySmoothCutout(CRYSTAL_BEAM_TEXTURE));
+        matrices.mulPose(Axis.YP.rotation((float) (-Math.atan2(dz, dx)) - (float) (Math.PI / 2)));
+        matrices.mulPose(Axis.XP.rotation((float) (-Math.atan2(f, dy)) - (float) (Math.PI / 2)));
+        VertexConsumer vertexConsumer = vertexConsumers.getBuffer(RenderTypes.entitySmoothCutout(CRYSTAL_BEAM_LOCATION));
         float h = 0.0F - (age + tickDelta) * 0.01F;
-        float i = MathHelper.sqrt(value) / 32.0F - (age + tickDelta) * 0.01F;
+        float i = Mth.sqrt(value) / 32.0F - (age + tickDelta) * 0.01F;
         int j = 8;
         float k = 0.0F;
         float l = 0.75F;
         float m = 0.0F;
-        MatrixStack.Entry entry = matrices.peek();
+        PoseStack.Pose entry = matrices.last();
 
         for (int n = 1; n <= 8; n++) {
-            float o = MathHelper.sin(n * (float) (Math.PI * 2) / 8.0F) * 0.75F;
-            float p = MathHelper.cos(n * (float) (Math.PI * 2) / 8.0F) * 0.75F;
+            float o = Mth.sin(n * (float) (Math.PI * 2) / 8.0F) * 0.75F;
+            float p = Mth.cos(n * (float) (Math.PI * 2) / 8.0F) * 0.75F;
             float q = n / 8.0F;
-            vertexConsumer.vertex(entry, k * 0.2F, l * 0.2F, 0.0F)
-                    .color(Colors.BLACK)
-                    .texture(m, h)
-                    .overlay(OverlayTexture.DEFAULT_UV)
-                    .light(light)
-                    .normal(entry, 0.0F, -1.0F, 0.0F);
-            vertexConsumer.vertex(entry, k, l, g).color(Colors.WHITE).texture(m, i).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, -1.0F, 0.0F);
-            vertexConsumer.vertex(entry, o, p, g).color(Colors.WHITE).texture(q, i).overlay(OverlayTexture.DEFAULT_UV).light(light).normal(entry, 0.0F, -1.0F, 0.0F);
-            vertexConsumer.vertex(entry, o * 0.2F, p * 0.2F, 0.0F)
-                    .color(Colors.BLACK)
-                    .texture(q, h)
-                    .overlay(OverlayTexture.DEFAULT_UV)
-                    .light(light)
-                    .normal(entry, 0.0F, -1.0F, 0.0F);
+            vertexConsumer.addVertex(entry, k * 0.2F, l * 0.2F, 0.0F)
+                    .setColor(CommonColors.BLACK)
+                    .setUv(m, h)
+                    .setOverlay(OverlayTexture.NO_OVERLAY)
+                    .setLight(light)
+                    .setNormal(entry, 0.0F, -1.0F, 0.0F);
+            vertexConsumer.addVertex(entry, k, l, g).setColor(CommonColors.WHITE).setUv(m, i).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(entry, 0.0F, -1.0F, 0.0F);
+            vertexConsumer.addVertex(entry, o, p, g).setColor(CommonColors.WHITE).setUv(q, i).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(entry, 0.0F, -1.0F, 0.0F);
+            vertexConsumer.addVertex(entry, o * 0.2F, p * 0.2F, 0.0F)
+                    .setColor(CommonColors.BLACK)
+                    .setUv(q, h)
+                    .setOverlay(OverlayTexture.NO_OVERLAY)
+                    .setLight(light)
+                    .setNormal(entry, 0.0F, -1.0F, 0.0F);
             k = o;
             l = p;
             m = q;
         }
 
-        matrices.pop();
+        matrices.popPose();
     }
 
     public enum BaseRenderMode implements NameableEnum {
@@ -574,11 +561,11 @@ public class CrystalChams implements ModInitializer {
 
 
         @Override
-        public Text getDisplayName() {
+        public Component getDisplayName() {
             return switch (this) {
-                case ALWAYS -> Text.translatable("config.baseMode.always");
-                case DEFAULT -> Text.translatable("config.baseMode.default");
-                case NEVER -> Text.translatable("config.baseMode.never");
+                case ALWAYS -> Component.translatable("config.baseMode.always");
+                case DEFAULT -> Component.translatable("config.baseMode.default");
+                case NEVER -> Component.translatable("config.baseMode.never");
             };
         }
     }
