@@ -2,19 +2,20 @@ package tektonikal.crystalchams.mixin.yacl;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import dev.isxander.yacl3.api.ConfigCategory;
-import dev.isxander.yacl3.api.OptionDescription;
 import dev.isxander.yacl3.api.YetAnotherConfigLib;
-import dev.isxander.yacl3.api.utils.Dimension;
 import dev.isxander.yacl3.api.utils.MutableDimension;
-import dev.isxander.yacl3.gui.*;
+import dev.isxander.yacl3.gui.OptionDescriptionWidget;
+import dev.isxander.yacl3.gui.OptionListWidget;
+import dev.isxander.yacl3.gui.WidgetAndType;
+import dev.isxander.yacl3.gui.YACLScreen;
 import dev.isxander.yacl3.gui.utils.GuiUtils;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.tabs.Tab;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.packs.PackSelectionScreen;
-import net.minecraft.client.gui.components.tabs.Tab;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.*;
@@ -103,7 +104,7 @@ public abstract class YACLSCreenMixin extends Screen {
                 //this is terrible but I don't care anymore
                 consumer.accept(optionList.getWidget());
                 //TODO!!!!!!!!!
-              consumer.accept(undoButton);
+                consumer.accept(undoButton);
 //              consumer.accept(searchField);
                 consumer.accept(resetAnimButton);
                 consumer.accept(cancelResetButton);
@@ -116,9 +117,9 @@ public abstract class YACLSCreenMixin extends Screen {
 
 
         @Inject(method = "renderBackground", at = @At("TAIL"))
-        private void CC$renderBackground(GuiGraphics drawContext, CallbackInfo ci) {
+        private void CC$renderBackground(GuiGraphicsExtractor graphics, CallbackInfo ci) {
             if (Calendar.getInstance().get(Calendar.MONTH) == Calendar.APRIL && Calendar.getInstance().get(Calendar.DAY_OF_MONTH) == 1) {
-                GuiUtils.blitGuiTex(drawContext, Identifier.parse("crystalchams:custom/bg.png"), 0, 0, 1920, 1080, 1920, 1080, CrystalChams.mc.getWindow().getGuiScaledWidth(), CrystalChams.mc.getWindow().getGuiScaledHeight());
+                graphics.blit(Identifier.parse("crystalchams:custom/bg.png"), 0, 0, 1920, 1080, 1920, 1080, CrystalChams.mc.getWindow().getGuiScaledWidth(), CrystalChams.mc.getWindow().getGuiScaledHeight());
             }
         }
     }

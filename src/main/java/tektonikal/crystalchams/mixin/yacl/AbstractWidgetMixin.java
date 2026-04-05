@@ -1,15 +1,7 @@
 package tektonikal.crystalchams.mixin.yacl;
 
 import dev.isxander.yacl3.gui.AbstractWidget;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.util.ARGB;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Next;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import tektonikal.crystalchams.CrystalChams;
 
 @Mixin(AbstractWidget.class)
 public class AbstractWidgetMixin {

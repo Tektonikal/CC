@@ -6,32 +6,34 @@ import dev.isxander.yacl3.api.ConfigCategory;
 import dev.isxander.yacl3.api.ListOptionEntry;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionGroup;
-import dev.isxander.yacl3.gui.*;
+import dev.isxander.yacl3.gui.AbstractWidget;
+import dev.isxander.yacl3.gui.OptionListWidget;
+import dev.isxander.yacl3.gui.TextScaledButtonWidget;
+import dev.isxander.yacl3.gui.YACLSelectionList;
 import dev.isxander.yacl3.impl.ListOptionEntryImpl;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import tektonikal.crystalchams.CrystalChams;
 import tektonikal.crystalchams.OptionGroups;
-import tektonikal.crystalchams.config.*;
-import tektonikal.crystalchams.util.Easings;
+import tektonikal.crystalchams.config.ChamsConfig;
+import tektonikal.crystalchams.config.EvilOption;
+import tektonikal.crystalchams.config.ModelPartController;
+import tektonikal.crystalchams.config.ModelPartOptions;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
 @Mixin(value = OptionListWidget.class)
 public class OptionListWidgetAccessor extends YACLSelectionList<OptionListWidget.Entry> {
@@ -47,13 +49,13 @@ public class OptionListWidgetAccessor extends YACLSelectionList<OptionListWidget
         public AbstractWidget widget;
         @Shadow(remap = false)
         @Final
-        private TextScaledButtonWidget resetButton;
-        @Shadow(remap = false)
-        @Final
         public Option<?> option;
         @Shadow
         @Final
         OptionListWidget this$0;
+        @Shadow(remap = false)
+        @Final
+        private TextScaledButtonWidget resetButton;
         @Unique
         private TextScaledButtonWidget applyAllButton;
         @Unique
@@ -61,6 +63,30 @@ public class OptionListWidgetAccessor extends YACLSelectionList<OptionListWidget
 
         protected OptionListWidgetEntryMixin(TextScaledButtonWidget applyAllButton) {
             this.applyAllButton = applyAllButton;
+        }
+
+        @Unique
+        private static List<EvilOption> getLinkedOptions(OptionGroups group) {
+            //THIS IS EVEN WORSE KILLING MYSELF
+            List<EvilOption> options = new ArrayList<>(List.of());
+            Arrays.stream(ChamsConfig.class.getDeclaredFields()).filter(field -> field.getName().startsWith("o_") && !field.getName().equals("o_frameList")).forEach(input -> {
+                try {
+                    options.add((EvilOption) input.get(null));
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            for (ListOptionEntry<ModelPartOptions> entry : ChamsConfig.o_frameList.options()) {
+                ModelPartController controller = (ModelPartController) ((ListOptionEntryImpl.EntryController) (entry.controller())).controller();
+                Arrays.stream(controller.getClass().getDeclaredFields()).filter(field -> field.getName().startsWith("o_") && !field.getName().equals("o_frameList")).forEach(input -> {
+                    try {
+                        options.add((EvilOption) input.get(controller));
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            }
+            return options.stream().filter(evilOption -> evilOption != null && evilOption.group() == group).toList();
         }
 
         @Inject(method = "<init>", at = @At("TAIL"), remap = false)
@@ -131,30 +157,6 @@ public class OptionListWidgetAccessor extends YACLSelectionList<OptionListWidget
             });
         }
 
-        @Unique
-        private static List<EvilOption> getLinkedOptions(OptionGroups group) {
-            //THIS IS EVEN WORSE KILLING MYSELF
-            List<EvilOption> options = new ArrayList<>(List.of());
-            Arrays.stream(ChamsConfig.class.getDeclaredFields()).filter(field -> field.getName().startsWith("o_") && !field.getName().equals("o_frameList")).forEach(input -> {
-                try {
-                    options.add((EvilOption) input.get(null));
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-            for (ListOptionEntry<ModelPartOptions> entry : ChamsConfig.o_frameList.options()) {
-                ModelPartController controller = (ModelPartController) ((ListOptionEntryImpl.EntryController) (entry.controller())).controller();
-                Arrays.stream(controller.getClass().getDeclaredFields()).filter(field -> field.getName().startsWith("o_") && !field.getName().equals("o_frameList")).forEach(input -> {
-                    try {
-                        options.add((EvilOption) input.get(controller));
-                    } catch (IllegalAccessException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
-            }
-            return options.stream().filter(evilOption -> evilOption != null && evilOption.group() == group).toList();
-        }
-
 //        @Inject(method = "renderContent", at = @At("HEAD"))
 //        private void CC$YEAH(DrawContext graphics, int mouseX, int mouseY, boolean hovered, float deltaTicks, CallbackInfo ci) {
 //            graphics.getMatrices().push();
@@ -163,14 +165,14 @@ public class OptionListWidgetAccessor extends YACLSelectionList<OptionListWidget
 //            }
 //        }
 
-        @Inject(method = "renderContent", at = @At(value = "INVOKE", target = "Ldev/isxander/yacl3/gui/OptionListWidget$OptionEntry;isMouseOver(DD)Z", shift = At.Shift.BEFORE))
-        private void onRender(GuiGraphics graphics, int mouseX, int mouseY, boolean hovered, float deltaTicks, CallbackInfo ci) {
+        @Inject(method = "extractContent", at = @At(value = "INVOKE", target = "Ldev/isxander/yacl3/gui/OptionListWidget$OptionEntry;isMouseOver(DD)Z", shift = At.Shift.BEFORE))
+        private void onRender(GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean hovered, float deltaTicks, CallbackInfo ci) {
             if (applyAllButton != null && resetButton != null) {
                 applyAllButton.setY(resetButton.getY());
                 //not the greatest of ways to do it, but whatever
                 applyAllButton.active = !optionsSynced() && option.available();
                 applyAllButton.setTooltip(applyAllButton.active ? Tooltip.create(Component.nullToEmpty("Apply To All")) : null);
-                applyAllButton.render(graphics, mouseX, mouseY, deltaTicks);
+                applyAllButton.extractRenderState(graphics, mouseX, mouseY, deltaTicks);
             }
         }
 

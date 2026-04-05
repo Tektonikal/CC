@@ -6,7 +6,7 @@ import dev.isxander.yacl3.impl.controller.AbstractControllerBuilderImpl;
 import tektonikal.crystalchams.config.ModelPartController;
 import tektonikal.crystalchams.config.ModelPartOptions;
 
-public class ModelPartControllerBuilder extends AbstractControllerBuilderImpl<ModelPartOptions>{
+public class ModelPartControllerBuilder extends AbstractControllerBuilderImpl<ModelPartOptions> {
     public ModelPartControllerBuilder(Option<ModelPartOptions> option) {
         super(option);
     }

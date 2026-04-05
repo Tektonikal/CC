@@ -32,15 +32,16 @@ public abstract class EndCrystalMixin extends Entity implements EndCrystalEntity
 //    @Unique
 //    public float frame1BounceSpeed = ChamsConfig.CONFIG.instance().frame1BounceSpeed;
 
-    @Shadow public int time;
+    @Shadow
+    public int time;
 
     public EndCrystalMixin(EntityType<?> type, Level world) {
         super(type, world);
     }
 
     @Inject(method = "<init>(Lnet/minecraft/world/entity/EntityType;Lnet/minecraft/world/level/Level;)V", at = @At(value = "TAIL"))
-    private void CC$ough(EntityType<? extends EndCrystal> entityType, Level world, CallbackInfo ci){
-        if(!ChamsConfig.o_randomizeAge.pendingValue()){
+    private void CC$ough(EntityType<? extends EndCrystal> type, Level level, CallbackInfo ci) {
+        if (!ChamsConfig.o_randomizeAge.pendingValue()) {
             this.time = 0;
         }
     }

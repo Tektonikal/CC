@@ -5,13 +5,12 @@ import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import tektonikal.crystalchams.CrystalChams;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public enum RenderMode implements NameableEnum {
-    DEFAULT(true, (identifier, aBoolean) ->  RenderTypes.entityTranslucent(identifier));
+    DEFAULT(true, (identifier, aBoolean) -> RenderTypes.entityTranslucent(identifier));
 //    GATEWAY(true, CrystalChams.CUSTOM_END_GATEWAY),
 //    WIREFRAME(false, CrystalChams.CUSTOM_DEBUG_LINE_STRIP),
 //    NOTEX(true, CrystalChams.CUSTOM_ENTITY_NOTEX),
@@ -26,10 +25,12 @@ public enum RenderMode implements NameableEnum {
         this.canCull = canCull;
         this.biFunction = function;
     }
+
     RenderMode(boolean canCull, Function<Double, RenderType> function) {
         this.canCull = canCull;
         this.function = function;
     }
+
     public boolean canCull() {
         return this.canCull;
     }
@@ -37,6 +38,7 @@ public enum RenderMode implements NameableEnum {
     public BiFunction<Identifier, Boolean, RenderType> getBiFunction() {
         return biFunction;
     }
+
     public Function<Double, RenderType> getFunction() {
         return function;
     }

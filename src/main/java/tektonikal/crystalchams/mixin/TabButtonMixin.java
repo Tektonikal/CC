@@ -1,9 +1,9 @@
 package tektonikal.crystalchams.mixin;
 
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.TabButton;
+import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
@@ -46,8 +46,8 @@ public abstract class TabButtonMixin extends AbstractWidget {
 //        }
 //    }
 
-    @Inject(method = "renderWidget", at = @At("TAIL"))
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+    @Inject(method = "extractWidgetRenderState", at = @At("TAIL"))
+    public void render(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         hoverProgress = (float) CrystalChams.ease(hoverProgress, isHovered || (isFocused() && CrystalChams.mc.getLastInputType().isKeyboard()) && this.active ? 1 : 0, 10F);
         selectedProgress = (float) CrystalChams.ease(selectedProgress, isSelected() && this.active ? 1 : 0, 10F);
     }

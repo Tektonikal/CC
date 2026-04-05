@@ -5,9 +5,8 @@ import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.ControllerBuilder;
 import dev.isxander.yacl3.impl.ProvidesBindingForDeprecation;
 import dev.isxander.yacl3.impl.utils.YACLConstants;
-import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
-import org.apache.commons.lang3.ArrayUtils;
+import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,16 +21,14 @@ import java.util.function.Supplier;
 //I DON'T CARE THAT THIS IS INTERNAL API !!!!!!!!!!!!!
 public class EvilOption<T> implements Option<T> {
     private final Component name;
-    private OptionDescription description;
     private final Controller<T> controller;
-    private boolean available;
-
     private final ImmutableSet<OptionFlag> flags;
-
     private final StateManager<T> stateManager;
     private final List<OptionEventListener<T>> listeners;
-    private int currentListenerDepth;
     private final OptionGroups group;
+    private OptionDescription description;
+    private boolean available;
+    private int currentListenerDepth;
 
     public EvilOption(
             @NotNull Component name,
@@ -58,11 +55,14 @@ public class EvilOption<T> implements Option<T> {
         triggerListener(OptionEventListener.Event.INITIAL, false);
     }
 
+    public static <T> EvilOptionBuilder<T> createBuilder() {
+        return new EvilOptionBuilder<>();
+    }
+
     @Override
     public @NotNull Component name() {
         return name;
     }
-
 
     @Override
     public @NotNull OptionDescription description() {
@@ -191,26 +191,14 @@ public class EvilOption<T> implements Option<T> {
         }
     }
 
-    public static <T> EvilOptionBuilder<T> createBuilder() {
-        return new EvilOptionBuilder<>();
-    }
-
-
     public static class EvilOptionBuilder<T> implements Builder<T> {
-        private Component name = Component.literal("Name not specified!").withStyle(ChatFormatting.RED);
-
-        private Function<T, OptionDescription> descriptionFunction = pending -> OptionDescription.EMPTY;
-
-        private Function<Option<T>, Controller<T>> controlGetter;
-
-        private OptionGroups group;
-
-        private boolean available = true;
-
         private final Set<OptionFlag> flags = new HashSet<>();
-
         private final List<OptionEventListener<T>> listeners = new ArrayList<>();
-
+        private Component name = Component.literal("Name not specified!").withStyle(ChatFormatting.RED);
+        private Function<T, OptionDescription> descriptionFunction = pending -> OptionDescription.EMPTY;
+        private Function<Option<T>, Controller<T>> controlGetter;
+        private OptionGroups group;
+        private boolean available = true;
         private @Nullable Binding<T> binding;
         private boolean instantDeprecated = false;
 
