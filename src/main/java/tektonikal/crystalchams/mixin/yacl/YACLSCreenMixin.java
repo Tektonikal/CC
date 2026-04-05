@@ -22,7 +22,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import tektonikal.crystalchams.CrystalChams;
-import tektonikal.crystalchams.config.EvilYACLScreen;
 import tektonikal.crystalchams.config.SecondaryYACLScreen;
 
 import java.util.Calendar;
@@ -66,7 +65,8 @@ public abstract class YACLSCreenMixin extends Screen {
 
         @Inject(method = "<init>", at = @At("TAIL"), remap = false)
         private void cc$OUGHHHHHHH(YACLScreen screen, ConfigCategory category, ScreenRect tabArea, CallbackInfo ci, @Local(ordinal = 1) int padding, @Local(ordinal = 2) int paddedWidth, @Local MutableDimension<Integer> actionDim) {
-            if ((CrystalChams.mc.currentScreen instanceof EvilYACLScreen || CrystalChams.mc.currentScreen instanceof SecondaryYACLScreen)) {
+            //TODO
+            if ((CrystalChams.mc.currentScreen instanceof YACLScreen || CrystalChams.mc.currentScreen instanceof SecondaryYACLScreen)) {
                 packsButton = ButtonWidget.builder(Text.literal("Resource Packs"), btn -> {
                     screen.finishOrSave();
                     CrystalChams.mc.setScreen(new PackScreen(CrystalChams.mc.getResourcePackManager(), resourcePackManager -> {
@@ -77,29 +77,29 @@ public abstract class YACLSCreenMixin extends Screen {
 
                 resetAnimButton = ButtonWidget.builder(Text.literal("Reset Animation"), btn -> CrystalChams.previewCrystalEntity.age = 0).position(undoButton.getX(), undoButton.getY() - 22).size(actionDim.width(), actionDim.height()).build();
 
-                descriptionWidget = new OptionDescriptionWidget(
+                this.descriptionWidget = new OptionDescriptionWidget(
                         () -> new ScreenRect(
                                 screen.width / 3 * 2 + padding,
                                 tabArea.getTop() + padding,
                                 paddedWidth,
-                                saveFinishedButton.getY() - 2 - padding
+                                packsButton.getY() - 1 - tabArea.getTop() - padding * 2
                         ),
-                        DescriptionWithName.of(Text.of(""), OptionDescription.of())
+                        null
                 );
                 undoButton.setPosition(cancelResetButton.getX(), cancelResetButton.getY() - 22);
                 //force done button to save
-                actionDim = Dimension.ofInt(screen.width / 3 * 2 + screen.width / 6, screen.height - padding - 20, paddedWidth, 20);
-                saveFinishedButton = ButtonWidget.builder(Text.literal("Done"), btn -> {
-                    CrystalChams.beamProgress = 0;
-                            screen.finishOrSave();
-                        }).position(actionDim.x() - actionDim.width() / 2, actionDim.y())
-                        .size(actionDim.width(), actionDim.height()).build();
+//                actionDim = Dimension.ofInt(screen.width / 3 * 2 + screen.width / 6, screen.height - padding - 20, paddedWidth, 20);
+//                saveFinishedButton = ButtonWidget.builder(Text.literal("Done"), btn -> {
+//                    CrystalChams.beamProgress = 0;
+//                            screen.finishOrSave();
+//                        }).position(actionDim.x() - actionDim.width() / 2, actionDim.y())
+//                        .size(actionDim.width(), actionDim.height()).build();
             }
         }
 
         @Inject(method = "forEachChild", at = @At(value = "HEAD"), cancellable = true)
         private void CC$oughhh(Consumer<ClickableWidget> consumer, CallbackInfo ci) {
-            if ((CrystalChams.mc.currentScreen instanceof EvilYACLScreen || CrystalChams.mc.currentScreen instanceof SecondaryYACLScreen)) {
+            if ((CrystalChams.mc.currentScreen instanceof YACLScreen || CrystalChams.mc.currentScreen instanceof SecondaryYACLScreen)) {
                 //this is terrible but I don't care anymore
                 consumer.accept(optionList.getWidget());
                 //TODO!!!!!!!!!

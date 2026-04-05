@@ -1,6 +1,7 @@
 package tektonikal.crystalchams.config;
 
 import dev.isxander.yacl3.api.*;
+import dev.isxander.yacl3.api.controller.FloatSliderControllerBuilder;
 import dev.isxander.yacl3.api.utils.Dimension;
 import dev.isxander.yacl3.gui.AbstractWidget;
 import dev.isxander.yacl3.gui.YACLScreen;
@@ -8,11 +9,11 @@ import dev.isxander.yacl3.gui.controllers.ControllerWidget;
 import dev.isxander.yacl3.gui.utils.GuiUtils;
 import dev.isxander.yacl3.impl.ListOptionEntryImpl;
 import dev.isxander.yacl3.impl.controller.ColorControllerBuilderImpl;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.Text;
 import tektonikal.crystalchams.CrystalChams;
 import tektonikal.crystalchams.OptionGroups;
-import tektonikal.crystalchams.stupidfuckingboilerplate.CustomFloatSliderControllerBuilder;
 import tektonikal.crystalchams.util.Easings;
 
 import java.awt.*;
@@ -54,36 +55,36 @@ public class ModelPartController implements Controller<ModelPartOptions> {
     @SuppressWarnings("deprecation")
     public ModelPartController(Option<ModelPartOptions> option) {
         this.option = option;
-        o_render = CrystalChams.createBooleanOption("Render Frame", 
+        o_render = CrystalChams.createBooleanOption(Text.translatable("config.option.renderFrames"),
                 StateManager.createSimple(true, () -> option.binding().getValue().render, newVal -> option.binding().getValue().render = newVal), OptionGroups.RENDER);
-        o_offset = EvilOption.<Float>createBuilder().name(Text.of("Vertical Offset")).controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(-2.5f, 2.5f).step(0.1f).formatValue(CrystalChams.BLOCKS_FORMATTER)).stateManager(StateManager.createSimple(0F, () -> option.binding().getValue().offset, newVal -> option.binding().getValue().offset = newVal)).group(OptionGroups.VERTICAL_OFFSET).build();
-        o_rotationSpeed = EvilOption.<Float>createBuilder().name(Text.of("Rotation Speed")).controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(-15f, 15f).step(0.1f).formatValue(val -> Text.of(String.format("%.1f", val) + "x"))).stateManager(StateManager.createSimple(1F, () -> option.binding().getValue().rotationSpeed, newVal -> option.binding().getValue().rotationSpeed = newVal)).group(OptionGroups.ROTATION_SPEED).build();
-        o_bounceHeight = EvilOption.<Float>createBuilder().name(Text.of("Bounce Height")).controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 2.5f).step(0.05f).formatValue(val -> Text.of(String.format("%.2f", val) + "x"))).stateManager(StateManager.createSimple(1F, () -> option.binding().getValue().bounceHeight, newVal -> option.binding().getValue().bounceHeight = newVal)).group(OptionGroups.BOUNCE_HEIGHT).build();
-        o_bounceSpeed = EvilOption.<Float>createBuilder().name(Text.of("Bounce Speed")).controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 2.5f).step(0.05f).formatValue(val -> Text.of(String.format("%.2f", val) + "x"))).stateManager(StateManager.createSimple(1F, () -> option.binding().getValue().bounceSpeed, newVal -> option.binding().getValue().bounceSpeed = newVal)).group(OptionGroups.BOUNCE_SPEED).build();
-        o_delay = EvilOption.<Float>createBuilder().name(Text.of("Delay")).controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(-2.5f, 2.5f).step(0.1f).formatValue(CrystalChams.SECONDS_FORMATTER)).stateManager(StateManager.createSimple(0F, () -> option.binding().getValue().delay, newVal -> option.binding().getValue().delay = newVal)).group(OptionGroups.DELAY).build();
-        o_scale = EvilOption.<Float>createBuilder().name(Text.of("Scale")).controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 2f).step(0.05f).formatValue(val -> Text.of(String.format("%.2f", val) + "x"))).stateManager(StateManager.createSimple(1F, () -> option.binding().getValue().scale, newVal -> option.binding().getValue().scale = newVal)).group(OptionGroups.SCALE).build();
-        o_color = EvilOption.<Color>createBuilder().name(Text.of("Color")).controller(ColorControllerBuilderImpl::new).stateManager(StateManager.createSimple(new Color(255, 255, 255), () -> option.binding().getValue().color, newVal -> option.binding().getValue().color = newVal)).group(OptionGroups.COLOR).build();
-        o_alpha = EvilOption.<Float>createBuilder().name(Text.of("Opacity")).controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(val -> Text.of(String.format("%.0f", val * 100) + "%"))).stateManager(StateManager.createSimple(1F, () -> option.binding().getValue().alpha, newVal -> option.binding().getValue().alpha = newVal)).group(OptionGroups.OPACITY).build();
+        o_offset = EvilOption.<Float>createBuilder().name(Text.translatable("config.option.verticalOffset")).controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(-2.5f, 2.5f).step(0.1f).formatValue(CrystalChams.BLOCKS_FORMATTER)).stateManager(StateManager.createSimple(0F, () -> option.binding().getValue().offset, newVal -> option.binding().getValue().offset = newVal)).group(OptionGroups.VERTICAL_OFFSET).build();
+        o_rotationSpeed = EvilOption.<Float>createBuilder().name(Text.translatable("config.option.rotationSpeed")).controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(-15f, 15f).step(0.1f).formatValue(val -> Text.translatable(String.format("%.1f", val) + "x"))).stateManager(StateManager.createSimple(1F, () -> option.binding().getValue().rotationSpeed, newVal -> option.binding().getValue().rotationSpeed = newVal)).group(OptionGroups.ROTATION_SPEED).build();
+        o_bounceHeight = EvilOption.<Float>createBuilder().name(Text.translatable("config.option.bounceHeight")).controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 2.5f).step(0.05f).formatValue(val -> Text.translatable(String.format("%.2f", val) + "x"))).stateManager(StateManager.createSimple(1F, () -> option.binding().getValue().bounceHeight, newVal -> option.binding().getValue().bounceHeight = newVal)).group(OptionGroups.BOUNCE_HEIGHT).build();
+        o_bounceSpeed = EvilOption.<Float>createBuilder().name(Text.translatable("config.option.bounceSpeed")).controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 2.5f).step(0.05f).formatValue(val -> Text.translatable(String.format("%.2f", val) + "x"))).stateManager(StateManager.createSimple(1F, () -> option.binding().getValue().bounceSpeed, newVal -> option.binding().getValue().bounceSpeed = newVal)).group(OptionGroups.BOUNCE_SPEED).build();
+        o_delay = EvilOption.<Float>createBuilder().name(Text.translatable("config.option.delay")).controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(-2.5f, 2.5f).step(0.1f).formatValue(CrystalChams.SECONDS_FORMATTER)).stateManager(StateManager.createSimple(0F, () -> option.binding().getValue().delay, newVal -> option.binding().getValue().delay = newVal)).group(OptionGroups.DELAY).build();
+        o_scale = EvilOption.<Float>createBuilder().name(Text.translatable("config.option.scale")).controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 2f).step(0.05f).formatValue(val -> Text.translatable(String.format("%.2f", val) + "x"))).stateManager(StateManager.createSimple(1F, () -> option.binding().getValue().scale, newVal -> option.binding().getValue().scale = newVal)).group(OptionGroups.SCALE).build();
+        o_color = EvilOption.<Color>createBuilder().name(Text.translatable("config.group.color")).controller(ColorControllerBuilderImpl::new).stateManager(StateManager.createSimple(new Color(255, 255, 255), () -> option.binding().getValue().color, newVal -> option.binding().getValue().color = newVal)).group(OptionGroups.COLOR).build();
+        o_alpha = EvilOption.<Float>createBuilder().name(Text.translatable("config.option.opacity")).controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 1f).step(0.01f).formatValue(val -> Text.translatable(String.format("%.0f", val * 100) + "%"))).stateManager(StateManager.createSimple(1F, () -> option.binding().getValue().alpha, newVal -> option.binding().getValue().alpha = newVal)).group(OptionGroups.OPACITY).build();
         o_blockLightLevel = CrystalChams.createBlockLightLevelOption(StateManager.createSimple(-1, () -> option.binding().getValue().blockLightLevel, newVal -> option.binding().getValue().blockLightLevel = newVal));
         o_skyLightLevel = CrystalChams.createSkyLightLevelOption(StateManager.createSimple(-1, () -> option.binding().getValue().skyLightLevel, newVal -> option.binding().getValue().skyLightLevel = newVal));
 
-        o_renderLayer = CrystalChams.createRenderModeOption("Render Mode", 
+        o_renderLayer = CrystalChams.createRenderModeOption(Text.translatable("config.option.renderMode"),
                 StateManager.createSimple(RenderMode.DEFAULT, () -> option.binding().getValue().renderLayer, newVal -> option.binding().getValue().renderLayer = newVal),
                 OptionGroups.RENDER_MODE);
-        o_culling = CrystalChams.createBooleanOption(CrystalChams.SEPARATOR+"Culled",  StateManager.createSimple(false, () -> option.binding().getValue().culling, newVal -> option.binding().getValue().culling = newVal), OptionGroups.CULLED);
-        o_funnyOption = CrystalChams.createBooleanOption("Funny Option",  StateManager.createSimple(false, () -> option.binding().getValue().funnyOption, newVal -> option.binding().getValue().funnyOption = newVal), OptionGroups.THE_FUNNY_OPTION);
-        o_funnierOption = CrystalChams.createBooleanOption("Funnier Option",  StateManager.createSimple(false, () -> option.binding().getValue().funnierOption, newVal -> option.binding().getValue().funnierOption = newVal), OptionGroups.THE_FUNNIER_OPTION);
-        o_rainbow = CrystalChams.createBooleanOption("Rainbow",  StateManager.createSimple(false, () -> option.binding().getValue().rainbow, newVal -> option.binding().getValue().rainbow = newVal), OptionGroups.RAINBOW);
-        o_rainbowSpeed = EvilOption.<Float>createBuilder().name(Text.of(CrystalChams.SEPARATOR+"Rainbow Speed")).controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(0f, 10f).step(0.1f).formatValue(value -> Text.of(String.format("%.1f", value) + "x"))).stateManager(StateManager.createSimple(2F, () -> option.binding().getValue().rainbowSpeed, newVal -> option.binding().getValue().rainbowSpeed = newVal)).group(OptionGroups.RAINBOW_SPEED).build();
-        o_rainbowDelay = EvilOption.<Float>createBuilder().name(Text.of(CrystalChams.SEPARATOR+"Rainbow Delay")).controller(integerOption -> CustomFloatSliderControllerBuilder.create(integerOption).step(0.1F).range(-2.5F, 2.5F).formatValue(CrystalChams.SECONDS_FORMATTER)).stateManager(StateManager.createSimple(0F, () -> option.binding().getValue().rainbowDelay, newVal -> option.binding().getValue().rainbowDelay = newVal)).group(OptionGroups.RAINBOW_DELAY).build();
-        o_rainbowSaturation = CrystalChams.createFloatOptionPercent(CrystalChams.SEPARATOR+"Saturation",  StateManager.createSimple(1f, () -> option.binding().getValue().rainbowSaturation, newVal -> option.binding().getValue().rainbowSaturation = newVal), OptionGroups.RAINBOW_SATURATION);
-        o_rainbowBrightness = CrystalChams.createFloatOptionPercent(CrystalChams.SEPARATOR+"Brightness",  StateManager.createSimple(1F, () -> option.binding().getValue().rainbowBrightness, newVal -> option.binding().getValue().rainbowBrightness = newVal), OptionGroups.RAINBOW_BRIGHTNESS);
-        o_animation = CrystalChams.createBooleanOption("Animations", 
+        o_culling = CrystalChams.createBooleanOption(Text.translatable(CrystalChams.SEPARATOR).append(Text.translatable("config.option.culling")),  StateManager.createSimple(false, () -> option.binding().getValue().culling, newVal -> option.binding().getValue().culling = newVal), OptionGroups.CULLED);
+        o_funnyOption = CrystalChams.createBooleanOption(Text.translatable("Funny Option"),  StateManager.createSimple(false, () -> option.binding().getValue().funnyOption, newVal -> option.binding().getValue().funnyOption = newVal), OptionGroups.THE_FUNNY_OPTION);
+        o_funnierOption = CrystalChams.createBooleanOption(Text.translatable("Funnier Option"),  StateManager.createSimple(false, () -> option.binding().getValue().funnierOption, newVal -> option.binding().getValue().funnierOption = newVal), OptionGroups.THE_FUNNIER_OPTION);
+        o_rainbow = CrystalChams.createBooleanOption(Text.translatable("config.option.rainbow"),  StateManager.createSimple(false, () -> option.binding().getValue().rainbow, newVal -> option.binding().getValue().rainbow = newVal), OptionGroups.RAINBOW);
+        o_rainbowSpeed = EvilOption.<Float>createBuilder().name(Text.translatable(CrystalChams.SEPARATOR).append(Text.translatable("config.option.rainbowSpeed"))).controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(0f, 10f).step(0.1f).formatValue(value -> Text.translatable(String.format("%.1f", value) + "x"))).stateManager(StateManager.createSimple(2F, () -> option.binding().getValue().rainbowSpeed, newVal -> option.binding().getValue().rainbowSpeed = newVal)).group(OptionGroups.RAINBOW_SPEED).build();
+        o_rainbowDelay = EvilOption.<Float>createBuilder().name(Text.translatable(CrystalChams.SEPARATOR).append(Text.translatable("config.option.rainbowDelay"))).controller(integerOption -> FloatSliderControllerBuilder.create(integerOption).step(0.1F).range(-2.5F, 2.5F).formatValue(CrystalChams.SECONDS_FORMATTER)).stateManager(StateManager.createSimple(0F, () -> option.binding().getValue().rainbowDelay, newVal -> option.binding().getValue().rainbowDelay = newVal)).group(OptionGroups.RAINBOW_DELAY).build();
+        o_rainbowSaturation = CrystalChams.createFloatOptionPercent(Text.translatable(CrystalChams.SEPARATOR).append(Text.translatable("config.option.rainbowSaturation")), StateManager.createSimple(1f, () -> option.binding().getValue().rainbowSaturation, newVal -> option.binding().getValue().rainbowSaturation = newVal), OptionGroups.RAINBOW_SATURATION);
+        o_rainbowBrightness = CrystalChams.createFloatOptionPercent(Text.translatable(CrystalChams.SEPARATOR).append(Text.translatable("config.option.rainbowBrightness")), StateManager.createSimple(1F, () -> option.binding().getValue().rainbowBrightness, newVal -> option.binding().getValue().rainbowBrightness = newVal), OptionGroups.RAINBOW_BRIGHTNESS);
+        o_animation = CrystalChams.createBooleanOption(Text.translatable("Animations"),
                 StateManager.createSimple(false, () -> option.binding().getValue().animation, newVal -> option.binding().getValue().animation = newVal), OptionGroups.ANIMATION);
 
-        o_animateVerticalOffset = CrystalChams.createBooleanOption("Animate Vertical Offset", 
+        o_animateVerticalOffset = CrystalChams.createBooleanOption(Text.translatable("Animate Vertical Offset"),
                 StateManager.createSimple(false, () -> option.binding().getValue().animateVerticalOffset, newVal -> option.binding().getValue().animateVerticalOffset = newVal), OptionGroups.ANIMATE_VERTICAL_OFFSET);
-        o_startingVerticalOffset =  EvilOption.<Float>createBuilder().name(Text.of("Vertical Offset")).controller(floatOption -> CustomFloatSliderControllerBuilder.create(floatOption).range(-2.5f, 2.5f).step(0.1f).formatValue(CrystalChams.BLOCKS_FORMATTER)).stateManager(StateManager.createSimple(0F, () -> option.binding().getValue().offset, newVal -> option.binding().getValue().offset = newVal)).group(OptionGroups.VERTICAL_OFFSET).build();
+        o_startingVerticalOffset =  EvilOption.<Float>createBuilder().name(Text.translatable("Vertical Offset")).controller(floatOption -> FloatSliderControllerBuilder.create(floatOption).range(-2.5f, 2.5f).step(0.1f).formatValue(CrystalChams.BLOCKS_FORMATTER)).stateManager(StateManager.createSimple(0F, () -> option.binding().getValue().offset, newVal -> option.binding().getValue().offset = newVal)).group(OptionGroups.VERTICAL_OFFSET).build();
 
 
         //too lazy to set up annotations again, whatever man
@@ -128,30 +129,30 @@ public class ModelPartController implements Controller<ModelPartOptions> {
 
     @Override
     public Text formatValue() {
-        return Text.of("Edit");
+        return Text.translatable("Edit");
     }
 
     @Override
     public AbstractWidget provideWidget(YACLScreen screen, Dimension<Integer> widgetDimension) {
         subScreen = YetAnotherConfigLib.createBuilder()
-                .title(Text.of("Custom End Crystals"))
+                .title(Text.translatable("config.title"))
                 .category(ConfigCategory.createBuilder()
                         //TODO include index?
-                        .name(Text.of("Edit Frame"))
+                        .name(Text.translatable("Edit Frame"))
                         .option(o_render)
                         .group(OptionGroup.createBuilder()
-                                .name(Text.of("Transform"))
+                                .name(Text.translatable("config.group.transform"))
                                 .option(o_offset)
                                 .option(o_scale)
                                 .build())
                         .group(OptionGroup.createBuilder()
-                                .name(Text.of("Movement"))
+                                .name(Text.translatable("config.group.movement"))
                                 .option(o_rotationSpeed)
                                 .option(o_bounceHeight)
                                 .option(o_bounceSpeed)
                                 .option(o_delay).build())
                         .group(OptionGroup.createBuilder()
-                                .name(Text.of("Color"))
+                                .name(Text.translatable("config.group.color"))
                                 .option(o_color)
                                 .option(o_alpha)
                                 .option(o_rainbow)
@@ -160,7 +161,7 @@ public class ModelPartController implements Controller<ModelPartOptions> {
                                 .option(o_rainbowSaturation)
                                 .option(o_rainbowBrightness).build())
                         .group(OptionGroup.createBuilder()
-                                .name(Text.of("Rendering"))
+                                .name(Text.translatable("config.group.rendering"))
                                 .option(o_blockLightLevel)
                                 .option(o_skyLightLevel)
                                 .option(o_renderLayer)
@@ -169,7 +170,7 @@ public class ModelPartController implements Controller<ModelPartOptions> {
 //                                .option(o_funnierOption)
                                 .build())
 //                        .group(OptionGroup.createBuilder()
-//                                .name(Text.of("Animation"))
+//                                .name(Text.translatable("Animation"))
 //
 //                                .build())
                         .build())
@@ -199,7 +200,7 @@ public class ModelPartController implements Controller<ModelPartOptions> {
                     index = ChamsConfig.o_frameList.indexOf(modelPartOptionsListOptionEntry);
                 }
             }
-            Text name = Text.of("Frame " + (index + 1));
+            Text name = Text.translatable("Frame " + (index + 1));
             Text shortenedName = Text.literal(GuiUtils.shortenString(name.getString(), textRenderer, getDimension().width() - getControlWidth() - getXPadding() - 7, "...")).setStyle(name.getStyle());
 
             drawButtonRect(graphics, getDimension().x(), getDimension().y(), getDimension().xLimit(), getDimension().yLimit(), hovered || focused, isAvailable());
@@ -212,8 +213,8 @@ public class ModelPartController implements Controller<ModelPartOptions> {
 
 
         @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if (!isMouseOver(mouseX, mouseY) || !isAvailable()) return false;
+        public boolean mouseClicked(Click mouseButtonEvent, boolean doubleClick) {
+            if (!isMouseOver(mouseButtonEvent.x(), mouseButtonEvent.y()) || !isAvailable()) return false;
             playDownSound();
             client.setScreen(new SecondaryYACLScreen(control.subScreen, screen));
             return true;

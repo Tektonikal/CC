@@ -6,6 +6,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(RenderTickCounter.Dynamic.class)
 public interface RenderTickCounterAccessor {
-    @Accessor("tickDelta")
-    float getTickDelta();
+//    @Accessor("tickDelta")
+//    float getTickDelta();
 }

@@ -155,29 +155,23 @@ public class OptionListWidgetAccessor extends YACLSelectionList<OptionListWidget
             return options.stream().filter(evilOption -> evilOption != null && evilOption.group() == group).toList();
         }
 
-        @Inject(method = "renderContent", at = @At("HEAD"))
-        private void CC$YEAH(DrawContext graphics, int mouseX, int mouseY, boolean hovered, float deltaTicks, CallbackInfo ci) {
-            graphics.getMatrices().push();
-            if (ChamsConfig.o_showAnimations.pendingValue() && (CrystalChams.mc.currentScreen instanceof EvilYACLScreen || CrystalChams.mc.currentScreen instanceof SecondaryYACLScreen) && resetButton != null) {
-                graphics.getMatrices().translate(-CrystalChams.mc.getWindow().getScaledWidth() * (1 - onScreenProgress), 0, 0);
-            }
-        }
+//        @Inject(method = "renderContent", at = @At("HEAD"))
+//        private void CC$YEAH(DrawContext graphics, int mouseX, int mouseY, boolean hovered, float deltaTicks, CallbackInfo ci) {
+//            graphics.getMatrices().push();
+//            if (ChamsConfig.o_showAnimations.pendingValue() && (CrystalChams.mc.currentScreen instanceof EvilYACLScreen || CrystalChams.mc.currentScreen instanceof SecondaryYACLScreen) && resetButton != null) {
+//                graphics.getMatrices().translate(-CrystalChams.mc.getWindow().getScaledWidth() * (1 - onScreenProgress), 0, 0);
+//            }
+//        }
 
-        @Inject(method = "renderContent", at = @At("TAIL"))
+        @Inject(method = "render", at = @At(value = "INVOKE", target = "Ldev/isxander/yacl3/gui/OptionListWidget$OptionEntry;isMouseOver(DD)Z", shift = At.Shift.BEFORE))
         private void onRender(DrawContext graphics, int mouseX, int mouseY, boolean hovered, float deltaTicks, CallbackInfo ci) {
-            if (resetButton != null) {
-                var scaledHeight = CrystalChams.mc.getWindow().getScaledHeight();
-                onScreenProgress = (float) CrystalChams.ease(onScreenProgress, resetButton.getY() >= scaledHeight * 0.025
-                        && resetButton.getY() <= scaledHeight * 0.975 ? 1 : 0, 20);
-            }
-            if (applyAllButton != null) {
+            if (applyAllButton != null && resetButton != null) {
                 applyAllButton.setY(resetButton.getY());
                 //not the greatest of ways to do it, but whatever
                 applyAllButton.active = !optionsSynced() && option.available();
                 applyAllButton.setTooltip(applyAllButton.active ? Tooltip.of(Text.of("Apply To All")) : null);
                 applyAllButton.render(graphics, mouseX, mouseY, deltaTicks);
             }
-            graphics.getMatrices().pop();
         }
 
 

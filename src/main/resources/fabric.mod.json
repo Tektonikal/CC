@@ -4,8 +4,17 @@
   "version": "${version}",
   "name": "Custom End Crystals",
   "description": "Customize how your end crystals look!",
-  "authors": ["Tektonikal"],
-  "contributors": [],
+  "authors": [
+    "Tektonikal"
+  ],
+  "contributors": [
+    "Nicolette",
+    "EvilAndQueer",
+    "Full",
+    "NG5M",
+    "Ivory",
+    "CalmAndCalmado"
+  ],
   "license": "LGPL-3.0",
   "icon": "icon.png",
   "environment": "client",

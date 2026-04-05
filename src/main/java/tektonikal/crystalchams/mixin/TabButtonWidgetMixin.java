@@ -1,33 +1,20 @@
 package tektonikal.crystalchams.mixin;
 
-import dev.isxander.yacl3.gui.YACLScreen;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ButtonTextures;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TabButtonWidget;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.ColorHelper;
-import net.minecraft.util.math.MathHelper;
-import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 import tektonikal.crystalchams.CrystalChams;
-import tektonikal.crystalchams.config.ChamsConfig;
-import tektonikal.crystalchams.config.EvilYACLScreen;
-import tektonikal.crystalchams.config.SecondaryYACLScreen;
 
-import static tektonikal.crystalchams.CrystalChams.fillFloat;
+//import static tektonikal.crystalchams.CrystalChams.fillFloat;
 
 @Mixin(TabButtonWidget.class)
 public abstract class TabButtonWidgetMixin extends ClickableWidget {
@@ -52,12 +39,12 @@ public abstract class TabButtonWidgetMixin extends ClickableWidget {
     @Shadow
     public abstract boolean isCurrentTab();
 
-    @ModifyArgs(method = "renderWidget", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Lnet/minecraft/util/Identifier;IIII)V"))
-    public void CC$OUGH(Args args) {
-        if ((CrystalChams.mc.currentScreen instanceof EvilYACLScreen || CrystalChams.mc.currentScreen instanceof SecondaryYACLScreen) && ChamsConfig.o_showAnimations.pendingValue()) {
-            args.set(0, altTextures.get(this.isCurrentTab(), this.isSelected()));
-        }
-    }
+//    @ModifyArgs(method = "renderWidget", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Lnet/minecraft/util/Identifier;IIII)V"))
+//    public void CC$OUGH(Args args) {
+//        if ((CrystalChams.mc.currentScreen instanceof EvilYACLScreen || CrystalChams.mc.currentScreen instanceof SecondaryYACLScreen) && ChamsConfig.o_showAnimations.pendingValue()) {
+//            args.set(0, altTextures.get(this.isCurrentTab(), this.isSelected()));
+//        }
+//    }
 
     @Inject(method = "renderWidget", at = @At("TAIL"))
     public void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
@@ -65,33 +52,33 @@ public abstract class TabButtonWidgetMixin extends ClickableWidget {
         selectedProgress = (float) CrystalChams.ease(selectedProgress, isCurrentTab() && this.active ? 1 : 0, 10F);
     }
 
-    @Inject(method = "drawCurrentTabLine", at = @At("HEAD"), cancellable = true)
-    private void drawCurrentTabLine(DrawContext context, TextRenderer textRenderer, int color, CallbackInfo ci) {
-        if ((CrystalChams.mc.currentScreen instanceof EvilYACLScreen || CrystalChams.mc.currentScreen instanceof SecondaryYACLScreen) && ChamsConfig.o_showAnimations.pendingValue()) {
-            int i = Math.min(textRenderer.getWidth(this.getMessage()), this.getWidth() - 4);
-            float j = this.getX() + ((this.getWidth() - i) / 2F);
-            int k = this.getY() + this.getHeight() - 2;
-            fillFloat(context, MathHelper.lerp(selectedProgress, j + (i / 2F), (int)j), k - (selectedProgress) + 1, MathHelper.lerp(selectedProgress, j + (i / 2F), (int)(j + i)), k + 1, ColorHelper.Argb.lerp(selectedProgress, 0x00000000, this.active ? -1 : -6250336));
-            ci.cancel();
-        }
-    }
+//    @Inject(method = "drawCurrentTabLine", at = @At("HEAD"), cancellable = true)
+//    private void drawCurrentTabLine(DrawContext context, TextRenderer textRenderer, int color, CallbackInfo ci) {
+//        if ((CrystalChams.mc.currentScreen instanceof EvilYACLScreen || CrystalChams.mc.currentScreen instanceof SecondaryYACLScreen) && ChamsConfig.o_showAnimations.pendingValue()) {
+//            int i = Math.min(textRenderer.getWidth(this.getMessage()), this.getWidth() - 4);
+//            float j = this.getX() + ((this.getWidth() - i) / 2F);
+//            int k = this.getY() + this.getHeight() - 2;
+//            fillFloat(context, MathHelper.lerp(selectedProgress, j + (i / 2F), (int)j), k - (selectedProgress) + 1, MathHelper.lerp(selectedProgress, j + (i / 2F), (int)(j + i)), k + 1, ColorHelper.lerp(selectedProgress, 0x00000000, this.active ? -1 : -6250336));
+//            ci.cancel();
+//        }
+//    }
 
-    @Inject(method = "renderWidget", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Lnet/minecraft/util/Identifier;IIII)V", shift = At.Shift.AFTER))
-    public void CC$OUGHHHHHHHHH(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
-        if ((CrystalChams.mc.currentScreen instanceof EvilYACLScreen || CrystalChams.mc.currentScreen instanceof SecondaryYACLScreen) && ChamsConfig.o_showAnimations.pendingValue()) {
-            drawBorder(context, this.getX() + 1, isCurrentTab() ? this.getY() + 1 : this.getY() + 5, this.width - 2, isCurrentTab() ? this.height - 2 : this.height - 7, ColorHelper.Argb.lerp(hoverProgress, 0x00333333, 0xFFFFFFFF), !isCurrentTab());
-        }
-    }
+//    @Inject(method = "renderWidget", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Lnet/minecraft/util/Identifier;IIII)V", shift = At.Shift.AFTER))
+//    public void CC$OUGHHHHHHHHH(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+//        if ((CrystalChams.mc.currentScreen instanceof EvilYACLScreen || CrystalChams.mc.currentScreen instanceof SecondaryYACLScreen) && ChamsConfig.o_showAnimations.pendingValue()) {
+//            drawBorder(context, this.getX() + 1, isCurrentTab() ? this.getY() + 1 : this.getY() + 5, this.width - 2, isCurrentTab() ? this.height - 2 : this.height - 7, ColorHelper.Argb.lerp(hoverProgress, 0x00333333, 0xFFFFFFFF), !isCurrentTab());
+//        }
+//    }
 
-    @Unique
-    public void drawBorder(DrawContext context, float x, float y, float width, float height, int color, boolean bottom) {
-        fillFloat(context, x, y, x + width, y + 1, color);
-        if (bottom) {
-            fillFloat(context, x + 1, y + height - 1, x + width - 1, y + height, color);
-        }
-        fillFloat(context, x, y + 1, x + 1, y + height, color);
-        fillFloat(context, x + width - 1, y + 1, x + width, y + height, color);
-    }
+//    @Unique
+//    public void drawBorder(DrawContext context, float x, float y, float width, float height, int color, boolean bottom) {
+//        fillFloat(context, x, y, x + width, y + 1, color);
+//        if (bottom) {
+//            fillFloat(context, x + 1, y + height - 1, x + width - 1, y + height, color);
+//        }
+//        fillFloat(context, x, y + 1, x + 1, y + height, color);
+//        fillFloat(context, x + width - 1, y + 1, x + width, y + height, color);
+//    }
 
 
 }

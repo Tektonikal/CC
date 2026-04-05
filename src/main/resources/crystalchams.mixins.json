@@ -19,14 +19,15 @@
     "ButtonWidgetMixin",
     "EndCrystalEntityRendererMixin",
     "EnderDragonEntityRendererMixin",
+    "EntityHitboxDebugRendererMixin",
     "MinecraftClientMixin",
+    "ModelPartAccessor",
     "RenderTickCounterAccessor",
     "TabButtonWidgetMixin",
     "yacl.CategoryTabAccessor",
     "yacl.EvilAccessor",
     "yacl.OptionListWidgetAccessor",
     "yacl.OptionListWidgetAccessor$OptionListWidgetEntryMixin",
-    "yacl.XanderIHateYouMixin",
     "yacl.YACLSCreenMixin",
     "yacl.YACLSCreenMixin$CategoryTabMixin"
   ]

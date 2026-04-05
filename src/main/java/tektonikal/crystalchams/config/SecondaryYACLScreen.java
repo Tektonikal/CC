@@ -12,6 +12,7 @@ import dev.isxander.yacl3.impl.ListOptionEntryImpl;
 import dev.isxander.yacl3.impl.utils.YACLConstants;
 import dev.isxander.yacl3.platform.YACLPlatform;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.client.gui.screen.Screen;
@@ -27,7 +28,7 @@ import tektonikal.crystalchams.mixin.yacl.CategoryTabAccessor;
 import java.util.HashSet;
 import java.util.Set;
 
-import static tektonikal.crystalchams.CrystalChams.drawPreviewCrystal;
+//import static tektonikal.crystalchams.CrystalChams.drawPreviewCrystal;
 
 public class SecondaryYACLScreen extends YACLScreen {
     public static float prog = 0;
@@ -43,27 +44,27 @@ public class SecondaryYACLScreen extends YACLScreen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        Window w = MinecraftClient.getInstance().getWindow();
-        parent.render(context, closing ? mouseX : -1, closing ? mouseY : -1, delta);
-        context.getMatrices().push();
-        context.getMatrices().translate(0, w.getScaledHeight() - (w.getScaledHeight() * prog), 0);
+//        Window w = MinecraftClient.getInstance().getWindow();
+//        parent.render(context, closing ? mouseX : -1, closing ? mouseY : -1, delta);
+//        context.getMatrices().push();
+//        context.getMatrices().translate(0, w.getScaledHeight() - (w.getScaledHeight() * prog), 0);
         super.render(context, mouseX, mouseY, delta);
-        drawPreviewCrystal(context, ((CategoryTabAccessor) this.tabManager.getCurrentTab()).rightPaneDim(), this);
-        context.getMatrices().pop();
-        prog = (float) CrystalChams.ease(prog, closing ? 0 : 1, 15F);
-        if (prog <= 0.0025 && closing) {
-            close();
-        }
+//        drawPreviewCrystal(context, ((CategoryTabAccessor) this.tabManager.getCurrentTab()).rightPaneDim(), this);
+//        context.getMatrices().pop();
+//        prog = (float) CrystalChams.ease(prog, closing ? 0 : 1, 15F);
+//        if (prog <= 0.0025 && closing) {
+//            close();
+//        }
     }
 
-    @Override
-    public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
-        if (this.client.world == null) {
-            this.renderPanoramaBackground(context, delta);
-        }
-        this.applyBlur(delta);
-        this.renderDarkening(context);
-    }
+//    @Override
+//    public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
+//        if (this.client.world == null) {
+//            this.renderPanoramaBackground(context, delta);
+//        }
+//        this.applyBlur(delta);
+//        this.renderDarkening(context);
+//    }
 
     @Override
     public void finishOrSave() {
@@ -107,64 +108,64 @@ public class SecondaryYACLScreen extends YACLScreen {
         return x >= r.getLeft() && x < r.getRight() && y >= r.getTop() && y < r.getBottom();
     }
 
+//    @Override
+//    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+//        if (draggin) {
+//            CrystalChams.crystalTargetDraggedRotX += (float) deltaX;
+//            CrystalChams.crystalTargetDraggedRotY -= (float) deltaY;
+//        }
+//        if (closing) {
+//            return parent.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+//        } else {
+//            return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+//        }
+//    }
+//
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (draggin) {
-            CrystalChams.crystalTargetDraggedRotX += (float) deltaX;
-            CrystalChams.crystalTargetDraggedRotY -= (float) deltaY;
-        }
-        if (closing) {
-            return parent.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
-        } else {
-            return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
-        }
-    }
-
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(Click mouseButtonEvent, boolean bl) {
         ScreenRect r = ((CategoryTabAccessor) this.tabManager.getCurrentTab()).rightPaneDim();
-        if (contains(mouseX, mouseY, r)) {
-            if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+        if (contains(mouseButtonEvent.x(), mouseButtonEvent.y(), r)) {
+            if (mouseButtonEvent.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
                 draggin = true;
             }
-            if (button == GLFW.GLFW_MOUSE_BUTTON_MIDDLE) {
+            if (mouseButtonEvent.button() == GLFW.GLFW_MOUSE_BUTTON_MIDDLE) {
                 CrystalChams.crystalTargetDraggedRotX = 0;
                 CrystalChams.crystalTargetDraggedRotY = 0;
             }
         }
         if (closing) {
-            return parent.mouseClicked(mouseX, mouseY, button);
+            return parent.mouseClicked(mouseButtonEvent, bl);
         } else {
-            return super.mouseClicked(mouseX, mouseY, button);
+            return super.mouseClicked(mouseButtonEvent, bl);
         }
     }
 
-    @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        draggin = false;
-        if (closing) {
-            return parent.mouseReleased(mouseX, mouseY, button);
-        } else {
-            return super.mouseReleased(mouseX, mouseY, button);
-        }
-    }
+//    @Override
+//    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+//        draggin = false;
+//        if (closing) {
+//            return parent.mouseReleased(mouseX, mouseY, button);
+//        } else {
+//            return super.mouseReleased(mouseX, mouseY, button);
+//        }
+//    }
 
-    @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == GLFW.GLFW_KEY_ESCAPE && this.shouldCloseOnEsc() && !closing) {
-            closing = true;
-            return true;
-        } else {
-            if (closing) {
-                if (keyCode == GLFW.GLFW_KEY_ESCAPE && this.shouldCloseOnEsc()) {
-                    close();
-                }
-                return parent.keyPressed(keyCode, scanCode, modifiers);
-            } else {
-                return super.keyPressed(keyCode, scanCode, modifiers);
-            }
-        }
-    }
+//    @Override
+//    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+//        if (keyCode == GLFW.GLFW_KEY_ESCAPE && this.shouldCloseOnEsc() && !closing) {
+//            closing = true;
+//            return true;
+//        } else {
+//            if (closing) {
+//                if (keyCode == GLFW.GLFW_KEY_ESCAPE && this.shouldCloseOnEsc()) {
+//                    close();
+//                }
+//                return parent.keyPressed(keyCode, scanCode, modifiers);
+//            } else {
+//                return super.keyPressed(keyCode, scanCode, modifiers);
+//            }
+//        }
+//    }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
