@@ -115,6 +115,9 @@ public class ModelPartOptions {
     public boolean funnyOption = false;
     public boolean funnierOption = false;
 
+    public ModelPartOptions() {
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
@@ -125,8 +128,5 @@ public class ModelPartOptions {
     @Override
     public int hashCode() {
         return Objects.hash(render, offset, rotationSpeed, bounceHeight, bounceSpeed, delay, scale, color, alpha, blockLightLevel, skyLightLevel, renderLayer, culling, rainbow, rainbowSpeed, rainbowDelay, rainbowSaturation, rainbowBrightness, animation, animateVerticalOffset, startingVerticalOffset, verticalOffsetAnimationDuration, verticalOffsetAnimationDelay, verticalOffsetEasing, animateRotationSpeed, startingRotationSpeed, rotationSpeedAnimationDuration, rotationSpeedAnimationDelay, rotationSpeedEasing, animateBounceHeight, startingBounceHeight, bounceHeightAnimationDuration, bounceHeightAnimationDelay, bounceHeightEasing, animateBounceSpeed, startingBounceSpeed, bounceSpeedAnimationDuration, bounceSpeedAnimationDelay, bounceSpeedEasing, animateTickDelay, startingTickDelay, tickDelayAnimationDuration, tickDelayAnimationDelay, tickDelayEasing, animateScale, startingScale, scaleAnimationDuration, scaleAnimationDelay, scaleEasing, animateColor, startingColor, colorAnimationDuration, colorAnimationDelay, colorEasing, animateAlpha, startingAlpha, alphaAnimationDuration, alphaAnimationDelay, alphaEasing, animateRainbowSpeed, startingRainbowSpeed, rainbowSpeedAnimationDuration, rainbowSpeedAnimationDelay, rainbowSpeedEasing, animateRainbowDelay, startingRainbowDelay, rainbowDelayAnimationDuration, rainbowDelayAnimationDelay, rainbowDelayEasing, animateRainbowSaturation, startingRainbowSaturation, rainbowSaturationAnimationDuration, rainbowSaturationAnimationDelay, rainbowSaturationEasing, animateRainbowBrightness, startingRainbowBrightness, rainbowBrightnessAnimationDuration, rainbowBrightnessAnimationDelay, rainbowBrightnessEasing, funnyOption, funnierOption);
-    }
-
-    public ModelPartOptions() {
     }
 }

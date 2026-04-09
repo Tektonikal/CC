@@ -5,8 +5,8 @@ import dev.isxander.yacl3.api.StateManager;
 import dev.isxander.yacl3.impl.ProvidesBindingForDeprecation;
 
 public class EvilStateManager<T> implements StateManager<T>, ProvidesBindingForDeprecation<T> {
-    private T pendingValue;
     private final Binding<T> binding;
+    private T pendingValue;
     private StateListener<T> stateListener;
 
     public EvilStateManager(Binding<T> binding) {

@@ -4,23 +4,17 @@ import dev.isxander.yacl3.api.Controller;
 import dev.isxander.yacl3.api.utils.Dimension;
 import dev.isxander.yacl3.gui.AbstractWidget;
 import dev.isxander.yacl3.gui.controllers.LabelController;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(value = LabelController.class, remap = false)
-public abstract class LabelControllerMixin implements Controller<Text> {
+public abstract class LabelControllerMixin implements Controller<Component> {
 
 
     @Mixin(value = LabelController.LabelControllerElement.class, remap = false)
     public abstract static class LabelControllerElementMixin extends AbstractWidget {
-        @Shadow
-        protected abstract int getYPadding();
-
-        @Shadow
-        protected abstract int getXPadding();
-
         @Shadow
         @Final
         LabelController this$0;
@@ -28,6 +22,12 @@ public abstract class LabelControllerMixin implements Controller<Text> {
         public LabelControllerElementMixin(Dimension<Integer> dim) {
             super(dim);
         }
+
+        @Shadow
+        protected abstract int getYPadding();
+
+        @Shadow
+        protected abstract int getXPadding();
 
 //        @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawText(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/text/OrderedText;IIIZ)I"))
 //        private int ough(DrawContext graphics, TextRenderer textRenderer, OrderedText text, int x, int y, int color, boolean shadow){

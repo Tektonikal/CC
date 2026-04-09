@@ -35,10 +35,9 @@
     "sources": "https://github.com/Tektonikal/CC"
   },
   "depends": {
-    "fabricloader": "*",
-    "fabric": "*",
-    "minecraft": "${minecraft_version}",
-    "yet_another_config_lib_v3": "3.8.2"
+    "fabricloader": ">=${loader_version}",
+    "minecraft": ">=${minecraft_version}",
+    "yet_another_config_lib_v3": ">=${yacl_version}"
   },
   "breaks": {
     "controlify": "*"
@@ -49,6 +48,5 @@
         "Discord": "https://discord.gg/HyUVJYeKS5"
       }
     }
-  },
-  "accessWidener": "crystalchams.accesswidener"
+  }
 }

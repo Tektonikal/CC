@@ -1,8 +1,7 @@
 package tektonikal.crystalchams.util;
 
 import dev.isxander.yacl3.api.NameableEnum;
-import net.minecraft.text.Text;
-import tektonikal.crystalchams.CrystalChams;
+import net.minecraft.network.chat.Component;
 
 import java.util.function.Function;
 
@@ -42,16 +41,18 @@ public enum Easings implements NameableEnum {
     easeInOutElastic(x -> x == 0 ? 0 : x == 1 ? 1 : x < 0.5 ? -(pow(2, 20 * x - 10) * sin((20 * x - 11.125) * ((2 * PI) / 4.5))) / 2 : (pow(2, -20 * x + 10) * sin((20 * x - 11.125) * ((2 * PI) / 4.5))) / 2 + 1);
 
     final Function<Double, Number> function;
+
     Easings(Function<Double, Number> function) {
         this.function = function;
     }
+
     public Function<Double, Number> getFunction() {
         return function;
     }
 
     @Override
-    public Text getDisplayName() {
+    public Component getDisplayName() {
         //TODO!
-        return Text.of(this.name());
+        return Component.nullToEmpty(this.name());
     }
 }

@@ -1,37 +1,28 @@
 package tektonikal.crystalchams.mixin;
 
-import dev.isxander.yacl3.gui.LowProfileButtonWidget;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.gui.components.AbstractWidget;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import tektonikal.crystalchams.CrystalChams;
-import tektonikal.crystalchams.config.ChamsConfig;
-import tektonikal.crystalchams.config.SecondaryYACLScreen;
 
-import java.awt.*;
-
-@Mixin(ClickableWidget.class)
-public abstract class ButtonWidgetMixin{
-    @Shadow private int x;
-    @Shadow private int y;
-    @Shadow protected int width;
-    @Shadow protected int height;
-
-    @Shadow public boolean active;
-
-
-    @Shadow private boolean focused;
-    @Shadow protected boolean hovered;
-
-
+@Mixin(AbstractWidget.class)
+public abstract class ButtonWidgetMixin {
+    @Shadow
+    public boolean active;
+    @Shadow
+    protected int width;
+    @Shadow
+    protected int height;
+    @Shadow
+    protected boolean isHovered;
     @Unique
     float hoverProgress;
+    @Shadow
+    private int x;
+    @Shadow
+    private int y;
+    @Shadow
+    private boolean focused;
 //    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/ClickableWidget;renderWidget(Lnet/minecraft/client/gui/DrawContext;IIF)V", shift = At.Shift.AFTER))
 //    private void CC$OUGHHHH(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci){
 //        if((CrystalChams.mc.currentScreen instanceof EvilYACLScreen || CrystalChams.mc.currentScreen instanceof SecondaryYACLScreen) && ((ClickableWidget)(Object)this) instanceof ButtonWidget && !(((ClickableWidget)(Object)this) instanceof LowProfileButtonWidget) && ChamsConfig.o_showAnimations.pendingValue()){

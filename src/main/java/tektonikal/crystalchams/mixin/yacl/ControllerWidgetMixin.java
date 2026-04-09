@@ -4,19 +4,10 @@ import dev.isxander.yacl3.api.utils.Dimension;
 import dev.isxander.yacl3.gui.AbstractWidget;
 import dev.isxander.yacl3.gui.YACLScreen;
 import dev.isxander.yacl3.gui.controllers.ControllerWidget;
-import net.minecraft.client.gui.DrawContext;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import tektonikal.crystalchams.CrystalChams;
-import tektonikal.crystalchams.config.ChamsConfig;
-import tektonikal.crystalchams.config.SecondaryYACLScreen;
-
-import java.awt.*;
 
 @Mixin(ControllerWidget.class)
 public abstract class ControllerWidgetMixin extends AbstractWidget {

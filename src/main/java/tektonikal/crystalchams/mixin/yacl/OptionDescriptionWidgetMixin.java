@@ -1,22 +1,18 @@
 package tektonikal.crystalchams.mixin.yacl;
 
 import dev.isxander.yacl3.gui.OptionDescriptionWidget;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
-import tektonikal.crystalchams.CrystalChams;
-import tektonikal.crystalchams.config.SecondaryYACLScreen;
 
 @Mixin(OptionDescriptionWidget.class)
-public abstract class OptionDescriptionWidgetMixin extends ClickableWidget {
+public abstract class OptionDescriptionWidgetMixin extends AbstractWidget {
 
 
-    public OptionDescriptionWidgetMixin(int x, int y, int width, int height, Text message) {
+    public OptionDescriptionWidgetMixin(int x, int y, int width, int height, Component message) {
         super(x, y, width, height, message);
     }
 
