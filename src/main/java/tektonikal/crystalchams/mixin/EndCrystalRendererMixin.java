@@ -129,7 +129,7 @@ public abstract class EndCrystalRendererMixin extends EntityRenderer<EndCrystal,
         poseStack.translate(0.0F, -0.5F, 0.0F);
         if ((state.showsBottom && ChamsConfig.o_baseRenderMode.pendingValue() == BaseRenderMode.DEFAULT) || ChamsConfig.o_baseRenderMode.pendingValue() == BaseRenderMode.ALWAYS) {
             int col = getColor(ChamsConfig.o_baseColor.pendingValue(), ChamsConfig.o_baseAlpha.pendingValue(), ChamsConfig.o_baseRainbow.pendingValue(), ChamsConfig.o_baseRainbowDelay.pendingValue(), ChamsConfig.o_baseRainbowSpeed.pendingValue(), ChamsConfig.o_baseRainbowSaturation.pendingValue(), ChamsConfig.o_baseRainbowBrightness.pendingValue());
-            submitNodeCollector.submitModelPart(model.base, poseStack, getLayer(RenderMode.DEFAULT, ChamsConfig.o_beamCulling.pendingValue(), END_CRYSTAL_LOCATION), /* packLight(ChamsConfig.o_baseBlockLightLevel.pendingValue(), ChamsConfig.o_baseSkyLightLevel.pendingValue(), state.lightCoords) */ state.lightCoords, overlay, null, col, null);
+            submitNodeCollector.submitModelPart(model.base, poseStack, getLayer(RenderMode.DEFAULT, ChamsConfig.o_beamCulling.pendingValue(), END_CRYSTAL_LOCATION), packLight(ChamsConfig.o_baseBlockLightLevel.pendingValue(), ChamsConfig.o_baseSkyLightLevel.pendingValue(), state.lightCoords), overlay, null, col, null);
         }
         poseStack.popPose();
         //Frames
@@ -169,7 +169,7 @@ public abstract class EndCrystalRendererMixin extends EntityRenderer<EndCrystal,
                     }
                     updateAlpha(controller);
 //                    float alpha = controller.o_alpha.pendingValue() * (endCrystalEntity.equals(previewCrystalEntity) ? controller.alphaMultiplier : 1);
-                    int col = getColor(controller.o_color.pendingValue(), 1, controller.o_rainbow.pendingValue(), controller.o_rainbowDelay.pendingValue(), controller.o_rainbowSpeed.pendingValue(), controller.o_rainbowSaturation.pendingValue(), controller.o_rainbowBrightness.pendingValue());
+                    int col = getColor(controller.o_color.pendingValue(), controller.o_alpha.pendingValue(), controller.o_rainbow.pendingValue(), controller.o_rainbowDelay.pendingValue(), controller.o_rainbowSpeed.pendingValue(), controller.o_rainbowSaturation.pendingValue(), controller.o_rainbowBrightness.pendingValue());
                     if (controller.o_funnierOption.pendingValue()) {
                         //TODO
 //                        renderFunny(endCrystalEntity, yaw, tickDelta, matrixStack, getLayer(vertexConsumerProvider, controller.o_renderLayer.pendingValue(), controller.o_culling.pendingValue(), TEXTURE), getLight(light, controller.o_lightLevel.pendingValue()), col, vertexConsumerProvider, pos);
@@ -184,7 +184,7 @@ public abstract class EndCrystalRendererMixin extends EntityRenderer<EndCrystal,
 //                            EnderDragonEntityRenderer.renderCrystalBeam(-p, -q + CrystalChams.getYOffset(realAge, ChamsConfig.o_coreOffset.pendingValue(), ChamsConfig.o_coreBounceSpeed.pendingValue(), ChamsConfig.o_coreBounceHeight.pendingValue(), ChamsConfig.o_coreDelay.pendingValue()), -r, tickDelta, endCrystalEntity.endCrystalAge, matrixStack, vertexConsumerProvider, light);
 //                        }
                     } else {
-                        submitNodeCollector.submitModelPart(orphanedAndEuthanizedFrame, poseStack, getLayer(RenderMode.DEFAULT, controller.o_culling.pendingValue(), END_CRYSTAL_LOCATION), /* packLight(controller.o_blockLightLevel.pendingValue(), controller.o_skyLightLevel.pendingValue(), state.lightCoords) */ state.lightCoords, overlay, null, col, null);
+                        submitNodeCollector.submitModelPart(orphanedAndEuthanizedFrame, poseStack, getLayer(RenderMode.DEFAULT, controller.o_culling.pendingValue(), END_CRYSTAL_LOCATION), packLight(controller.o_blockLightLevel.pendingValue(), controller.o_skyLightLevel.pendingValue(), state.lightCoords), overlay, null, col, null);
                     }
                     poseStack.popPose();
                 }
@@ -206,7 +206,7 @@ public abstract class EndCrystalRendererMixin extends EntityRenderer<EndCrystal,
             int col = getColor(ChamsConfig.o_coreColor.pendingValue(),
                     getAnimatedValue(ChamsConfig.o_coreAlphaAnimation.pendingValue(), ChamsConfig.o_coreAlphaEasing.pendingValue(), realAge, ChamsConfig.o_coreAlphaDelay.pendingValue(), ChamsConfig.o_coreAlphaAnimDuration.pendingValue(), ChamsConfig.o_coreStartAlpha.pendingValue(), ChamsConfig.o_coreAlpha.pendingValue()),
                     ChamsConfig.o_coreRainbow.pendingValue(), ChamsConfig.o_coreRainbowDelay.pendingValue(), ChamsConfig.o_coreRainbowSpeed.pendingValue(), ChamsConfig.o_coreRainbowSaturation.pendingValue(), ChamsConfig.o_coreRainbowBrightness.pendingValue());
-            submitNodeCollector.submitModelPart(orphanedAndEuthanizedCore, poseStack, getLayer(RenderMode.DEFAULT, ChamsConfig.o_coreCulling.pendingValue(), END_CRYSTAL_LOCATION), /* packLight(ChamsConfig.o_coreBlockLightLevel.pendingValue(), ChamsConfig.o_coreSkyLightLevel.pendingValue(), state.lightCoords) */ state.lightCoords, overlay, null, col, null);
+            submitNodeCollector.submitModelPart(orphanedAndEuthanizedCore, poseStack, getLayer(RenderMode.DEFAULT, ChamsConfig.o_coreCulling.pendingValue(), END_CRYSTAL_LOCATION), packLight(ChamsConfig.o_coreBlockLightLevel.pendingValue(), ChamsConfig.o_coreSkyLightLevel.pendingValue(), state.lightCoords), overlay, null, col, null);
             poseStack.popPose();
         }
         poseStack.popPose();

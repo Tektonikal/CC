@@ -36,10 +36,7 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.ARGB;
-import net.minecraft.util.CommonColors;
-import net.minecraft.util.Mth;
-import net.minecraft.util.Util;
+import net.minecraft.util.*;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import org.slf4j.Logger;
@@ -487,15 +484,15 @@ public class CrystalChams implements ModInitializer {
 //        return new Vec3d(target.x, target.y, target.z);
 //    }
 
-//    public static int packLight(int block, int sky, int light) {
-//        if (block == -1) {
-//            block = LightTexture.block(light);
-//        }
-//        if (sky == -1) {
-//            sky = LightTexture.sky(light);
-//        }
-//        return block << 4 | sky << 20;
-//    }
+    public static int packLight(int block, int sky, int light) {
+        if (block == -1) {
+            block = LightCoordsUtil.block(light);
+        }
+        if (sky == -1) {
+            sky = LightCoordsUtil.sky(light);
+        }
+        return block << 4 | sky << 20;
+    }
 
     private static void renderVanillaCrystalBeam(float dx, float dy, float dz, float tickDelta, int age, PoseStack matrices, MultiBufferSource vertexConsumers, int light) {
         float f = Mth.sqrt(dx * dx + dz * dz);
